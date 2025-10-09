@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import uuid
+from datetime import datetime
 
 from fastapi_users import schemas
 from pydantic import BaseModel
@@ -29,6 +32,25 @@ class ItemCreate(ItemBase):
 
 class ItemRead(ItemBase):
     id: UUID
+    user_id: UUID
+
+    model_config = {"from_attributes": True}
+
+
+class VideoBase(BaseModel):
+    title: str
+    description: str | None = None
+
+
+class VideoCreate(VideoBase):
+    pass
+
+
+class VideoRead(VideoBase):
+    id: UUID
+    filename: str
+    file_size: int
+    created_at: datetime
     user_id: UUID
 
     model_config = {"from_attributes": True}
