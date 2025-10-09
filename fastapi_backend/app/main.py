@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .utils import simple_generate_unique_route_id
 from app.routes.items import router as items_router
 from app.routes.videos import router as videos_router
+from app.routes.tts import router as tts_router
 from app.config import settings
 
 app = FastAPI(
@@ -54,5 +55,8 @@ app.include_router(items_router, prefix="/items")
 
 # Include videos routes
 app.include_router(videos_router, prefix="/videos")
+
+# Include TTS routes
+app.include_router(tts_router, prefix="/tts")
 
 add_pagination(app)

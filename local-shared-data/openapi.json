@@ -1083,6 +1083,48 @@
           }
         }
       }
+    },
+    "/tts/synthesize": {
+      "post": {
+        "tags": [
+          "tts"
+        ],
+        "summary": "Synthesize Speech",
+        "description": "Generate speech from text using Hume.ai TTS API.\n\nArgs:\n    request: TTS request containing text, voice description, and format\n\nReturns:\n    Audio URL or base64-encoded audio data",
+        "operationId": "synthesize_speech",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TTSRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TTSResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1377,6 +1419,73 @@
           "size"
         ],
         "title": "Page[ItemRead]"
+      },
+      "TTSRequest": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "description": "Text to synthesize into speech"
+          },
+          "voice_description": {
+            "type": "string",
+            "title": "Voice Description",
+            "description": "Description of the voice characteristics (e.g., 'warm female voice with slight accent')"
+          },
+          "format": {
+            "type": "string",
+            "pattern": "^(mp3|wav)$",
+            "title": "Format",
+            "description": "Audio format: 'mp3' or 'wav'",
+            "default": "mp3"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text",
+          "voice_description"
+        ],
+        "title": "TTSRequest"
+      },
+      "TTSResponse": {
+        "properties": {
+          "audio_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audio Url"
+          },
+          "audio_base64": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audio Base64"
+          },
+          "format": {
+            "type": "string",
+            "title": "Format"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "format",
+          "message"
+        ],
+        "title": "TTSResponse"
       },
       "Page_VideoRead_": {
         "properties": {
