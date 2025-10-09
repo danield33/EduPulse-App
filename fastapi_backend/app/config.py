@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Set
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -37,6 +39,10 @@ class Settings(BaseSettings):
 
     # CORS
     CORS_ORIGINS: Set[str]
+
+    # Video Upload
+    VIDEO_UPLOAD_DIR: str = "uploaded_videos"
+    MAX_VIDEO_SIZE: int = 500 * 1024 * 1024  # 500MB in bytes
 
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", extra="ignore"
