@@ -20,10 +20,10 @@ class TTImageRequest(BaseModel):
         pattern="^(1024x1024|512x512|256x256)$",
     )
 
-class DalleResponse(BaseModel):
+class TTImageResponse(BaseModel):
     image_url: str
 
-@router.post("/generateImage", response_model=DalleResponse)
+@router.post("/generateImage", response_model=TTImageResponse)
 async def generate_image(request: TTImageRequest, user: User = Depends(current_active_user)):
     """
     Generate an image using DALL-E based on a text prompt.
@@ -71,7 +71,7 @@ async def generate_image(request: TTImageRequest, user: User = Depends(current_a
         data = response.json()
         image_url = data["data"][0]["url"]
 
-        return DalleResponse(image_url=image_url)
+        return TTImageResponse(image_url=image_url)
 
     except requests.RequestException as e:
         raise HTTPException(

@@ -60,7 +60,7 @@ async def synthesize_speech(request: TTSRequest, user: User = Depends(current_ac
         )
 
     payload = {
-        "utterances": [{"text": request.text, "description": request.voice_description}],
+        "utterances": [{"text": request.text, "description": request.voice_description, "trailing_silence": 0}],
         "format": {"type": request.format},
         "num_generations": 1,
     }

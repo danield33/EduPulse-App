@@ -830,6 +830,52 @@
         }
       }
     },
+    "/videos/generate": {
+      "post": {
+        "tags": [
+          "videos"
+        ],
+        "summary": "Generate Video",
+        "operationId": "generate_video",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VideoGenerateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VideoRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
     "/videos/upload": {
       "post": {
         "tags": [
@@ -1155,7 +1201,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DalleResponse"
+                  "$ref": "#/components/schemas/TTImageResponse"
                 }
               }
             }
@@ -1287,19 +1333,6 @@
           "file"
         ],
         "title": "Body_videos-upload_video"
-      },
-      "DalleResponse": {
-        "properties": {
-          "image_url": {
-            "type": "string",
-            "title": "Image Url"
-          }
-        },
-        "type": "object",
-        "required": [
-          "image_url"
-        ],
-        "title": "DalleResponse"
       },
       "ErrorModel": {
         "properties": {
@@ -1578,6 +1611,19 @@
         ],
         "title": "TTImageRequest"
       },
+      "TTImageResponse": {
+        "properties": {
+          "image_url": {
+            "type": "string",
+            "title": "Image Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "image_url"
+        ],
+        "title": "TTImageResponse"
+      },
       "TTSRequest": {
         "properties": {
           "text": {
@@ -1829,6 +1875,22 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "VideoGenerateRequest": {
+        "properties": {
+          "audio": {
+            "$ref": "#/components/schemas/TTSRequest"
+          },
+          "images": {
+            "$ref": "#/components/schemas/TTImageRequest"
+          }
+        },
+        "type": "object",
+        "required": [
+          "audio",
+          "images"
+        ],
+        "title": "VideoGenerateRequest"
       },
       "VideoRead": {
         "properties": {
