@@ -3,9 +3,10 @@ import tempfile
 from typing import Optional
 
 import requests
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
-
+from app.users import current_active_user
+from app.database import User, get_async_session
 from app.config import settings
 
 router = APIRouter(tags=["tts"])
@@ -34,7 +35,7 @@ class TTSResponse(BaseModel):
 
 
 @router.post("/synthesize", response_model=TTSResponse)
-async def synthesize_speech(request: TTSRequest):
+async def synthesize_speech(request: TTSRequest, user: User = Depends(current_active_user)):
     """
     Generate speech from text using Hume.ai TTS API.
 
@@ -44,8 +45,14 @@ async def synthesize_speech(request: TTSRequest):
     Returns:
         Audio URL or base64-encoded audio data
     """
+
+    if not user:
+        raise HTTPException(
+            status_code=401,
+            detail="User not authenticated"
+        )
+
     api_key = os.getenv("HUME_API_KEY")
-    print(os.environ)
     if not api_key:
         raise HTTPException(
             status_code=500,

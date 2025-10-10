@@ -1,8 +1,10 @@
 
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, HTTPException, Response, Depends
 from pydantic import BaseModel, Field
 import os
 import requests
+from app.users import current_active_user
+from app.database import User, get_async_session
 
 router = APIRouter(tags=["ttimage"])
 
@@ -22,7 +24,7 @@ class DalleResponse(BaseModel):
     image_url: str
 
 @router.post("/generateImage", response_model=DalleResponse)
-async def generate_image(request: TTImageRequest):
+async def generate_image(request: TTImageRequest, user: User = Depends(current_active_user)):
     """
     Generate an image using DALL-E based on a text prompt.
 
@@ -32,6 +34,12 @@ async def generate_image(request: TTImageRequest):
     Returns:
         Image URL or image data
     """
+    if not user:
+        raise HTTPException(
+            status_code=401,
+            detail="User not authenticated"
+        )
+
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
         raise HTTPException(
