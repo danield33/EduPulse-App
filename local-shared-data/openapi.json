@@ -1125,6 +1125,48 @@
           }
         }
       }
+    },
+    "/ttimage/generateImage": {
+      "post": {
+        "tags": [
+          "ttimage"
+        ],
+        "summary": "Generate Image",
+        "description": "Generate an image using DALL-E based on a text prompt.\n\nArgs:\n    request: Dalle request containing the prompt and desired image size.\n\nReturns:\n    Image URL or image data",
+        "operationId": "generate_image",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TTImageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DalleResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1235,6 +1277,19 @@
           "file"
         ],
         "title": "Body_videos-upload_video"
+      },
+      "DalleResponse": {
+        "properties": {
+          "image_url": {
+            "type": "string",
+            "title": "Image Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "image_url"
+        ],
+        "title": "DalleResponse"
       },
       "ErrorModel": {
         "properties": {
@@ -1420,6 +1475,99 @@
         ],
         "title": "Page[ItemRead]"
       },
+      "Page_VideoRead_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/VideoRead"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "size": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Size"
+          },
+          "pages": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pages"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "page",
+          "size"
+        ],
+        "title": "Page[VideoRead]"
+      },
+      "TTImageRequest": {
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "title": "Prompt",
+            "description": "Text prompt for image generation"
+          },
+          "n": {
+            "type": "integer",
+            "title": "N",
+            "description": "Number of images to generate (max 1)"
+          },
+          "size": {
+            "type": "string",
+            "pattern": "^(1024x1024|512x512|256x256)$",
+            "title": "Size",
+            "description": "Image size: '1024x1024', '512x512', or '256x256'",
+            "default": "1024x1024"
+          }
+        },
+        "type": "object",
+        "required": [
+          "prompt",
+          "n"
+        ],
+        "title": "TTImageRequest"
+      },
       "TTSRequest": {
         "properties": {
           "text": {
@@ -1486,72 +1634,6 @@
           "message"
         ],
         "title": "TTSResponse"
-      },
-      "Page_VideoRead_": {
-        "properties": {
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/VideoRead"
-            },
-            "type": "array",
-            "title": "Items"
-          },
-          "total": {
-            "anyOf": [
-              {
-                "type": "integer",
-                "minimum": 0.0
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Total"
-          },
-          "page": {
-            "anyOf": [
-              {
-                "type": "integer",
-                "minimum": 1.0
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Page"
-          },
-          "size": {
-            "anyOf": [
-              {
-                "type": "integer",
-                "minimum": 1.0
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Size"
-          },
-          "pages": {
-            "anyOf": [
-              {
-                "type": "integer",
-                "minimum": 0.0
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Pages"
-          }
-        },
-        "type": "object",
-        "required": [
-          "items",
-          "page",
-          "size"
-        ],
-        "title": "Page[VideoRead]"
       },
       "UserCreate": {
         "properties": {
