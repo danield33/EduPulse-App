@@ -5,9 +5,9 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, Q
 from fastapi.responses import StreamingResponse
 from fastapi_pagination import Page, Params
 from fastapi_pagination.ext.sqlalchemy import apaginate
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from pydantic import BaseModel
 import base64
 import tempfile
 import os
@@ -38,15 +38,6 @@ def transform_videos(videos):
 class VideoGenerateRequest(BaseModel):
     audio: TTSRequest
     images: TTImageRequest
-
-
-class VideoInfo(BaseModel):
-    index: int
-    path: str
-
-
-class GenerateResponse(BaseModel):
-    videos: list[VideoInfo]
 
 
 def safe_b64decode(b64_string: str) -> bytes:
