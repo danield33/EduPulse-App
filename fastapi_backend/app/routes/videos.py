@@ -22,7 +22,7 @@ from app.users import current_active_user
 from app.routes.ttimage import TTImageRequest, generate_image
 from app.routes.tts import TTSRequest, synthesize_speech
 
-from fastapi_backend.commands.ffmpeg_cmds import make_video
+from app.ffmpeg_cmds import make_video
 
 router = APIRouter(tags=["videos"])
 

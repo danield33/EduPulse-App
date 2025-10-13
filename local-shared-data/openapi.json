@@ -1223,6 +1223,190 @@
           }
         ]
       }
+    },
+    "/lessons/lessons/": {
+      "post": {
+        "tags": [
+          "lessons"
+        ],
+        "summary": "Create Lesson",
+        "operationId": "create_lesson",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LessonCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LessonRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lessons/lessons/{lesson_id}": {
+      "get": {
+        "tags": [
+          "lessons"
+        ],
+        "summary": "Get Lesson",
+        "operationId": "get_lesson",
+        "parameters": [
+          {
+            "name": "lesson_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Lesson Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LessonRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lessons/lessons/{lesson_id}/video/{index}": {
+      "get": {
+        "tags": [
+          "lessons"
+        ],
+        "summary": "Get Video By Index",
+        "operationId": "get_video_by_index",
+        "parameters": [
+          {
+            "name": "lesson_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Lesson Id"
+            }
+          },
+          {
+            "name": "index",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Index"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lessons/lessons/{lesson_id}/video/{index}/has_next": {
+      "get": {
+        "tags": [
+          "lessons"
+        ],
+        "summary": "Has Next Video",
+        "operationId": "has_next_video",
+        "parameters": [
+          {
+            "name": "lesson_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Lesson Id"
+            }
+          },
+          {
+            "name": "index",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Index"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1333,6 +1517,32 @@
           "file"
         ],
         "title": "Body_videos-upload_video"
+      },
+      "Breakpoint": {
+        "properties": {
+          "question": {
+            "type": "string",
+            "title": "Question"
+          },
+          "options": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Options"
+          },
+          "correct_option": {
+            "type": "integer",
+            "title": "Correct Option"
+          }
+        },
+        "type": "object",
+        "required": [
+          "question",
+          "options",
+          "correct_option"
+        ],
+        "title": "Breakpoint"
       },
       "ErrorModel": {
         "properties": {
@@ -1451,6 +1661,150 @@
           "user_id"
         ],
         "title": "ItemRead"
+      },
+      "LessonCreate": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Lesson title"
+          },
+          "videos": {
+            "items": {
+              "$ref": "#/components/schemas/LessonVideoBase"
+            },
+            "type": "array",
+            "title": "Videos"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "videos",
+          "user_id"
+        ],
+        "title": "LessonCreate"
+      },
+      "LessonRead": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Lesson title"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "videos": {
+            "items": {
+              "$ref": "#/components/schemas/LessonVideoRead"
+            },
+            "type": "array",
+            "title": "Videos"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "id",
+          "created_at",
+          "user_id",
+          "videos"
+        ],
+        "title": "LessonRead"
+      },
+      "LessonVideoBase": {
+        "properties": {
+          "video_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Video Id"
+          },
+          "index": {
+            "type": "integer",
+            "title": "Index"
+          },
+          "breakpoints": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/Breakpoint"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Breakpoints"
+          }
+        },
+        "type": "object",
+        "required": [
+          "video_id",
+          "index"
+        ],
+        "title": "LessonVideoBase"
+      },
+      "LessonVideoRead": {
+        "properties": {
+          "video_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Video Id"
+          },
+          "index": {
+            "type": "integer",
+            "title": "Index"
+          },
+          "breakpoints": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/Breakpoint"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Breakpoints"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "video": {
+            "$ref": "#/components/schemas/VideoRead"
+          }
+        },
+        "type": "object",
+        "required": [
+          "video_id",
+          "index",
+          "id",
+          "video"
+        ],
+        "title": "LessonVideoRead"
       },
       "Page_ItemRead_": {
         "properties": {
