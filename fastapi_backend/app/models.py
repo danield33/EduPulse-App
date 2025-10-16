@@ -18,18 +18,6 @@ class User(SQLAlchemyBaseUserTableUUID, Base):
     lessons = relationship("Lesson", back_populates="user", cascade="all, delete-orphan")
 
 
-class Item(Base):
-    __tablename__ = "items"
-
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    name: Mapped[str] = mapped_column(String, nullable=False)
-    description: Mapped[Optional[str]] = mapped_column(String)
-    quantity: Mapped[Optional[int]] = mapped_column(Integer)
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user.id"), nullable=False)
-
-    user = relationship("User", back_populates="items")
-
-
 class Video(Base):
     __tablename__ = "videos"
 

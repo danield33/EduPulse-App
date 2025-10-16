@@ -21,23 +21,6 @@ class UserUpdate(schemas.BaseUserUpdate):
     pass
 
 
-class ItemBase(BaseModel):
-    name: str
-    description: str | None = None
-    quantity: int | None = None
-
-
-class ItemCreate(ItemBase):
-    pass
-
-
-class ItemRead(ItemBase):
-    id: UUID
-    user_id: UUID
-
-    model_config = {"from_attributes": True}
-
-
 class VideoBase(BaseModel):
     title: str
     description: str | None = None
