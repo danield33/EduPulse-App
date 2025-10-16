@@ -1,14 +1,17 @@
-from app.models import Lesson, LessonVideo
-from app.schemas import LessonCreate, LessonRead
+from select import select
+
+from app.models import Lesson, LessonVideo, Video
+from app.schemas import LessonCreate, LessonRead, LessonVideoAdd, LessonVideoRead
 from uuid import UUID
 from app.users import current_active_user
 from app.database import User, get_async_session as get_db
 from fastapi import Depends, HTTPException, APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette import status
 
-router = APIRouter(prefix="/lessons", tags=["lessons"])
+router = APIRouter(tags=["lessons"])
 
-@router.post("/", response_model=LessonRead)
+@router.post("/create", response_model=LessonRead)
 def create_lesson(lesson: LessonCreate, db: AsyncSession = Depends(get_db)):
     new_lesson = Lesson(title=lesson.title, user_id=lesson.user_id)
     db.add(new_lesson)
@@ -27,6 +30,59 @@ def create_lesson(lesson: LessonCreate, db: AsyncSession = Depends(get_db)):
     db.refresh(new_lesson)
     return new_lesson
 
+@router.post("/{lesson_id}/add_video", response_model=LessonVideoRead)
+async def add_video_to_lesson(
+    lesson_id: UUID,
+    request: LessonVideoAdd,
+    db: AsyncSession = Depends(get_db)
+):
+    # Check that the lesson exists
+    lesson_result = await db.execute(select(Lesson).where(Lesson.id == lesson_id))
+    lesson = lesson_result.scalar_one_or_none()
+    if not lesson:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Lesson {lesson_id} not found"
+        )
+
+    # Check that the video exists
+    video_result = await db.execute(select(Video).where(Video.id == request.video_id))
+    video = video_result.scalar_one_or_none()
+    if not video:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Video {request.video_id} not found"
+        )
+
+    # Check that this video isn’t already linked to the lesson
+    existing_link = await db.execute(
+        select(LessonVideo).where(
+            LessonVideo.lesson_id == lesson_id,
+            LessonVideo.video_id == request.video_id
+        )
+    )
+    if existing_link.scalar_one_or_none():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Video already added to this lesson"
+        )
+
+    # Create new LessonVideo association
+    lesson_video = LessonVideo(
+        lesson_id=lesson_id,
+        video_id=request.video_id,
+        position=request.position
+    )
+    db.add(lesson_video)
+    await db.commit()
+    await db.refresh(lesson_video)
+
+    # Return the result (could be your LessonVideoRead schema)
+    return {
+        "lesson_id": lesson_id,
+        "video_id": request.video_id,
+        "position": request.position
+    }
 
 @router.get("/{lesson_id}", response_model=LessonRead)
 def get_lesson(lesson_id: UUID, db: AsyncSession = Depends(get_db)):

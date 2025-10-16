@@ -76,3 +76,9 @@ class LessonRead(LessonBase):
 
     class Config:
         from_attributes = True
+
+class LessonVideoAdd(BaseModel):
+    video_id: UUID
+    position: Optional[int] = None
+
+    model_config = {"from_attributes": True}
