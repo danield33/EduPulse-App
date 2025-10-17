@@ -1145,7 +1145,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LessonVideoRead"
+                  "$ref": "#/components/schemas/LessonVideoAddResponse"
                 }
               }
             }
@@ -1485,13 +1485,6 @@
             "title": "Title",
             "description": "Lesson title"
           },
-          "videos": {
-            "items": {
-              "$ref": "#/components/schemas/LessonVideoBase"
-            },
-            "type": "array",
-            "title": "Videos"
-          },
           "user_id": {
             "type": "string",
             "format": "uuid",
@@ -1501,7 +1494,6 @@
         "type": "object",
         "required": [
           "title",
-          "videos",
           "user_id"
         ],
         "title": "LessonCreate"
@@ -1527,13 +1519,6 @@
             "type": "string",
             "format": "uuid",
             "title": "User Id"
-          },
-          "videos": {
-            "items": {
-              "$ref": "#/components/schemas/LessonVideoRead"
-            },
-            "type": "array",
-            "title": "Videos"
           }
         },
         "type": "object",
@@ -1541,8 +1526,7 @@
           "title",
           "id",
           "created_at",
-          "user_id",
-          "videos"
+          "user_id"
         ],
         "title": "LessonRead"
       },
@@ -1553,7 +1537,7 @@
             "format": "uuid",
             "title": "Video Id"
           },
-          "position": {
+          "index": {
             "anyOf": [
               {
                 "type": "integer"
@@ -1562,7 +1546,21 @@
                 "type": "null"
               }
             ],
-            "title": "Position"
+            "title": "Index"
+          },
+          "breakpoints": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/Breakpoint"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Breakpoints"
           }
         },
         "type": "object",
@@ -1571,8 +1569,13 @@
         ],
         "title": "LessonVideoAdd"
       },
-      "LessonVideoBase": {
+      "LessonVideoAddResponse": {
         "properties": {
+          "lesson_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Lesson Id"
+          },
           "video_id": {
             "type": "string",
             "format": "uuid",
@@ -1581,71 +1584,15 @@
           "index": {
             "type": "integer",
             "title": "Index"
-          },
-          "breakpoints": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/Breakpoint"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Breakpoints"
           }
         },
         "type": "object",
         "required": [
+          "lesson_id",
           "video_id",
           "index"
         ],
-        "title": "LessonVideoBase"
-      },
-      "LessonVideoRead": {
-        "properties": {
-          "video_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Video Id"
-          },
-          "index": {
-            "type": "integer",
-            "title": "Index"
-          },
-          "breakpoints": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/Breakpoint"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Breakpoints"
-          },
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "video": {
-            "$ref": "#/components/schemas/VideoRead"
-          }
-        },
-        "type": "object",
-        "required": [
-          "video_id",
-          "index",
-          "id",
-          "video"
-        ],
-        "title": "LessonVideoRead"
+        "title": "LessonVideoAddResponse"
       },
       "Page_VideoRead_": {
         "properties": {
@@ -2055,11 +2002,6 @@
             "type": "string",
             "format": "date-time",
             "title": "Created At"
-          },
-          "user_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "User Id"
           }
         },
         "type": "object",
@@ -2068,8 +2010,7 @@
           "id",
           "filename",
           "file_size",
-          "created_at",
-          "user_id"
+          "created_at"
         ],
         "title": "VideoRead"
       },

@@ -1,36 +1,26 @@
-from select import select
 
-from app.models import Lesson, LessonVideo, Video
-from app.schemas import LessonCreate, LessonRead, LessonVideoAdd, LessonVideoRead
+from app.models import Lesson, LessonVideo, Video, Breakpoint
+from app.schemas import LessonCreate, LessonRead, LessonVideoAdd, LessonVideoRead, LessonVideoAddResponse
 from uuid import UUID
 from app.users import current_active_user
 from app.database import User, get_async_session as get_db
 from fastapi import Depends, HTTPException, APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
+from sqlalchemy import select
 
 router = APIRouter(tags=["lessons"])
 
 @router.post("/create", response_model=LessonRead)
-def create_lesson(lesson: LessonCreate, db: AsyncSession = Depends(get_db)):
+async def create_lesson(lesson: LessonCreate, db: AsyncSession = Depends(get_db)):
     new_lesson = Lesson(title=lesson.title, user_id=lesson.user_id)
+    print(lesson, 'LESSON')
     db.add(new_lesson)
-    db.flush()  # So we can use new_lesson.id
-
-    for v in lesson.videos:
-        lv = LessonVideo(
-            lesson_id=new_lesson.id,
-            video_id=v.video_id,
-            index=v.index,
-            breakpoints=[b.dict() for b in v.breakpoints] if v.breakpoints else None,
-        )
-        db.add(lv)
-
-    db.commit()
-    db.refresh(new_lesson)
+    await db.commit()
+    await db.refresh(new_lesson)
     return new_lesson
 
-@router.post("/{lesson_id}/add_video", response_model=LessonVideoRead)
+@router.post("/{lesson_id}/add_video", response_model=LessonVideoAddResponse)
 async def add_video_to_lesson(
     lesson_id: UUID,
     request: LessonVideoAdd,
@@ -71,9 +61,23 @@ async def add_video_to_lesson(
     lesson_video = LessonVideo(
         lesson_id=lesson_id,
         video_id=request.video_id,
-        position=request.position
+        index=request.index,
     )
+
+    # Optionally create breakpoints
+    if request.breakpoints:
+        for bp in request.breakpoints:
+            new_bp = Breakpoint(
+                lesson_video_id=lesson_video.id,
+                question=bp.question,
+                choices=bp.options,
+                correct_choice=bp.correct_option,
+            )
+            lesson_video.breakpoints.append(new_bp)
+            db.add(new_bp)
+
     db.add(lesson_video)
+
     await db.commit()
     await db.refresh(lesson_video)
 
@@ -81,7 +85,7 @@ async def add_video_to_lesson(
     return {
         "lesson_id": lesson_id,
         "video_id": request.video_id,
-        "position": request.position
+        "index": request.index
     }
 
 @router.get("/{lesson_id}", response_model=LessonRead)

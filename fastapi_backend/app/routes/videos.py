@@ -140,7 +140,6 @@ async def upload_video(
         filename=unique_filename,
         file_path=str(file_path),
         file_size=file_size,
-        user_id=user.id
     )
 
     db.add(db_video)

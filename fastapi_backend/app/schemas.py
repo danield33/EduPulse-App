@@ -35,7 +35,6 @@ class VideoRead(VideoBase):
     filename: str
     file_size: int
     created_at: datetime
-    user_id: UUID
 
     model_config = {"from_attributes": True}
 
@@ -64,21 +63,26 @@ class LessonBase(BaseModel):
 
 
 class LessonCreate(LessonBase):
-    videos: List[LessonVideoBase]
-    user_id: UUID  # 👈 Associate lesson with user who created it
+    user_id: UUID  # Associate lesson with user who created it
 
 
 class LessonRead(LessonBase):
     id: UUID
     created_at: datetime
     user_id: UUID
-    videos: List[LessonVideoRead]
 
     class Config:
         from_attributes = True
 
+
 class LessonVideoAdd(BaseModel):
     video_id: UUID
-    position: Optional[int] = None
+    index: Optional[int] = None
+    breakpoints: Optional[List[Breakpoint]] = None
 
     model_config = {"from_attributes": True}
+
+class LessonVideoAddResponse(BaseModel):
+    lesson_id: UUID
+    video_id: UUID
+    index: int
