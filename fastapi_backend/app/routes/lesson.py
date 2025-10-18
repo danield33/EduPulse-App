@@ -1,9 +1,8 @@
 
 from app.models import Lesson, LessonVideo, Video, Breakpoint
-from app.schemas import LessonCreate, LessonRead, LessonVideoAdd, LessonVideoRead, LessonVideoAddResponse
+from app.schemas import LessonCreate, LessonRead, LessonVideoAddResponse
 from uuid import UUID
-from app.users import current_active_user
-from app.database import User, get_async_session as get_db
+from app.database import get_async_session as get_db
 from fastapi import Depends, HTTPException, APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
@@ -14,7 +13,6 @@ router = APIRouter(tags=["lessons"])
 @router.post("/create", response_model=LessonRead)
 async def create_lesson(lesson: LessonCreate, db: AsyncSession = Depends(get_db)):
     new_lesson = Lesson(title=lesson.title, user_id=lesson.user_id)
-    print(lesson, 'LESSON')
     db.add(new_lesson)
     await db.commit()
     await db.refresh(new_lesson)
@@ -23,7 +21,7 @@ async def create_lesson(lesson: LessonCreate, db: AsyncSession = Depends(get_db)
 @router.post("/{lesson_id}/add_video", response_model=LessonVideoAddResponse)
 async def add_video_to_lesson(
     lesson_id: UUID,
-    request: LessonVideoAdd,
+    request: LessonVideoAddResponse,
     db: AsyncSession = Depends(get_db)
 ):
     # Check that the lesson exists

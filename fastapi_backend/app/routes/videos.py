@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, Query
@@ -38,6 +39,8 @@ def transform_videos(videos):
 class VideoGenerateRequest(BaseModel):
     audio: TTSRequest
     images: TTImageRequest
+    lesson_id: UUID
+    title: Optional[str]
 
 
 def safe_b64decode(b64_string: str) -> bytes:
