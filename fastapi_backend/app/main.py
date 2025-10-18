@@ -4,10 +4,10 @@ from .schemas import UserCreate, UserRead, UserUpdate
 from .users import auth_backend, fastapi_users, AUTH_URL_PATH
 from fastapi.middleware.cors import CORSMiddleware
 from .utils import simple_generate_unique_route_id
-from app.routes.items import router as items_router
 from app.routes.videos import router as videos_router
 from app.routes.tts import router as tts_router
 from app.routes.ttimage import router as ttimage_router
+from app.routes.lesson import router as lesson_router
 from app.config import settings
 
 app = FastAPI(
@@ -51,9 +51,6 @@ app.include_router(
     tags=["users"],
 )
 
-# Include items routes
-app.include_router(items_router, prefix="/items")
-
 # Include videos routes
 app.include_router(videos_router, prefix="/videos")
 
@@ -61,5 +58,7 @@ app.include_router(videos_router, prefix="/videos")
 app.include_router(tts_router, prefix="/tts")
 
 app.include_router(ttimage_router, prefix="/ttimage")
+
+app.include_router(lesson_router, prefix="/lessons")
 
 add_pagination(app)

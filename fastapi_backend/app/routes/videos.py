@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, Query
@@ -22,7 +23,7 @@ from app.users import current_active_user
 from app.routes.ttimage import TTImageRequest, generate_image
 from app.routes.tts import TTSRequest, synthesize_speech
 
-from fastapi_backend.commands.ffmpeg_cmds import make_video
+from app.ffmpeg_cmds import make_video
 
 router = APIRouter(tags=["videos"])
 
@@ -38,6 +39,8 @@ def transform_videos(videos):
 class VideoGenerateRequest(BaseModel):
     audio: TTSRequest
     images: TTImageRequest
+    lesson_id: UUID
+    title: Optional[str]
 
 
 def safe_b64decode(b64_string: str) -> bytes:
@@ -140,7 +143,6 @@ async def upload_video(
         filename=unique_filename,
         file_path=str(file_path),
         file_size=file_size,
-        user_id=user.id
     )
 
     db.add(db_video)
