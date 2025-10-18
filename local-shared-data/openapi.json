@@ -1069,6 +1069,108 @@
         ]
       }
     },
+    "/lessons/my": {
+      "get": {
+        "tags": [
+          "lessons"
+        ],
+        "summary": "Get My Lessons",
+        "description": "Get all lessons belonging to the current signed-in user.\nSupports sorting (by creation date or title) and pagination.",
+        "operationId": "get_my_lessons",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sort_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "created_at",
+                "title"
+              ],
+              "type": "string",
+              "description": "Sort lessons by 'created_at' or 'title'",
+              "default": "created_at",
+              "title": "Sort By"
+            },
+            "description": "Sort lessons by 'created_at' or 'title'"
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string",
+              "description": "Sort order: 'asc' for ascending, 'desc' for descending",
+              "default": "desc",
+              "title": "Order"
+            },
+            "description": "Sort order: 'asc' for ascending, 'desc' for descending"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "description": "Number of lessons to return per page (1\u2013100)",
+              "default": 20,
+              "title": "Limit"
+            },
+            "description": "Number of lessons to return per page (1\u2013100)"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of lessons to skip for pagination",
+              "default": 0,
+              "title": "Offset"
+            },
+            "description": "Number of lessons to skip for pagination"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LessonRead"
+                  },
+                  "title": "Response Lessons-Get My Lessons"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/lessons/create": {
       "post": {
         "tags": [
@@ -1134,7 +1236,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/LessonVideoAdd"
+                "$ref": "#/components/schemas/LessonVideoAddResponse"
               }
             }
           }
@@ -1416,32 +1518,6 @@
         ],
         "title": "Body_videos-upload_video"
       },
-      "Breakpoint": {
-        "properties": {
-          "question": {
-            "type": "string",
-            "title": "Question"
-          },
-          "options": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Options"
-          },
-          "correct_option": {
-            "type": "integer",
-            "title": "Correct Option"
-          }
-        },
-        "type": "object",
-        "required": [
-          "question",
-          "options",
-          "correct_option"
-        ],
-        "title": "Breakpoint"
-      },
       "ErrorModel": {
         "properties": {
           "detail": {
@@ -1529,45 +1605,6 @@
           "user_id"
         ],
         "title": "LessonRead"
-      },
-      "LessonVideoAdd": {
-        "properties": {
-          "video_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Video Id"
-          },
-          "index": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Index"
-          },
-          "breakpoints": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/Breakpoint"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Breakpoints"
-          }
-        },
-        "type": "object",
-        "required": [
-          "video_id"
-        ],
-        "title": "LessonVideoAdd"
       },
       "LessonVideoAddResponse": {
         "properties": {
@@ -1959,12 +1996,30 @@
           },
           "images": {
             "$ref": "#/components/schemas/TTImageRequest"
+          },
+          "lesson_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Lesson Id"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
           }
         },
         "type": "object",
         "required": [
           "audio",
-          "images"
+          "images",
+          "lesson_id",
+          "title"
         ],
         "title": "VideoGenerateRequest"
       },

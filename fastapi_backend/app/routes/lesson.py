@@ -1,14 +1,60 @@
+from typing import Literal, List
 
-from app.models import Lesson, LessonVideo, Video, Breakpoint
+from app.models import Lesson, LessonVideo, Video, Breakpoint, User
 from app.schemas import LessonCreate, LessonRead, LessonVideoAddResponse
 from uuid import UUID
 from app.database import get_async_session as get_db
-from fastapi import Depends, HTTPException, APIRouter
+from fastapi import Depends, HTTPException, APIRouter, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 from sqlalchemy import select
+from app.users import current_active_user
 
 router = APIRouter(tags=["lessons"])
+
+@router.get("/my", response_model=List[LessonRead])
+async def get_my_lessons(
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(current_active_user),
+    sort_by: Literal["created_at", "title"] = Query(
+        "created_at", description="Sort lessons by 'created_at' or 'title'"
+    ),
+    order: Literal["asc", "desc"] = Query(
+        "desc", description="Sort order: 'asc' for ascending, 'desc' for descending"
+    ),
+    limit: int = Query(
+        20, ge=1, le=100, description="Number of lessons to return per page (1–100)"
+    ),
+    offset: int = Query(
+        0, ge=0, description="Number of lessons to skip for pagination"
+    ),
+):
+    """
+    Get all lessons belonging to the current signed-in user.
+    Supports sorting (by creation date or title) and pagination.
+    """
+
+    # Base query
+    query = select(Lesson).where(Lesson.user_id == user.id)
+
+    # Apply sorting
+    if sort_by == "created_at":
+        query = query.order_by(
+            Lesson.created_at.asc() if order == "asc" else Lesson.created_at.desc()
+        )
+    elif sort_by == "title":
+        query = query.order_by(
+            Lesson.title.asc() if order == "asc" else Lesson.title.desc()
+        )
+
+    # Apply pagination
+    query = query.limit(limit).offset(offset)
+
+    # Execute query
+    result = await db.execute(query)
+    lessons = result.scalars().all()
+
+    return lessons
 
 @router.post("/create", response_model=LessonRead)
 async def create_lesson(lesson: LessonCreate, db: AsyncSession = Depends(get_db)):

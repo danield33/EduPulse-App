@@ -22,6 +22,12 @@ export type Body_auth_verify_verify = {
   token: string;
 };
 
+export type Body_videos_upload_video = {
+  title: string;
+  description?: string | null;
+  file: Blob | File;
+};
+
 export type ErrorModel = {
   detail:
     | string
@@ -34,18 +40,28 @@ export type HTTPValidationError = {
   detail?: Array<ValidationError>;
 };
 
-export type ItemCreate = {
-  name: string;
-  description?: string | null;
-  quantity?: number | null;
+export type LessonCreate = {
+  /**
+   * Lesson title
+   */
+  title: string;
+  user_id: string;
 };
 
-export type ItemRead = {
-  name: string;
-  description?: string | null;
-  quantity?: number | null;
+export type LessonRead = {
+  /**
+   * Lesson title
+   */
+  title: string;
   id: string;
+  created_at: string;
   user_id: string;
+};
+
+export type LessonVideoAddResponse = {
+  lesson_id: string;
+  video_id: string;
+  index: number;
 };
 
 export type login = {
@@ -57,12 +73,53 @@ export type login = {
   client_secret?: string | null;
 };
 
-export type Page_ItemRead_ = {
-  items: Array<ItemRead>;
+export type Page_VideoRead_ = {
+  items: Array<VideoRead>;
   total?: number | null;
   page: number | null;
   size: number | null;
   pages?: number | null;
+};
+
+export type TTImageRequest = {
+  /**
+   * Text prompt for image generation
+   */
+  prompt: string;
+  /**
+   * Number of images to generate (max 1)
+   */
+  n: number;
+  /**
+   * Image size: '1024x1024', '512x512', or '256x256'
+   */
+  size?: string;
+};
+
+export type TTImageResponse = {
+  image_url: string;
+};
+
+export type TTSRequest = {
+  /**
+   * Text to synthesize into speech
+   */
+  text: string;
+  /**
+   * Description of the voice characteristics (e.g., 'warm female voice with slight accent')
+   */
+  voice_description: string;
+  /**
+   * Audio format: 'mp3' or 'wav'
+   */
+  format?: string;
+};
+
+export type TTSResponse = {
+  audio_url?: string | null;
+  audio_base64?: string | null;
+  format: string;
+  message: string;
 };
 
 export type UserCreate = {
@@ -93,6 +150,22 @@ export type ValidationError = {
   loc: Array<string | number>;
   msg: string;
   type: string;
+};
+
+export type VideoGenerateRequest = {
+  audio: TTSRequest;
+  images: TTImageRequest;
+  lesson_id: string;
+  title: string | null;
+};
+
+export type VideoRead = {
+  title: string;
+  description?: string | null;
+  id: string;
+  filename: string;
+  file_size: number;
+  created_at: string;
 };
 
 export type AuthJwtLoginData = {
@@ -193,7 +266,23 @@ export type UsersDeleteUserResponse = void;
 
 export type UsersDeleteUserError = unknown | HTTPValidationError;
 
-export type ReadItemData = {
+export type GenerateVideoData = {
+  body: VideoGenerateRequest;
+};
+
+export type GenerateVideoResponse = VideoRead;
+
+export type GenerateVideoError = HTTPValidationError;
+
+export type UploadVideoData = {
+  body: Body_videos_upload_video;
+};
+
+export type UploadVideoResponse = VideoRead;
+
+export type UploadVideoError = HTTPValidationError;
+
+export type ListVideosData = {
   query?: {
     /**
      * Page number
@@ -206,24 +295,128 @@ export type ReadItemData = {
   };
 };
 
-export type ReadItemResponse = Page_ItemRead_;
+export type ListVideosResponse = Page_VideoRead_;
 
-export type ReadItemError = HTTPValidationError;
+export type ListVideosError = HTTPValidationError;
 
-export type CreateItemData = {
-  body: ItemCreate;
-};
-
-export type CreateItemResponse = ItemRead;
-
-export type CreateItemError = HTTPValidationError;
-
-export type DeleteItemData = {
+export type GetVideoData = {
   path: {
-    item_id: string;
+    video_id: string;
   };
 };
 
-export type DeleteItemResponse = unknown;
+export type GetVideoResponse = VideoRead;
 
-export type DeleteItemError = HTTPValidationError;
+export type GetVideoError = HTTPValidationError;
+
+export type DeleteVideoData = {
+  path: {
+    video_id: string;
+  };
+};
+
+export type DeleteVideoResponse = unknown;
+
+export type DeleteVideoError = HTTPValidationError;
+
+export type StreamVideoData = {
+  path: {
+    video_id: string;
+  };
+};
+
+export type StreamVideoResponse = unknown;
+
+export type StreamVideoError = HTTPValidationError;
+
+export type SynthesizeSpeechData = {
+  body: TTSRequest;
+};
+
+export type SynthesizeSpeechResponse = TTSResponse;
+
+export type SynthesizeSpeechError = HTTPValidationError;
+
+export type GenerateImageData = {
+  body: TTImageRequest;
+};
+
+export type GenerateImageResponse = TTImageResponse;
+
+export type GenerateImageError = HTTPValidationError;
+
+export type GetMyLessonsData = {
+  query?: {
+    /**
+     * Number of lessons to return per page (1–100)
+     */
+    limit?: number;
+    /**
+     * Number of lessons to skip for pagination
+     */
+    offset?: number;
+    /**
+     * Sort order: 'asc' for ascending, 'desc' for descending
+     */
+    order?: "asc" | "desc";
+    /**
+     * Sort lessons by 'created_at' or 'title'
+     */
+    sort_by?: "created_at" | "title";
+  };
+};
+
+export type GetMyLessonsResponse = Array<LessonRead>;
+
+export type GetMyLessonsError = HTTPValidationError;
+
+export type CreateLessonData = {
+  body: LessonCreate;
+};
+
+export type CreateLessonResponse = LessonRead;
+
+export type CreateLessonError = HTTPValidationError;
+
+export type AddVideoToLessonData = {
+  body: LessonVideoAddResponse;
+  path: {
+    lesson_id: string;
+  };
+};
+
+export type AddVideoToLessonResponse = LessonVideoAddResponse;
+
+export type AddVideoToLessonError = HTTPValidationError;
+
+export type GetLessonData = {
+  path: {
+    lesson_id: string;
+  };
+};
+
+export type GetLessonResponse = LessonRead;
+
+export type GetLessonError = HTTPValidationError;
+
+export type GetVideoByIndexData = {
+  path: {
+    index: number;
+    lesson_id: string;
+  };
+};
+
+export type GetVideoByIndexResponse = unknown;
+
+export type GetVideoByIndexError = HTTPValidationError;
+
+export type HasNextVideoData = {
+  path: {
+    index: number;
+    lesson_id: string;
+  };
+};
+
+export type HasNextVideoResponse = unknown;
+
+export type HasNextVideoError = HTTPValidationError;
