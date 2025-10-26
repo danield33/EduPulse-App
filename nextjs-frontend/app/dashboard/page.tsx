@@ -12,9 +12,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { fetchItems } from "@/components/actions/items-action";
 import { DeleteButton } from "./deleteButton";
-import { ReadItemResponse } from "@/app/openapi-client";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { PageSizeSelector } from "@/components/page-size-selector";
@@ -34,27 +32,28 @@ export default async function DashboardPage({
   const page = Number(params.page) || 1;
   const size = Number(params.size) || 10;
 
-  const items = (await fetchItems(page, size)) as ReadItemResponse;
+  const items = []
   const totalPages = Math.ceil((items.total || 0) / size);
 
+  
   return (
     <div>
       <h2 className="text-2xl font-semibold mb-6">Welcome to your Dashboard</h2>
       <p className="text-lg mb-6">
-        Here, you can see the overview of your items and manage them.
+        Here, you can see your lessons and manage them.
       </p>
 
       <div className="mb-6">
         <Link href="/dashboard/add-item">
           <Button variant="outline" className="text-lg px-4 py-2">
-            Add New Item
+            + Create New Lesson!
           </Button>
         </Link>
       </div>
 
       <section className="p-6 bg-white rounded-lg shadow-lg mt-8">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">Items</h2>
+          <h2 className="text-xl font-semibold">Lessons</h2>
           <PageSizeSelector currentSize={size} />
         </div>
 
@@ -63,7 +62,7 @@ export default async function DashboardPage({
             <TableRow>
               <TableHead className="w-[120px]">Name</TableHead>
               <TableHead>Description</TableHead>
-              <TableHead className="text-center">Quantity</TableHead>
+              <TableHead className="text-center">Watch Count</TableHead>
               <TableHead className="text-center">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -75,7 +74,7 @@ export default async function DashboardPage({
                 </TableCell>
               </TableRow>
             ) : (
-              items.items.map((item, index) => (
+              [{items: []}].items.map((item, index) => (
                 <TableRow key={index}>
                   <TableCell>{item.name}</TableCell>
                   <TableCell>{item.description}</TableCell>
