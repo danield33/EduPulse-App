@@ -5,6 +5,7 @@ import {
   createConfig,
   type OptionsLegacyParser,
   urlSearchParamsBodySerializer,
+  formDataBodySerializer,
 } from "@hey-api/client-axios";
 import type {
   AuthJwtLoginData,
@@ -41,15 +42,48 @@ import type {
   UsersDeleteUserData,
   UsersDeleteUserError,
   UsersDeleteUserResponse,
-  ReadItemData,
-  ReadItemError,
-  ReadItemResponse,
-  CreateItemData,
-  CreateItemError,
-  CreateItemResponse,
-  DeleteItemData,
-  DeleteItemError,
-  DeleteItemResponse,
+  GenerateVideoData,
+  GenerateVideoError,
+  GenerateVideoResponse,
+  UploadVideoData,
+  UploadVideoError,
+  UploadVideoResponse,
+  ListVideosData,
+  ListVideosError,
+  ListVideosResponse,
+  GetVideoData,
+  GetVideoError,
+  GetVideoResponse,
+  DeleteVideoData,
+  DeleteVideoError,
+  DeleteVideoResponse,
+  StreamVideoData,
+  StreamVideoError,
+  StreamVideoResponse,
+  SynthesizeSpeechData,
+  SynthesizeSpeechError,
+  SynthesizeSpeechResponse,
+  GenerateImageData,
+  GenerateImageError,
+  GenerateImageResponse,
+  GetMyLessonsData,
+  GetMyLessonsError,
+  GetMyLessonsResponse,
+  CreateLessonData,
+  CreateLessonError,
+  CreateLessonResponse,
+  AddVideoToLessonData,
+  AddVideoToLessonError,
+  AddVideoToLessonResponse,
+  GetLessonData,
+  GetLessonError,
+  GetLessonResponse,
+  GetVideoByIndexData,
+  GetVideoByIndexError,
+  GetVideoByIndexResponse,
+  HasNextVideoData,
+  HasNextVideoError,
+  HasNextVideoResponse,
 } from "./types.gen";
 
 export const client = createClient(createConfig());
@@ -252,49 +286,251 @@ export const usersDeleteUser = <ThrowOnError extends boolean = false>(
 };
 
 /**
- * Read Item
+ * Generate Video
  */
-export const readItem = <ThrowOnError extends boolean = false>(
-  options?: OptionsLegacyParser<ReadItemData, ThrowOnError>,
-) => {
-  return (options?.client ?? client).get<
-    ReadItemResponse,
-    ReadItemError,
-    ThrowOnError
-  >({
-    ...options,
-    url: "/items/",
-  });
-};
-
-/**
- * Create Item
- */
-export const createItem = <ThrowOnError extends boolean = false>(
-  options: OptionsLegacyParser<CreateItemData, ThrowOnError>,
+export const generateVideo = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<GenerateVideoData, ThrowOnError>,
 ) => {
   return (options?.client ?? client).post<
-    CreateItemResponse,
-    CreateItemError,
+    GenerateVideoResponse,
+    GenerateVideoError,
     ThrowOnError
   >({
     ...options,
-    url: "/items/",
+    url: "/videos/generate",
   });
 };
 
 /**
- * Delete Item
+ * Upload Video
+ * Upload a video file to disk and save metadata to database
  */
-export const deleteItem = <ThrowOnError extends boolean = false>(
-  options: OptionsLegacyParser<DeleteItemData, ThrowOnError>,
+export const uploadVideo = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<UploadVideoData, ThrowOnError>,
 ) => {
-  return (options?.client ?? client).delete<
-    DeleteItemResponse,
-    DeleteItemError,
+  return (options?.client ?? client).post<
+    UploadVideoResponse,
+    UploadVideoError,
     ThrowOnError
   >({
     ...options,
-    url: "/items/{item_id}",
+    ...formDataBodySerializer,
+    headers: {
+      "Content-Type": null,
+      ...options?.headers,
+    },
+    url: "/videos/upload",
+  });
+};
+
+/**
+ * List Videos
+ * Get all videos for the authenticated user
+ */
+export const listVideos = <ThrowOnError extends boolean = false>(
+  options?: OptionsLegacyParser<ListVideosData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<
+    ListVideosResponse,
+    ListVideosError,
+    ThrowOnError
+  >({
+    ...options,
+    url: "/videos/",
+  });
+};
+
+/**
+ * Get Video
+ * Get a specific video's metadata
+ */
+export const getVideo = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<GetVideoData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<
+    GetVideoResponse,
+    GetVideoError,
+    ThrowOnError
+  >({
+    ...options,
+    url: "/videos/{video_id}",
+  });
+};
+
+/**
+ * Delete Video
+ * Delete a video and its file from disk
+ */
+export const deleteVideo = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<DeleteVideoData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).delete<
+    DeleteVideoResponse,
+    DeleteVideoError,
+    ThrowOnError
+  >({
+    ...options,
+    url: "/videos/{video_id}",
+  });
+};
+
+/**
+ * Stream Video
+ * Stream a video file
+ */
+export const streamVideo = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<StreamVideoData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<
+    StreamVideoResponse,
+    StreamVideoError,
+    ThrowOnError
+  >({
+    ...options,
+    url: "/videos/{video_id}/stream",
+  });
+};
+
+/**
+ * Synthesize Speech
+ * Generate speech from text using Hume.ai TTS API.
+ *
+ * Args:
+ * request: TTS request containing text, voice description, and format
+ *
+ * Returns:
+ * Audio URL or base64-encoded audio data
+ */
+export const synthesizeSpeech = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<SynthesizeSpeechData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<
+    SynthesizeSpeechResponse,
+    SynthesizeSpeechError,
+    ThrowOnError
+  >({
+    ...options,
+    url: "/tts/synthesize",
+  });
+};
+
+/**
+ * Generate Image
+ * Generate an image using DALL-E based on a text prompt.
+ *
+ * Args:
+ * request: Dalle request containing the prompt and desired image size.
+ *
+ * Returns:
+ * Image URL or image data
+ */
+export const generateImage = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<GenerateImageData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<
+    GenerateImageResponse,
+    GenerateImageError,
+    ThrowOnError
+  >({
+    ...options,
+    url: "/ttimage/generateImage",
+  });
+};
+
+/**
+ * Get My Lessons
+ * Get all lessons belonging to the current signed-in user.
+ * Supports sorting (by creation date or title) and pagination.
+ */
+export const getMyLessons = <ThrowOnError extends boolean = false>(
+  options?: OptionsLegacyParser<GetMyLessonsData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<
+    GetMyLessonsResponse,
+    GetMyLessonsError,
+    ThrowOnError
+  >({
+    ...options,
+    url: "/lessons/my",
+  });
+};
+
+/**
+ * Create Lesson
+ */
+export const createLesson = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<CreateLessonData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<
+    CreateLessonResponse,
+    CreateLessonError,
+    ThrowOnError
+  >({
+    ...options,
+    url: "/lessons/create",
+  });
+};
+
+/**
+ * Add Video To Lesson
+ */
+export const addVideoToLesson = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<AddVideoToLessonData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<
+    AddVideoToLessonResponse,
+    AddVideoToLessonError,
+    ThrowOnError
+  >({
+    ...options,
+    url: "/lessons/{lesson_id}/add_video",
+  });
+};
+
+/**
+ * Get Lesson
+ */
+export const getLesson = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<GetLessonData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<
+    GetLessonResponse,
+    GetLessonError,
+    ThrowOnError
+  >({
+    ...options,
+    url: "/lessons/{lesson_id}",
+  });
+};
+
+/**
+ * Get Video By Index
+ */
+export const getVideoByIndex = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<GetVideoByIndexData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<
+    GetVideoByIndexResponse,
+    GetVideoByIndexError,
+    ThrowOnError
+  >({
+    ...options,
+    url: "/lessons/{lesson_id}/video/{index}",
+  });
+};
+
+/**
+ * Has Next Video
+ */
+export const hasNextVideo = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<HasNextVideoData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<
+    HasNextVideoResponse,
+    HasNextVideoError,
+    ThrowOnError
+  >({
+    ...options,
+    url: "/lessons/{lesson_id}/video/{index}/has_next",
   });
 };
