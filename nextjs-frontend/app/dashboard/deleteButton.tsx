@@ -1,6 +1,6 @@
 "use client";
 
-import { removeItem } from "@/components/actions/items-action";
+// import { removeItem } from "@/components/actions/items-action";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
 interface DeleteButtonProps {
@@ -9,7 +9,7 @@ interface DeleteButtonProps {
 
 export function DeleteButton({ itemId }: DeleteButtonProps) {
   const handleDelete = async () => {
-    await removeItem(itemId);
+    // await removeItem(itemId);
   };
 
   return (

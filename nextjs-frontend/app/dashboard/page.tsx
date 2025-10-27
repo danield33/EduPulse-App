@@ -32,8 +32,8 @@ export default async function DashboardPage({
   const page = Number(params.page) || 1;
   const size = Number(params.size) || 10;
 
-  const items = []
-  const totalPages = Math.ceil((items.total || 0) / size);
+  const items = {items: [], total: 0}
+  const totalPages = Math.ceil((items.items.length || 0) / size);
 
   
   return (
@@ -74,7 +74,7 @@ export default async function DashboardPage({
                 </TableCell>
               </TableRow>
             ) : (
-              [{items: []}].items.map((item, index) => (
+              items.items.map((item: any, index: any) => (
                 <TableRow key={index}>
                   <TableCell>{item.name}</TableCell>
                   <TableCell>{item.description}</TableCell>
@@ -103,7 +103,7 @@ export default async function DashboardPage({
           currentPage={page}
           totalPages={totalPages}
           pageSize={size}
-          totalItems={items.total || 0}
+          totalItems={items.items.length || 0}
           basePath="/dashboard"
         />
       </section>
