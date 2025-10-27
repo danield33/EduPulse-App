@@ -1,15 +1,18 @@
+# fastapi_backend/app/database.py
 from typing import AsyncGenerator
 from urllib.parse import urlparse
-
 from fastapi import Depends
 from fastapi_users.db import SQLAlchemyUserDatabase
 from sqlalchemy import NullPool
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.orm import sessionmaker
 
 from .config import settings
 from .models import Base, User
 
-
+# ------------------------------------------------------------
+# Build proper async connection URL for asyncpg
+# ------------------------------------------------------------
 parsed_db_url = urlparse(settings.DATABASE_URL)
 
 async_db_connection_url = (
@@ -18,23 +21,31 @@ async_db_connection_url = (
     f"{parsed_db_url.path}"
 )
 
-# Disable connection pooling for serverless environments like Vercel
+# ------------------------------------------------------------
+# Create Async Engine & Session
+# ------------------------------------------------------------
 engine = create_async_engine(async_db_connection_url, poolclass=NullPool)
 
 async_session_maker = async_sessionmaker(
-    engine, expire_on_commit=settings.EXPIRE_ON_COMMIT
+    bind=engine, expire_on_commit=settings.EXPIRE_ON_COMMIT
 )
 
-
+# ------------------------------------------------------------
+# Utility for Alembic or startup
+# ------------------------------------------------------------
 async def create_db_and_tables():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-
+# ------------------------------------------------------------
+# Async session dependency for FastAPI routes
+# ------------------------------------------------------------
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
     async with async_session_maker() as session:
         yield session
 
-
+# ------------------------------------------------------------
+# Optional helper for fastapi-users
+# ------------------------------------------------------------
 async def get_user_db(session: AsyncSession = Depends(get_async_session)):
     yield SQLAlchemyUserDatabase(session, User)

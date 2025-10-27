@@ -4,7 +4,7 @@ from datetime import datetime
 
 from fastapi_users.db import SQLAlchemyBaseUserTableUUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
-from sqlalchemy import String, Integer, ForeignKey, DateTime, ARRAY
+from sqlalchemy import String, Integer, ForeignKey, DateTime, ARRAY, Text
 from sqlalchemy.dialects.postgresql import UUID
 
 
@@ -13,9 +13,14 @@ class Base(DeclarativeBase):
 
 
 class User(SQLAlchemyBaseUserTableUUID, Base):
-    """A user can create multiple lessons."""
+    """A user can create multiple lessons and scripts."""
     lessons: Mapped[List["Lesson"]] = relationship(
         "Lesson",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
+    scripts: Mapped[List["Script"]] = relationship(
+        "Script",
         back_populates="user",
         cascade="all, delete-orphan"
     )
@@ -33,7 +38,6 @@ class Video(Base):
     file_size: Mapped[int] = mapped_column(Integer, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-    # No direct user relationship anymore
     lesson_links: Mapped[List["LessonVideo"]] = relationship(
         "LessonVideo",
         back_populates="video",
@@ -49,11 +53,9 @@ class Lesson(Base):
     title: Mapped[str] = mapped_column(String, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-    # Link to the user who created this lesson
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
     user: Mapped["User"] = relationship("User", back_populates="lessons")
 
-    # Ordered videos within the lesson
     lesson_videos: Mapped[List["LessonVideo"]] = relationship(
         "LessonVideo",
         back_populates="lesson",
@@ -93,3 +95,13 @@ class Breakpoint(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     lesson_video: Mapped["LessonVideo"] = relationship("LessonVideo", back_populates="breakpoints")
+
+
+class Script(Base):
+    __tablename__ = "scripts"
+    id = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    author = mapped_column(String, nullable=True)
+    content = mapped_column(Text, nullable=False)
+    created_at = mapped_column(DateTime, default=datetime.utcnow)
+    user_id = mapped_column(ForeignKey("user.id", ondelete="SET NULL"), nullable=True)
+    user = relationship("User", back_populates="scripts")

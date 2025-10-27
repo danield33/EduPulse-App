@@ -84,6 +84,11 @@ import type {
   GenerateScriptFromPdfData,
   GenerateScriptFromPdfError,
   GenerateScriptFromPdfResponse,
+  SaveScriptData,
+  SaveScriptError,
+  SaveScriptResponse,
+  RootError,
+  RootResponse,
 } from "./types.gen";
 
 export const client = createClient(createConfig());
@@ -519,7 +524,7 @@ export const hasNextVideo = <ThrowOnError extends boolean = false>(
 
 /**
  * Generate Script From Pdf
- * Accepts a PDF upload and returns a ~2-minute video script with [BREAKPOINT] tags.
+ * Accept a PDF upload and return a 2-minute teaching script.
  */
 export const generateScriptFromPdf = <ThrowOnError extends boolean = false>(
   options: OptionsLegacyParser<GenerateScriptFromPdfData, ThrowOnError>,
@@ -537,4 +542,35 @@ export const generateScriptFromPdf = <ThrowOnError extends boolean = false>(
     },
     url: "/api/scripts/generate-script-from-pdf",
   });
+};
+
+/**
+ * Save Script
+ * Save the generated script to the database.
+ */
+export const saveScript = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<SaveScriptData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<
+    SaveScriptResponse,
+    SaveScriptError,
+    ThrowOnError
+  >({
+    ...options,
+    url: "/api/scripts/save-script",
+  });
+};
+
+/**
+ * Root
+ */
+export const root = <ThrowOnError extends boolean = false>(
+  options?: OptionsLegacyParser<unknown, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<RootResponse, RootError, ThrowOnError>(
+    {
+      ...options,
+      url: "/",
+    },
+  );
 };

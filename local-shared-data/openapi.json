@@ -1,8 +1,9 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "FastAPI",
-    "version": "0.1.0"
+    "title": "EduPulse Backend",
+    "description": "Backend API for EduPulse platform (lessons, videos, scripts, AI tools).",
+    "version": "1.0.0"
   },
   "paths": {
     "/auth/jwt/login": {
@@ -678,7 +679,7 @@
     "/videos/generate": {
       "post": {
         "tags": [
-          "videos",
+          "Videos",
           "videos"
         ],
         "summary": "Generate Video",
@@ -725,7 +726,7 @@
     "/videos/upload": {
       "post": {
         "tags": [
-          "videos",
+          "Videos",
           "videos"
         ],
         "summary": "Upload Video",
@@ -735,7 +736,7 @@
           "content": {
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/Body_videos-upload_video"
+                "$ref": "#/components/schemas/Body_Videos-upload_video"
               }
             }
           },
@@ -773,7 +774,7 @@
     "/videos/": {
       "get": {
         "tags": [
-          "videos",
+          "Videos",
           "videos"
         ],
         "summary": "List Videos",
@@ -840,7 +841,7 @@
     "/videos/{video_id}": {
       "get": {
         "tags": [
-          "videos",
+          "Videos",
           "videos"
         ],
         "summary": "Get Video",
@@ -888,7 +889,7 @@
       },
       "delete": {
         "tags": [
-          "videos",
+          "Videos",
           "videos"
         ],
         "summary": "Delete Video",
@@ -936,7 +937,7 @@
     "/videos/{video_id}/stream": {
       "get": {
         "tags": [
-          "videos",
+          "Videos",
           "videos"
         ],
         "summary": "Stream Video",
@@ -984,7 +985,7 @@
     "/tts/synthesize": {
       "post": {
         "tags": [
-          "tts",
+          "Text-to-Speech",
           "tts"
         ],
         "summary": "Synthesize Speech",
@@ -1032,7 +1033,7 @@
     "/ttimage/generateImage": {
       "post": {
         "tags": [
-          "ttimage",
+          "Text-to-Image",
           "ttimage"
         ],
         "summary": "Generate Image",
@@ -1080,7 +1081,7 @@
     "/lessons/create": {
       "post": {
         "tags": [
-          "lessons",
+          "Lessons",
           "lessons"
         ],
         "summary": "Create Lesson",
@@ -1122,7 +1123,7 @@
     "/lessons/{lesson_id}/add_video": {
       "post": {
         "tags": [
-          "lessons",
+          "Lessons",
           "lessons"
         ],
         "summary": "Add Video To Lesson",
@@ -1176,7 +1177,7 @@
     "/lessons/{lesson_id}": {
       "get": {
         "tags": [
-          "lessons",
+          "Lessons",
           "lessons"
         ],
         "summary": "Get Lesson",
@@ -1220,7 +1221,7 @@
     "/lessons/{lesson_id}/video/{index}": {
       "get": {
         "tags": [
-          "lessons",
+          "Lessons",
           "lessons"
         ],
         "summary": "Get Video By Index",
@@ -1271,7 +1272,7 @@
     "/lessons/{lesson_id}/video/{index}/has_next": {
       "get": {
         "tags": [
-          "lessons",
+          "Lessons",
           "lessons"
         ],
         "summary": "Has Next Video",
@@ -1325,7 +1326,7 @@
           "Script Generation"
         ],
         "summary": "Generate Script From Pdf",
-        "description": "Accepts a PDF upload and returns a ~2-minute video script with [BREAKPOINT] tags.",
+        "description": "Accept a PDF upload and return a 2-minute teaching script.",
         "operationId": "generate_script_from_pdf",
         "requestBody": {
           "content": {
@@ -1353,6 +1354,65 @@
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scripts/save-script": {
+      "post": {
+        "tags": [
+          "Script Generation"
+        ],
+        "summary": "Save Script",
+        "description": "Save the generated script to the database.",
+        "operationId": "save_script",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScriptIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "tags": [
+          "Root"
+        ],
+        "summary": "Root",
+        "operationId": "root",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           }
@@ -1393,6 +1453,36 @@
           "file"
         ],
         "title": "Body_Script Generation-generate_script_from_pdf"
+      },
+      "Body_Videos-upload_video": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "file": {
+            "type": "string",
+            "format": "binary",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "file"
+        ],
+        "title": "Body_Videos-upload_video"
       },
       "Body_auth-reset_forgot_password": {
         "properties": {
@@ -1452,36 +1542,6 @@
           "token"
         ],
         "title": "Body_auth-verify:verify"
-      },
-      "Body_videos-upload_video": {
-        "properties": {
-          "title": {
-            "type": "string",
-            "title": "Title"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description"
-          },
-          "file": {
-            "type": "string",
-            "format": "binary",
-            "title": "File"
-          }
-        },
-        "type": "object",
-        "required": [
-          "title",
-          "file"
-        ],
-        "title": "Body_videos-upload_video"
       },
       "ErrorModel": {
         "properties": {
@@ -1661,6 +1721,19 @@
           "size"
         ],
         "title": "Page[VideoRead]"
+      },
+      "ScriptIn": {
+        "properties": {
+          "content": {
+            "type": "string",
+            "title": "Content"
+          }
+        },
+        "type": "object",
+        "required": [
+          "content"
+        ],
+        "title": "ScriptIn"
       },
       "TTImageRequest": {
         "properties": {

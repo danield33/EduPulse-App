@@ -26,7 +26,7 @@ export type Body_Script_Generation_generate_script_from_pdf = {
   file: Blob | File;
 };
 
-export type Body_videos_upload_video = {
+export type Body_Videos_upload_video = {
   title: string;
   description?: string | null;
   file: Blob | File;
@@ -83,6 +83,10 @@ export type Page_VideoRead_ = {
   page: number | null;
   size: number | null;
   pages?: number | null;
+};
+
+export type ScriptIn = {
+  content: string;
 };
 
 export type TTImageRequest = {
@@ -279,7 +283,7 @@ export type GenerateVideoResponse = VideoRead;
 export type GenerateVideoError = HTTPValidationError;
 
 export type UploadVideoData = {
-  body: Body_videos_upload_video;
+  body: Body_Videos_upload_video;
 };
 
 export type UploadVideoResponse = VideoRead;
@@ -407,3 +411,15 @@ export type GenerateScriptFromPdfData = {
 export type GenerateScriptFromPdfResponse = unknown;
 
 export type GenerateScriptFromPdfError = HTTPValidationError;
+
+export type SaveScriptData = {
+  body: ScriptIn;
+};
+
+export type SaveScriptResponse = unknown;
+
+export type SaveScriptError = HTTPValidationError;
+
+export type RootResponse = unknown;
+
+export type RootError = unknown;

@@ -3,12 +3,13 @@ from __future__ import annotations
 from typing import Set
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
     # OpenAPI docs
     OPENAPI_URL: str = "/openapi.json"
-
+    DATABASE_URL: str = "postgresql+asyncpg://postgres:password@db:5432/mydatabase"
     # Database
     DATABASE_URL: str
     TEST_DATABASE_URL: str | None = None
