@@ -14,11 +14,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export default function Home() {
-  // 🔹 role toggle
-  const [role, setRole] = useState<"student" | "instructor">("student");
 
-  // 🔹 lessons state (used for instructor uploads)
-  const [lessons, setLessons] = useState<any[]>([]);
+
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
