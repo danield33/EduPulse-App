@@ -50,7 +50,7 @@ export default async function DashboardPage({
       </p>
 
       <div className="mb-6">
-        <Link href="/dashboard/add-item">
+        <Link href="/dashboard/new-lesson">
           <Button variant="outline" className="text-lg px-4 py-2">
             + Create New Lesson!
           </Button>
