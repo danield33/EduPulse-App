@@ -17,6 +17,9 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { PageSizeSelector } from "@/components/page-size-selector";
 import { PagePagination } from "@/components/page-pagination";
+import {getUser} from "@/components/actions/user-action";
+import {fetchMyLessons} from "@/components/actions/lesson-action";
+import {GetMyLessonsResponse, LessonRead} from "@/app/openapi-client";
 
 interface DashboardPageProps {
   searchParams: Promise<{
@@ -29,13 +32,16 @@ export default async function DashboardPage({
   searchParams,
 }: DashboardPageProps) {
   const params = await searchParams;
+  const myLessons = await fetchMyLessons();
+
   const page = Number(params.page) || 1;
   const size = Number(params.size) || 10;
 
   const items = {items: [], total: 0}
   const totalPages = Math.ceil((items.items.length || 0) / size);
 
-  
+
+
   return (
     <div>
       <h2 className="text-2xl font-semibold mb-6">Welcome to your Dashboard</h2>
@@ -44,7 +50,7 @@ export default async function DashboardPage({
       </p>
 
       <div className="mb-6">
-        <Link href="/dashboard/add-item">
+        <Link href="/dashboard/new-lesson">
           <Button variant="outline" className="text-lg px-4 py-2">
             + Create New Lesson!
           </Button>
@@ -67,18 +73,18 @@ export default async function DashboardPage({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {!items.items?.length ? (
+            {!myLessons.length ? (
               <TableRow>
                 <TableCell colSpan={4} className="text-center">
                   No results.
                 </TableCell>
               </TableRow>
             ) : (
-              items.items.map((item: any, index: any) => (
+              myLessons.map((item: LessonRead, index: any) => (
                 <TableRow key={index}>
-                  <TableCell>{item.name}</TableCell>
-                  <TableCell>{item.description}</TableCell>
-                  <TableCell className="text-center">{item.quantity}</TableCell>
+                  <TableCell>{item.title}</TableCell>
+                  {/*<TableCell>{item.}</TableCell>*/}
+                  <TableCell className="text-center">{item.created_at}</TableCell>
                   <TableCell className="text-center">
                     <DropdownMenu>
                       <DropdownMenuTrigger className="cursor-pointer p-1 text-gray-600 hover:text-gray-800">

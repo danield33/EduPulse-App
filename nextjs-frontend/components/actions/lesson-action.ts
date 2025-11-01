@@ -1,35 +1,33 @@
-import {GetMyLessonsData} from "@/app/openapi-client";
+import {GetMyLessonsData, getMyLessons} from "@/app/openapi-client";
+import {cookies} from "next/headers";
+import {getUser} from "@/components/actions/user-action";
+import {getAccessToken} from "@/components/actions/cookie-action";
 
 
 /**
  * Fetches the current user's lessons.
  */
+const DEFAULT_QUERY = {
+    limit: 10,
+    offset: 1,
+    sort_by: "created_at",
+    order: "desc",
+} as const;
 export async function fetchMyLessons({
                                          query
                                      }: GetMyLessonsData = {}): Promise<any> {
-    const {
-        limit = 10,
-        offset = 1,
-        sort_by = "created_at",
-        order = "desc",
-    } = query!;
-    const url = new URL(`http://0.0.0.0:8000/lessons/my`);
-    url.searchParams.set("limit", limit.toString());
-    url.searchParams.set("offset", offset.toString());
-    url.searchParams.set("sort_by", sort_by);
-    url.searchParams.set("order", order);
 
-    const res = await fetch(url.toString(), {
-        credentials: "include", // include cookies/session if needed
-    });
-
-    if (!res.ok) {
-        throw new Error(`Failed to fetch lessons: ${res.statusText}`);
+    const token = await getAccessToken();
+    if (!token) {
+        return {message: "No access token found"};
     }
 
-    const data = await res.json();
+    if(!query) query = DEFAULT_QUERY;
+    const {data} = await getMyLessons({
+        query: query,
+        headers: {"Authorization": `Bearer ${token}`},
+    })
     return {
         items: data,
-        total: data.length, // (replace later if backend includes pagination metadata)
     };
 }
