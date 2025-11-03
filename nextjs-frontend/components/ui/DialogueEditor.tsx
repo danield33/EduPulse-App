@@ -3,6 +3,9 @@ import DialogueBox from "@/components/ui/DialogueBox";
 import {Card} from "@/components/ui/card";
 import {AnimatePresence, motion} from "framer-motion";
 import {Button} from "@/components/ui/button";
+import {arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable} from "@dnd-kit/sortable";
+import {closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors} from "@dnd-kit/core";
+import {CSS} from "@dnd-kit/utilities";
 
 export interface DialogueLine {
     role: string;
@@ -25,15 +28,21 @@ export interface Scenario {
     script: ScriptBlock[];
 }
 
-export default function DialogueEditor({scenario: globalScenario}: {scenario: Scenario}) {
+
+export default function DialogueEditor({scenario: globalScenario}: { scenario: Scenario }) {
     const [scenario, setScenario] = useState<Scenario>(globalScenario);
     const [editing, setEditing] = useState<{ speaker?: string; line?: string; path?: string } | null>(null);
     const [newText, setNewText] = useState("");
 
     const handleEdit = (speaker: string, line: string, path: string) => {
-        setEditing({ speaker, line, path });
+        setEditing({speaker, line, path});
         setNewText(line);
     };
+
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {coordinateGetter: sortableKeyboardCoordinates})
+    );
 
     const saveEdit = () => {
         if (!editing || !editing.path) return;
@@ -53,6 +62,23 @@ export default function DialogueEditor({scenario: globalScenario}: {scenario: Sc
         setEditing(null);
     };
 
+    const handleDragEnd = (event: any) => {
+        const {active, over} = event;
+        if (!over || active.id === over.id) return;
+
+        const oldIndex = scenario.script.findIndex(
+            (_, i) => `item-${i}` === active.id
+        );
+        const newIndex = scenario.script.findIndex(
+            (_, i) => `item-${i}` === over.id
+        );
+
+        if (oldIndex === -1 || newIndex === -1) return;
+
+        const newScript = arrayMove(scenario.script, oldIndex, newIndex);
+        setScenario({...scenario, script: newScript});
+    };
+
     return (
         <div className="p-6 space-y-6 max-w-3xl mx-auto">
             <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">
@@ -60,63 +86,71 @@ export default function DialogueEditor({scenario: globalScenario}: {scenario: Sc
             </h2>
 
             {/* Main Dialogue */}
-            {scenario.script.map((block, i) =>
-                block.branch_options ? (
-                    <div key={i} className="mt-4">
-                        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200">
-                            Branching Dialogue Options
-                        </h3>
-                        {block.branch_options.map((branch, j) => (
-                            <div className="group realtive items-center flex flex-col w-full">
-                                <Card key={j} className="p-4 mt-3 bg-gray-50 dark:bg-gray-800 w-full">
-                                    <h4 className="font-semibold text-blue-700 dark:text-blue-300 mb-2">
-                                        {branch.type}
-                                    </h4>
-                                    {branch.dialogue.map((line: any, k: number) => (
-                                        <DialogueBox
-                                            key={k}
-                                            speaker={line.role}
-                                            line={line.dialogue}
-                                            onEdit={() =>
-                                                handleEdit(
-                                                    line.role,
-                                                    line.dialogue,
-                                                    `script.${i}.branch_options.${j}.dialogue.${k}`
-                                                )
-                                            }
-                                        />
-                                    ))}
-                                </Card>
-                                <button className="opacity-0 group-hover:opacity-100 transition-opacity text-sm
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                <SortableContext items={scenario.script.map((_, i) => `item-${i}`)}>
+
+                    {scenario.script.map((block, i) =>
+                        <SortableItem key={`item-${i}`} id={`item-${i}`}>
+                            {block.branch_options ? (
+                            <div key={i} className="mt-4">
+                                <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200">
+                                    Branching Dialogue Options
+                                </h3>
+                                {block.branch_options?.map((branch, j) => (
+                                    <div className="group realtive items-center flex flex-col w-full">
+                                        <Card key={j} className="p-4 mt-3 bg-gray-50 dark:bg-gray-800 w-full">
+                                            <h4 className="font-semibold text-blue-700 dark:text-blue-300 mb-2">
+                                                {branch.type}
+                                            </h4>
+                                            {branch.dialogue.map((line: any, k: number) => (
+                                                <DialogueBox
+                                                    key={k}
+                                                    speaker={line.role}
+                                                    line={line.dialogue}
+                                                    onEdit={() =>
+                                                        handleEdit(
+                                                            line.role,
+                                                            line.dialogue,
+                                                            `script.${i}.branch_options.${j}.dialogue.${k}`
+                                                        )
+                                                    }
+                                                />
+                                            ))}
+                                        </Card>
+                                        <button className="opacity-0 group-hover:opacity-100 transition-opacity text-sm
                                   text-blue-600 dark:text-blue-400 hover:underline mt-2 w-full">
+                                            + Add Breakpoint
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                            ) : (
+                            <div className="group realtive items-center flex flex-col">
+                                <DialogueBox
+                                    key={i}
+                                    speaker={block.role!}
+                                    line={block.dialogue!}
+                                    onEdit={() => handleEdit(block.role, block.dialogue, `script.${i}`)}
+                                />
+                                <button className="opacity-0 group-hover:opacity-100 transition-opacity text-sm
+                                  text-blue-600 dark:text-blue-400 hover:underline mt-2">
                                     + Add Breakpoint
                                 </button>
                             </div>
-                        ))}
-                    </div>
-                ) : (
-                    <div className="group realtive items-center flex flex-col">
-                        <DialogueBox
-                            key={i}
-                            speaker={block.role!}
-                            line={block.dialogue!}
-                            onEdit={() => handleEdit(block.role, block.dialogue, `script.${i}`)}
-                        />
-                        <button  className="opacity-0 group-hover:opacity-100 transition-opacity text-sm
-                                  text-blue-600 dark:text-blue-400 hover:underline mt-2">
-                            + Add Breakpoint
-                        </button>
-                    </div>
-                )
-            )}
+                            )}
+                        </SortableItem>
+                    )}
+                </SortableContext>
+
+            </DndContext>
 
             {/* Edit Modal */}
             <AnimatePresence>
                 {editing && (
                     <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
+                        initial={{opacity: 0}}
+                        animate={{opacity: 1}}
+                        exit={{opacity: 0}}
                         className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
                     >
                         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-96 shadow-lg">
@@ -160,6 +194,19 @@ export default function DialogueEditor({scenario: globalScenario}: {scenario: Sc
                     Download Updated JSON
                 </Button>
             </div>
+        </div>
+    );
+}
+
+function SortableItem({id, children}: { id: string; children: React.ReactNode }) {
+    const {attributes, listeners, setNodeRef, transform, transition} = useSortable({id});
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+    };
+    return (
+        <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+            {children}
         </div>
     );
 }
