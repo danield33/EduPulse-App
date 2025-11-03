@@ -3,6 +3,7 @@
 import {MouseEvent, useState} from "react";
 import {Button} from "@/components/ui/button";
 import {generateScriptFromPdf} from "@/app/openapi-client";
+import DialogueBox from "@/components/ui/DialogueBox";
 
 
 export default function CreateNewLessonPage() {
@@ -24,7 +25,7 @@ export default function CreateNewLessonPage() {
             baseURL: "http://localhost:8000"
         });
 
-        if("script" in (res.data as any)){
+        if ("script" in (res.data as any)) {
             const lessonData = JSON.parse((res.data as any).script);
 
             setScript(lessonData.script);
@@ -91,18 +92,15 @@ export default function CreateNewLessonPage() {
                                     Generated Lesson Plan
                                 </h3>
                                 <ul className="space-y-3">
-                                    {script.map((line, idx) => (
-                                        <li
-                                            key={idx}
-                                            className="p-4 border rounded-lg shadow bg-white dark:bg-gray-700"
-                                        >
-                                            <h4 className="font-bold text-gray-800 dark:text-white">
-                                                {line.role || `Lesson ${idx + 1}`}
-                                            </h4>
-                                            <p className="text-gray-600 dark:text-gray-300">
-                                                {line.dialogue}
-                                            </p>
+                                    {script.map((line, index) => (
+                                        <li key={index} className="flex flex-col items-center space-y-2 group relative">
+                                            <DialogueBox line={line.dialogue} speaker={line.role}/>
+                                            <button className="opacity-0 group-hover:opacity-100 transition-opacity text-sm
+                                            text-blue-600 dark:text-blue-400 hover:underline mt-2">
+                                                + Add Breakpoint
+                                            </button>
                                         </li>
+
                                     ))}
                                 </ul>
                             </div>
