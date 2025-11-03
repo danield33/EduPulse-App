@@ -6,8 +6,6 @@ import {Button} from "@/components/ui/button";
 import {arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable} from "@dnd-kit/sortable";
 import {closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors} from "@dnd-kit/core";
 import {CSS} from "@dnd-kit/utilities";
-import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
-import {PlusCircle} from "lucide-react";
 import {ScriptContentButton} from "@/components/ui/ScriptContentButton";
 
 export interface DialogueLine {
@@ -84,7 +82,11 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
         setScenario({...scenario, script: newScript});
     };
 
-    const handleAddDialogueBox = (index: number) => {
+    const handleAddDialogueBox = (
+        scriptIndex: number,
+        branchIndex?: number,
+        dialogueIndex?: number
+    ) => {
         const updated = structuredClone(scenario);
 
         const newDialogue = {
@@ -92,11 +94,22 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
             dialogue: "New dialogue line...",
         };
 
-        // Insert the new dialogue line right after the clicked index
-        updated.script.splice(index + 1, 0, newDialogue);
+        if (
+            branchIndex !== undefined &&
+            updated.script[scriptIndex].branch_options &&
+            updated.script[scriptIndex].branch_options![branchIndex]
+        ) {
+            // Add to branch dialogue array
+            const branch = updated.script[scriptIndex].branch_options![branchIndex];
+            branch.dialogue.splice((dialogueIndex ?? branch.dialogue.length) + 1, 0, newDialogue);
+        } else {
+            // Add to main script array
+            updated.script.splice(scriptIndex + 1, 0, newDialogue);
+        }
 
         setScenario(updated);
     };
+
 
     const handleDeleteDialogueBox = () => {
         if (!editing?.path) return;
@@ -137,7 +150,7 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
             } else {
                 console.warn("Delete: index out of range", key);
             }
-        } else if (typeof parent === "object" && parent !== null && (key in parent)) {
+        } else if (typeof parent === "object" && (key in parent)) {
             // otherwise delete object property
             if (typeof key === "number") {
                 // numeric key on object -> convert to string
@@ -167,45 +180,49 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                     {scenario.script.map((block, i) =>
                         <SortableItem key={`item-${i}`} id={`item-${i}`}>
                             {block.branch_options ? (
-                            <div key={i} className="mt-4">
-                                <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200">
-                                    Branching Dialogue Options
-                                </h3>
-                                {block.branch_options?.map((branch, j) => (
-                                    <div key={j} className="group realtive items-center flex flex-col w-full">
-                                        <Card className="p-4 mt-3 bg-gray-50 dark:bg-gray-800 w-full">
-                                            <h4 className="font-semibold text-blue-700 dark:text-blue-300 mb-2">
-                                                {branch.type}
-                                            </h4>
-                                            {branch.dialogue.map((line: any, k: number) => (
-                                                <DialogueBox
-                                                    key={k}
-                                                    speaker={line.role}
-                                                    line={line.dialogue}
-                                                    onEdit={() =>
-                                                        handleEdit(
-                                                            line.role,
-                                                            line.dialogue,
-                                                            `script.${i}.branch_options.${j}.dialogue.${k}`
-                                                        )
-                                                    }
-                                                />
-                                            ))}
-                                        </Card>
-                                        <ScriptContentButton/>
-                                    </div>
-                                ))}
-                            </div>
+                                <div key={i} className="mt-4">
+                                    <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200">
+                                        Branching Dialogue Options
+                                    </h3>
+                                    {block.branch_options?.map((branch, j) => (
+                                        <div key={j} className="group realtive items-center flex flex-col w-full">
+                                            <Card className="p-4 mt-3 bg-gray-50 dark:bg-gray-800 w-full">
+                                                <h4 className="font-semibold text-blue-700 dark:text-blue-300 mb-2">
+                                                    {branch.type}
+                                                </h4>
+                                                {branch.dialogue.map((line: any, k: number) => (
+                                                    <>
+                                                        <DialogueBox
+                                                            key={k}
+                                                            speaker={line.role}
+                                                            line={line.dialogue}
+                                                            onEdit={() =>
+                                                                handleEdit(
+                                                                    line.role,
+                                                                    line.dialogue,
+                                                                    `script.${i}.branch_options.${j}.dialogue.${k}`
+                                                                )
+                                                            }
+                                                        />
+                                                        <ScriptContentButton
+                                                            onAddDialogue={() => handleAddDialogueBox(i, j, k)}/>
+                                                    </>
+                                                ))}
+                                            </Card>
+                                        </div>
+                                    ))}
+                                    <ScriptContentButton onAddDialogue={() => handleAddDialogueBox(i)}/>
+                                </div>
                             ) : (
-                            <div className="group realtive items-center flex flex-col">
-                                <DialogueBox
-                                    key={i}
-                                    speaker={block.role!}
-                                    line={block.dialogue!}
-                                    onEdit={() => handleEdit(block.role, block.dialogue, `script.${i}`)}
-                                />
-                                <ScriptContentButton onAddDialogue={() => handleAddDialogueBox(i)}/>
-                            </div>
+                                <div className="group realtive items-center flex flex-col">
+                                    <DialogueBox
+                                        key={i}
+                                        speaker={block.role!}
+                                        line={block.dialogue!}
+                                        onEdit={() => handleEdit(block.role, block.dialogue, `script.${i}`)}
+                                    />
+                                    <ScriptContentButton onAddDialogue={() => handleAddDialogueBox(i)}/>
+                                </div>
                             )}
                         </SortableItem>
                     )}
@@ -291,8 +308,8 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
     );
 }
 
-function SortableItem({ id, children }: { id: string; children: React.ReactNode }) {
-    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
+function SortableItem({id, children}: { id: string; children: React.ReactNode }) {
+    const {attributes, listeners, setNodeRef, transform, transition} = useSortable({id});
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
