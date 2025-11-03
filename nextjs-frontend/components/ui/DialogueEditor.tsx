@@ -28,6 +28,14 @@ export interface Scenario {
     script: ScriptBlock[];
 }
 
+function BreakpointButton(){
+    return (
+        <button className="opacity-0 group-hover:opacity-100 transition-opacity text-sm
+                                  text-blue-600 dark:text-blue-400 hover:underline mt-2 w-full">
+            + Add Breakpoint
+        </button>
+    )
+}
 
 export default function DialogueEditor({scenario: globalScenario}: { scenario: Scenario }) {
     const [scenario, setScenario] = useState<Scenario>(globalScenario);
@@ -35,7 +43,6 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
     const [newText, setNewText] = useState("");
 
     const handleEdit = (speaker: string, line: string, path: string) => {
-        console.log("handling edit")
         setEditing({speaker, line, path});
         setNewText(line);
     };
@@ -80,7 +87,6 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
         setScenario({...scenario, script: newScript});
     };
 
-    console.log(editing);
     return (
         <div className="p-6 space-y-6 max-w-3xl mx-auto">
             <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">
@@ -119,10 +125,7 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                                                 />
                                             ))}
                                         </Card>
-                                        <button className="opacity-0 group-hover:opacity-100 transition-opacity text-sm
-                                  text-blue-600 dark:text-blue-400 hover:underline mt-2 w-full">
-                                            + Add Breakpoint
-                                        </button>
+                                        <BreakpointButton/>
                                     </div>
                                 ))}
                             </div>
@@ -138,10 +141,7 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                                     }
                                     }
                                 />
-                                <button className="opacity-0 group-hover:opacity-100 transition-opacity text-sm
-                                  text-blue-600 dark:text-blue-400 hover:underline mt-2">
-                                    + Add Breakpoint
-                                </button>
+                                <BreakpointButton/>
                             </div>
                             )}
                         </SortableItem>
