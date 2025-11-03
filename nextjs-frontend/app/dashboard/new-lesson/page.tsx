@@ -3,7 +3,6 @@
 import {MouseEvent, useState} from "react";
 import {Button} from "@/components/ui/button";
 import {generateScriptFromPdf} from "@/app/openapi-client";
-import DialogueBox from "@/components/ui/DialogueBox";
 import DialogueEditor, {Scenario} from "@/components/ui/DialogueEditor";
 
 
@@ -27,10 +26,13 @@ export default function CreateNewLessonPage() {
         });
 
         if ("script" in (res.data as any)) {
-            console.log(res.data)
             const scenario = JSON.parse(((res.data as any).script));
-
             setScenario(scenario);
+        } else {
+            setScenario({
+                title: "No data found",
+                script: [{role: "No data found", dialogue: "The AI couldn't generate a script"}]
+            })
         }
     }
 
