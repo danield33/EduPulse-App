@@ -6,6 +6,9 @@ import {Button} from "@/components/ui/button";
 import {arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable} from "@dnd-kit/sortable";
 import {closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors} from "@dnd-kit/core";
 import {CSS} from "@dnd-kit/utilities";
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
+import {PlusCircle} from "lucide-react";
+import {ScriptContentButton} from "@/components/ui/ScriptContentButton";
 
 export interface DialogueLine {
     role: string;
@@ -28,14 +31,6 @@ export interface Scenario {
     script: ScriptBlock[];
 }
 
-function BreakpointButton(){
-    return (
-        <button className="opacity-0 group-hover:opacity-100 transition-opacity text-sm
-                                  text-blue-600 dark:text-blue-400 hover:underline mt-2 w-full">
-            + Add Breakpoint
-        </button>
-    )
-}
 
 export default function DialogueEditor({scenario: globalScenario}: { scenario: Scenario }) {
     const [scenario, setScenario] = useState<Scenario>(globalScenario);
@@ -125,7 +120,7 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                                                 />
                                             ))}
                                         </Card>
-                                        <BreakpointButton/>
+                                        <ScriptContentButton/>
                                     </div>
                                 ))}
                             </div>
@@ -135,13 +130,9 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                                     key={i}
                                     speaker={block.role!}
                                     line={block.dialogue!}
-                                    onEdit={() => {
-                                        console.log('edit', 1)
-                                        handleEdit(block.role, block.dialogue, `script.${i}`)
-                                    }
-                                    }
+                                    onEdit={() => handleEdit(block.role, block.dialogue, `script.${i}`)}
                                 />
-                                <BreakpointButton/>
+                                <ScriptContentButton/>
                             </div>
                             )}
                         </SortableItem>
