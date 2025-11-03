@@ -48,22 +48,24 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
     );
 
     const saveEdit = () => {
-        if (!editing || !editing.path) return;
+        if (!editing) return;
 
         const updated = structuredClone(scenario);
-
-        const pathParts = editing.path.split(".");
+        const pathParts = editing.path!.split(".");
         let target: any = updated;
 
         for (let i = 0; i < pathParts.length - 1; i++) {
             target = target[pathParts[i]];
         }
 
-        target[pathParts[pathParts.length - 1]].dialogue = newText;
+        const lastKey = pathParts[pathParts.length - 1];
+        target[lastKey].dialogue = newText;
+        target[lastKey].role = editing.speaker;
 
         setScenario(updated);
         setEditing(null);
     };
+
 
     const handleDragEnd = (event: any) => {
         const {active, over} = event;
@@ -80,6 +82,20 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
 
         const newScript = arrayMove(scenario.script, oldIndex, newIndex);
         setScenario({...scenario, script: newScript});
+    };
+
+    const handleAddDialogueBox = (index: number) => {
+        const updated = structuredClone(scenario);
+
+        const newDialogue = {
+            role: "Narrator",
+            dialogue: "New dialogue line...",
+        };
+
+        // Insert the new dialogue line right after the clicked index
+        updated.script.splice(index + 1, 0, newDialogue);
+
+        setScenario(updated);
     };
 
     return (
@@ -132,7 +148,7 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                                     line={block.dialogue!}
                                     onEdit={() => handleEdit(block.role, block.dialogue, `script.${i}`)}
                                 />
-                                <ScriptContentButton/>
+                                <ScriptContentButton onAddDialogue={() => handleAddDialogueBox(i)}/>
                             </div>
                             )}
                         </SortableItem>
@@ -152,8 +168,20 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                     >
                         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-96 shadow-lg">
                             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">
-                                Edit Dialogue ({editing.speaker})
+                                Edit Dialogue
                             </h3>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Speaker
+                            </label>
+                            <input
+                                type="text"
+                                value={editing.speaker || ""}
+                                onChange={(e) =>
+                                    setEditing({...editing, speaker: e.target.value})
+                                }
+                                className="w-full border rounded-md p-2 mb-4 bg-gray-50 dark:bg-gray-900 dark:text-white focus:ring focus:ring-blue-300"
+                                placeholder="e.g. Teacher, Narrator, Character A"
+                            />
                             <textarea
                                 value={newText}
                                 onChange={(e) => setNewText(e.target.value)}
