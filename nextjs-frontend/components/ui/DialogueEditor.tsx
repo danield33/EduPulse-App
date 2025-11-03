@@ -98,6 +98,62 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
         setScenario(updated);
     };
 
+    const handleDeleteDialogueBox = () => {
+        if (!editing?.path) return;
+
+        // clone the scenario safely
+        const updated: any = typeof structuredClone === "function"
+            ? structuredClone(scenario)
+            : JSON.parse(JSON.stringify(scenario));
+
+        const pathParts = editing.path.split(".").map((p) => {
+            // convert numeric-looking segs to numbers for array access
+            return /^\d+$/.test(p) ? Number(p) : p;
+        });
+
+        // traverse to find parent container and key
+        let parent: any = null;
+        let cur: any = updated;
+        let key: string | number | null = null;
+
+        for (let i = 0; i < pathParts.length; i++) {
+            parent = cur;
+            key = pathParts[i];
+            // stop traversal if parent is undefined/null
+            if (parent == null) break;
+            cur = parent[key as any];
+        }
+
+        if (parent == null || key == null) {
+            console.warn("Delete: could not resolve path", editing.path);
+            setEditing(null);
+            return;
+        }
+
+        // If parent is an array and key is a number -> remove that index
+        if (Array.isArray(parent) && typeof key === "number") {
+            if (key >= 0 && key < parent.length) {
+                parent.splice(key, 1);
+            } else {
+                console.warn("Delete: index out of range", key);
+            }
+        } else if (typeof parent === "object" && parent !== null && (key in parent)) {
+            // otherwise delete object property
+            if (typeof key === "number") {
+                // numeric key on object -> convert to string
+                delete parent[String(key)];
+            } else {
+                delete parent[key as string];
+            }
+        } else {
+            console.warn("Delete: parent container mismatch", parent, key);
+        }
+
+        setScenario(updated);
+        setEditing(null);
+    };
+
+
     return (
         <div className="p-6 space-y-6 max-w-3xl mx-auto">
             <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">
@@ -187,15 +243,27 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                                 onChange={(e) => setNewText(e.target.value)}
                                 className="w-full h-32 border rounded-md p-2 mb-4 bg-gray-50 dark:bg-gray-900 dark:text-white resize-none focus:ring focus:ring-blue-300"
                             />
-                            <div className="flex justify-end space-x-3">
+
+                            <div className="flex justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
+                                {/* Delete Button */}
                                 <Button
-                                    variant="outline"
-                                    onClick={() => setEditing(null)}
-                                    className="text-gray-600"
+                                    variant="destructive"
+                                    onClick={handleDeleteDialogueBox}
+                                    className="bg-red-600 hover:bg-red-700 text-white"
                                 >
-                                    Cancel
+                                    Delete
                                 </Button>
-                                <Button onClick={saveEdit}>Save</Button>
+
+                                <div className="flex space-x-3">
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => setEditing(null)}
+                                        className="text-gray-600"
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button onClick={saveEdit}>Save</Button>
+                                </div>
                             </div>
                         </div>
                     </motion.div>
