@@ -35,6 +35,7 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
     const [newText, setNewText] = useState("");
 
     const handleEdit = (speaker: string, line: string, path: string) => {
+        console.log("handling edit")
         setEditing({speaker, line, path});
         setNewText(line);
     };
@@ -79,6 +80,7 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
         setScenario({...scenario, script: newScript});
     };
 
+    console.log(editing);
     return (
         <div className="p-6 space-y-6 max-w-3xl mx-auto">
             <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">
@@ -97,8 +99,8 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                                     Branching Dialogue Options
                                 </h3>
                                 {block.branch_options?.map((branch, j) => (
-                                    <div className="group realtive items-center flex flex-col w-full">
-                                        <Card key={j} className="p-4 mt-3 bg-gray-50 dark:bg-gray-800 w-full">
+                                    <div key={j} className="group realtive items-center flex flex-col w-full">
+                                        <Card className="p-4 mt-3 bg-gray-50 dark:bg-gray-800 w-full">
                                             <h4 className="font-semibold text-blue-700 dark:text-blue-300 mb-2">
                                                 {branch.type}
                                             </h4>
@@ -130,7 +132,11 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                                     key={i}
                                     speaker={block.role!}
                                     line={block.dialogue!}
-                                    onEdit={() => handleEdit(block.role, block.dialogue, `script.${i}`)}
+                                    onEdit={() => {
+                                        console.log('edit', 1)
+                                        handleEdit(block.role, block.dialogue, `script.${i}`)
+                                    }
+                                    }
                                 />
                                 <button className="opacity-0 group-hover:opacity-100 transition-opacity text-sm
                                   text-blue-600 dark:text-blue-400 hover:underline mt-2">
@@ -198,14 +204,27 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
     );
 }
 
-function SortableItem({id, children}: { id: string; children: React.ReactNode }) {
-    const {attributes, listeners, setNodeRef, transform, transition} = useSortable({id});
+function SortableItem({ id, children }: { id: string; children: React.ReactNode }) {
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
     };
+
     return (
-        <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+        <div
+            ref={setNodeRef}
+            style={style}
+            className="relative group border border-transparent hover:border-gray-300 rounded-md"
+            {...attributes}
+        >
+            <div
+                {...listeners}
+                className="absolute -left-6 top-4 cursor-grab text-gray-400 group-hover:text-gray-600 select-none"
+                title="Drag to reorder"
+            >
+                ⋮⋮
+            </div>
             {children}
         </div>
     );
