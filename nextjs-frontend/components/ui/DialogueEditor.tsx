@@ -110,6 +110,47 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
         setScenario(updated);
     };
 
+    const handleAddBranchingDialogue = (
+        scriptIndex: number,
+        branchIndex?: number
+    ) => {
+        const updated = structuredClone(scenario);
+
+        const newBranchOption: BranchOption = {
+            type: "New Branch Option",
+            dialogue: [
+                {
+                    role: "Narrator",
+                    dialogue: "New branch dialogue line...",
+                },
+            ],
+        };
+
+        //  If we are inside an existing branching dialogue group
+        if (
+            branchIndex !== undefined &&
+            updated.script[scriptIndex].branch_options &&
+            Array.isArray(updated.script[scriptIndex].branch_options)
+        ) {
+            updated.script[scriptIndex].branch_options!.splice(
+                branchIndex + 1,
+                0,
+                newBranchOption
+            );
+        } else {
+            // Otherwise, create a new branching dialogue group
+            const newBranchGroup: ScriptBlock = {
+                branch_options: [newBranchOption],
+                dialogue: '',
+                role: ''
+            };
+
+            updated.script.splice(scriptIndex + 1, 0, newBranchGroup);
+        }
+
+        setScenario(updated);
+    };
+
 
     const handleDeleteDialogueBox = () => {
         if (!editing?.path) return;
@@ -205,13 +246,17 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                                                             }
                                                         />
                                                         <ScriptContentButton
-                                                            onAddDialogue={() => handleAddDialogueBox(i, j, k)}/>
+                                                            onAddDialogue={() => handleAddDialogueBox(i, j, k)}
+                                                            onAddBranching={() => handleAddBranchingDialogue(i, j)}
+                                                        />
                                                     </>
                                                 ))}
                                             </Card>
                                         </div>
                                     ))}
-                                    <ScriptContentButton onAddDialogue={() => handleAddDialogueBox(i)}/>
+                                    <ScriptContentButton onAddDialogue={() => handleAddDialogueBox(i)}
+                                                         onAddBranching={() => handleAddBranchingDialogue(i)}
+                                    />
                                 </div>
                             ) : (
                                 <div className="group realtive items-center flex flex-col">
@@ -221,7 +266,9 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                                         line={block.dialogue!}
                                         onEdit={() => handleEdit(block.role, block.dialogue, `script.${i}`)}
                                     />
-                                    <ScriptContentButton onAddDialogue={() => handleAddDialogueBox(i)}/>
+                                    <ScriptContentButton onAddDialogue={() => handleAddDialogueBox(i)}
+                                                         onAddBranching={() => handleAddBranchingDialogue(i)}
+                                    />
                                 </div>
                             )}
                         </SortableItem>
