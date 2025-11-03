@@ -2,12 +2,13 @@ import React from 'react';
 
 interface DialogueBoxProps {
     speaker: string,
-    line: string
+    line: string,
+    onEdit?: () => void;
 }
 
 const DialogueBox = ({speaker, line}: DialogueBoxProps) => {
     return (
-        <div className="relative p-4 border rounded-lg shadow bg-white dark:bg-gray-700">
+        <div className="relative p-4 border rounded-lg shadow bg-white dark:bg-gray-700 w-full">
             <div className="flex justify-between items-start">
                 <h4 className="font-bold text-gray-800 dark:text-white">
                     {speaker}
