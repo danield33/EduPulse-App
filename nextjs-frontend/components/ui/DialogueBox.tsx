@@ -6,7 +6,7 @@ interface DialogueBoxProps {
     onEdit?: () => void;
 }
 
-const DialogueBox = ({speaker, line}: DialogueBoxProps) => {
+const DialogueBox = ({speaker, line, onEdit}: DialogueBoxProps) => {
     return (
         <div className="relative p-4 border rounded-lg shadow bg-white dark:bg-gray-700 w-full">
             <div className="flex justify-between items-start">
@@ -14,7 +14,7 @@ const DialogueBox = ({speaker, line}: DialogueBoxProps) => {
                     {speaker}
                 </h4>
                 <button
-                    onClick={() => console.log('edit')}
+                    onClick={onEdit}
                     className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
                 >
                     Edit

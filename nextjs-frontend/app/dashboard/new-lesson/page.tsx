@@ -27,8 +27,8 @@ export default function CreateNewLessonPage() {
         });
 
         if ("script" in (res.data as any)) {
-            console.log(res.data.script)
-            const scenario = JSON.parse((res.data.script));
+            console.log(res.data)
+            const scenario = JSON.parse(((res.data as any).script));
 
             setScenario(scenario);
         }
@@ -89,25 +89,6 @@ export default function CreateNewLessonPage() {
 
                         {scenario && <DialogueEditor scenario={scenario}/>}
 
-                        {/*{s.length > 0 && (*/}
-                        {/*    <div className="mt-6 w-full max-w-2xl">*/}
-                        {/*        <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">*/}
-                        {/*            Generated Lesson Plan*/}
-                        {/*        </h3>*/}
-                        {/*        <ul className="space-y-3">*/}
-                        {/*            {script.map((line, index) => (*/}
-                        {/*                <li key={index} className="flex flex-col items-center space-y-2 group relative">*/}
-                        {/*                    <DialogueBox line={line.dialogue} speaker={line.role}/>*/}
-                        {/*                    <button className="opacity-0 group-hover:opacity-100 transition-opacity text-sm*/}
-                        {/*                    text-blue-600 dark:text-blue-400 hover:underline mt-2">*/}
-                        {/*                        + Add Breakpoint*/}
-                        {/*                    </button>*/}
-                        {/*                </li>*/}
-
-                        {/*            ))}*/}
-                        {/*        </ul>*/}
-                        {/*    </div>*/}
-                        {/*)}*/}
                     </div>
                 </section>
             </main>

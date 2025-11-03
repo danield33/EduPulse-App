@@ -67,34 +67,46 @@ export default function DialogueEditor({scenario: globalScenario}: {scenario: Sc
                             Branching Dialogue Options
                         </h3>
                         {block.branch_options.map((branch, j) => (
-                            <Card key={j} className="p-4 mt-3 bg-gray-50 dark:bg-gray-800">
-                                <h4 className="font-semibold text-blue-700 dark:text-blue-300 mb-2">
-                                    {branch.type}
-                                </h4>
-                                {branch.dialogue.map((line: any, k: number) => (
-                                    <DialogueBox
-                                        key={k}
-                                        speaker={line.role}
-                                        line={line.dialogue}
-                                        onEdit={() =>
-                                            handleEdit(
-                                                line.role,
-                                                line.dialogue,
-                                                `script.${i}.branch_options.${j}.dialogue.${k}`
-                                            )
-                                        }
-                                    />
-                                ))}
-                            </Card>
+                            <div className="group realtive items-center flex flex-col w-full">
+                                <Card key={j} className="p-4 mt-3 bg-gray-50 dark:bg-gray-800 w-full">
+                                    <h4 className="font-semibold text-blue-700 dark:text-blue-300 mb-2">
+                                        {branch.type}
+                                    </h4>
+                                    {branch.dialogue.map((line: any, k: number) => (
+                                        <DialogueBox
+                                            key={k}
+                                            speaker={line.role}
+                                            line={line.dialogue}
+                                            onEdit={() =>
+                                                handleEdit(
+                                                    line.role,
+                                                    line.dialogue,
+                                                    `script.${i}.branch_options.${j}.dialogue.${k}`
+                                                )
+                                            }
+                                        />
+                                    ))}
+                                </Card>
+                                <button className="opacity-0 group-hover:opacity-100 transition-opacity text-sm
+                                  text-blue-600 dark:text-blue-400 hover:underline mt-2 w-full">
+                                    + Add Breakpoint
+                                </button>
+                            </div>
                         ))}
                     </div>
                 ) : (
-                    <DialogueBox
-                        key={i}
-                        speaker={block.role!}
-                        line={block.dialogue!}
-                        onEdit={() => handleEdit(block.role, block.dialogue, `script.${i}`)}
-                    />
+                    <div className="group realtive items-center flex flex-col">
+                        <DialogueBox
+                            key={i}
+                            speaker={block.role!}
+                            line={block.dialogue!}
+                            onEdit={() => handleEdit(block.role, block.dialogue, `script.${i}`)}
+                        />
+                        <button  className="opacity-0 group-hover:opacity-100 transition-opacity text-sm
+                                  text-blue-600 dark:text-blue-400 hover:underline mt-2">
+                            + Add Breakpoint
+                        </button>
+                    </div>
                 )
             )}
 

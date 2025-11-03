@@ -61,6 +61,7 @@ dependencies = [
     { name = "openai" },
     { name = "pydantic-settings" },
     { name = "pypdf2" },
+    { name = "watchdog" },
 ]
 
 [package.dev-dependencies]
@@ -88,6 +89,7 @@ requires-dist = [
     { name = "openai", specifier = ">=2.6.1" },
     { name = "pydantic-settings", specifier = ">=2.5.2,<3" },
     { name = "pypdf2", specifier = ">=3.0.1" },
+    { name = "watchdog", specifier = ">=5.0.3" },
 ]
 
 [package.metadata.requires-dev]
