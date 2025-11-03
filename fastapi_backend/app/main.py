@@ -8,6 +8,8 @@ from app.routes.videos import router as videos_router
 from app.routes.tts import router as tts_router
 from app.routes.ttimage import router as ttimage_router
 from app.routes.lesson import router as lesson_router
+from app.routes.generate_script import router as script_router
+
 from app.config import settings
 
 app = FastAPI(
@@ -60,5 +62,6 @@ app.include_router(tts_router, prefix="/tts")
 app.include_router(ttimage_router, prefix="/ttimage")
 
 app.include_router(lesson_router, prefix="/lessons")
+app.include_router(script_router, prefix="/generate_script")
 
 add_pagination(app)

@@ -1407,6 +1407,46 @@
           }
         }
       }
+    },
+    "/generate_script/from_pdf": {
+      "post": {
+        "tags": [
+          "genscript"
+        ],
+        "summary": "Generate Script From Pdf",
+        "description": "Accept a PDF upload and return a 2-minute teaching script.",
+        "operationId": "generate_script_from_pdf",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_genscript-generate_script_from_pdf"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1487,6 +1527,20 @@
           "token"
         ],
         "title": "Body_auth-verify:verify"
+      },
+      "Body_genscript-generate_script_from_pdf": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_genscript-generate_script_from_pdf"
       },
       "Body_videos-upload_video": {
         "properties": {

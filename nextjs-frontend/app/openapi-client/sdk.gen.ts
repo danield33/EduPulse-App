@@ -84,6 +84,9 @@ import type {
   HasNextVideoData,
   HasNextVideoError,
   HasNextVideoResponse,
+  GenerateScriptFromPdfData,
+  GenerateScriptFromPdfError,
+  GenerateScriptFromPdfResponse,
 } from "./types.gen";
 
 export const client = createClient(createConfig());
@@ -532,5 +535,27 @@ export const hasNextVideo = <ThrowOnError extends boolean = false>(
   >({
     ...options,
     url: "/lessons/{lesson_id}/video/{index}/has_next",
+  });
+};
+
+/**
+ * Generate Script From Pdf
+ * Accept a PDF upload and return a 2-minute teaching script.
+ */
+export const generateScriptFromPdf = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<GenerateScriptFromPdfData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<
+    GenerateScriptFromPdfResponse,
+    GenerateScriptFromPdfError,
+    ThrowOnError
+  >({
+    ...options,
+    ...formDataBodySerializer,
+    headers: {
+      "Content-Type": null,
+      ...options?.headers,
+    },
+    url: "/generate_script/from_pdf",
   });
 };

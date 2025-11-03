@@ -1,25 +1,32 @@
 "use client"
 
-import {FormEvent, FormEventHandler} from "react";
+import {MouseEvent} from "react";
 import {Button} from "@/components/ui/button";
+import {generateScriptFromPdf} from "@/app/openapi-client";
+
 
 export default function CreateNewLessonPage() {
 
-
-    const createScript = async (e:  FormEvent<HTMLFormElement>) => {
+    const createScript = async (e: MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
+        console.log('submit')
         const fileInput = document.getElementById("script-upload") as HTMLInputElement;
         if (!fileInput?.files?.length) return;
 
+        console.log(fileInput.files, 'files', 1)
         const formData = new FormData();
         formData.append("file", fileInput.files[0]);
 
-        const res = await fetch("/api/generate-lessons", {
-            method: "POST",
-            body: formData,
+        console.log(process.env.API_BASE_URL, 'baseurl')
+        const res = await generateScriptFromPdf({
+            body: {
+                file: fileInput.files[0],
+            },
+            baseURL: "http://localhost:8000"
         });
 
-        const data = await res.json();
+        console.log(res);
+
         // setLessons(data.lessons || []);
     }
 
@@ -40,7 +47,6 @@ export default function CreateNewLessonPage() {
 
                             <form
                                 className="mb-6 flex flex-col items-center justify-center border-2 border-dashed border-gray-400 dark:border-gray-600 rounded-lg p-8 bg-gray-100 dark:bg-gray-800"
-                                onSubmit={createScript}
                             >
                                 {/* Hidden native input */}
                                 <input
@@ -71,7 +77,7 @@ export default function CreateNewLessonPage() {
 
                             </form>
 
-                            <Button className={"rounded-xl bg-lime-400 text-black hover:bg-lime-500"}>
+                            <Button className={"rounded-xl bg-lime-400 text-black hover:bg-lime-500"} type={"button"} onClick={createScript}>
                                 Submit!
                             </Button>
 

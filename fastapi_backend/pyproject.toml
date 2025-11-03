@@ -13,6 +13,7 @@ dependencies = [
     "fastapi-mail>=1.4.1,<2",
     "fastapi-pagination==0.13.3",
     "pypdf2>=3.0.1",
+    "openai>=2.6.1",
 ]
 
 [dependency-groups]

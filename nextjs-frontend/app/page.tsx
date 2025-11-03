@@ -1,17 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { FaGithub } from "react-icons/fa";
 
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
 
 export default function Home() {
 
