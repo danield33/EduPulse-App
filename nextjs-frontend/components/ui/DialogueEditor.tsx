@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import DialogueBox from "@/components/ui/DialogueBox";
 import {Card} from "@/components/ui/card";
 import {AnimatePresence, motion} from "framer-motion";
@@ -50,8 +50,9 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
         currentImage: { url?: string; prompt?: string } | null;
     } | null>(null);
 
-    const [uploadFile, setUploadFile] = useState<File | null>(null);
-    const [promptText, setPromptText] = useState("");
+    useEffect(() => {
+        console.log(imageEdit, 'img')
+    }, [imageEdit])
 
     const handleEdit = (speaker: string, line: string, path: string) => {
         setEditing({speaker, line, path});
@@ -298,7 +299,7 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                                                             onAddBranching={() => handleAddBranchingDialogue(i, j)}
                                                             onAddImage={() => setImageEdit({
                                                                 path: `script.${i}.branch_options.${j}.dialogue.${k}`,
-                                                                currentImage: scenario.script[i].image || null,
+                                                                currentImage: scenario.script[i].branch_options?.[j].dialogue[k].image || null,
                                                             })}
                                                         />
                                                     </div>

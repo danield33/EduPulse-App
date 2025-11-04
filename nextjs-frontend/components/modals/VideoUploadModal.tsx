@@ -1,5 +1,5 @@
 import {AnimatePresence, motion} from "framer-motion";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {Button} from "@/components/ui/button";
 
 interface ImageModalProps {
@@ -20,6 +20,7 @@ export function VideoUploadModal({
         currentImage?.prompt || ""
     );
 
+
     const handleSave = () => {
         if (uploadFile) {
             const localUrl = URL.createObjectURL(uploadFile);
@@ -27,6 +28,7 @@ export function VideoUploadModal({
         } else if (promptText.trim()) {
             onSave({prompt: promptText.trim()});
         }
+        setUploadFile(null);
         onClose();
     };
 
