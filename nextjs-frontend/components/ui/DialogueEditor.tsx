@@ -232,7 +232,7 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                                                     {branch.type}
                                                 </h4>
                                                 {branch.dialogue.map((line: any, k: number) => (
-                                                    <>
+                                                    <div key={k}>
                                                         <DialogueBox
                                                             key={k}
                                                             speaker={line.role}
@@ -249,7 +249,7 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                                                             onAddDialogue={() => handleAddDialogueBox(i, j, k)}
                                                             onAddBranching={() => handleAddBranchingDialogue(i, j)}
                                                         />
-                                                    </>
+                                                    </div>
                                                 ))}
                                             </Card>
                                         </div>
