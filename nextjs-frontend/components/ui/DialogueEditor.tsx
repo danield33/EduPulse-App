@@ -7,10 +7,16 @@ import {arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable} fr
 import {closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors} from "@dnd-kit/core";
 import {CSS} from "@dnd-kit/utilities";
 import {ScriptContentButton} from "@/components/ui/ScriptContentButton";
+import {VideoUploadModal} from "@/components/modals/VideoUploadModal";
 
 export interface DialogueLine {
     role: string;
     dialogue: string;
+    image?: {
+        url?: string;
+        prompt?: string;
+        base64?: string;
+    };
 }
 
 export interface BranchOption {
@@ -22,6 +28,11 @@ export interface ScriptBlock {
     role: string;
     dialogue: string;
     branch_options?: BranchOption[];
+    image?: {
+        url?: string;
+        prompt?: string;
+        base64?: string;
+    };
 }
 
 export interface Scenario {
@@ -34,6 +45,13 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
     const [scenario, setScenario] = useState<Scenario>(globalScenario);
     const [editing, setEditing] = useState<{ speaker?: string; line?: string; path?: string } | null>(null);
     const [newText, setNewText] = useState("");
+    const [imageEdit, setImageEdit] = useState<{
+        path: string;
+        currentImage: { url?: string; prompt?: string } | null;
+    } | null>(null);
+
+    const [uploadFile, setUploadFile] = useState<File | null>(null);
+    const [promptText, setPromptText] = useState("");
 
     const handleEdit = (speaker: string, line: string, path: string) => {
         setEditing({speaker, line, path});
@@ -110,10 +128,7 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
         setScenario(updated);
     };
 
-    const handleAddBranchingDialogue = (
-        scriptIndex: number,
-        branchIndex?: number
-    ) => {
+    const handleAddBranchingDialogue = (scriptIndex: number, branchIndex?: number) => {
         const updated = structuredClone(scenario);
 
         const newBranchOption: BranchOption = {
@@ -151,6 +166,11 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
         setScenario(updated);
     };
 
+    const handleEditBranchType = (scriptIndex: number, branchIndex: number, newType: string) => {
+        const updated = structuredClone(scenario);
+        updated.script[scriptIndex].branch_options![branchIndex].type = newType;
+        setScenario(updated);
+    };
 
     const handleDeleteDialogueBox = () => {
         if (!editing?.path) return;
@@ -207,6 +227,21 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
         setEditing(null);
     };
 
+    const handleAddImage = (data: { url?: string, prompt?: string }) => {
+        const updated = structuredClone(scenario);
+        const pathParts = imageEdit!.path.split(".").map((p) =>
+            /^\d+$/.test(p) ? Number(p) : p
+        );
+
+        let target: any = updated;
+        for (const key of pathParts)
+            target = target[key];
+
+        target.image = data;
+        setScenario(updated);
+        setImageEdit(null);
+    };
+
 
     return (
         <div className="p-6 space-y-6 max-w-3xl mx-auto">
@@ -228,9 +263,21 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                                     {block.branch_options?.map((branch, j) => (
                                         <div key={j} className="group realtive items-center flex flex-col w-full">
                                             <Card className="p-4 mt-3 bg-gray-50 dark:bg-gray-800 w-full">
-                                                <h4 className="font-semibold text-blue-700 dark:text-blue-300 mb-2">
-                                                    {branch.type}
-                                                </h4>
+                                                <div className="
+                                                      font-semibold text-blue-700 dark:text-blue-300
+                                                      bg-transparent border-b border-transparent
+                                                      hover:border-blue-300 focus:border-blue-400
+                                                      focus:outline-none w-full">
+                                                    {/* Inline editable branch type */}
+                                                    <input
+                                                        type="text"
+                                                        value={branch.type}
+                                                        onChange={(e) =>
+                                                            handleEditBranchType(i, j, e.target.value)
+                                                        }
+                                                        className="font-semibold text-blue-700 dark:text-blue-300 bg-transparent border-b border-transparent focus:border-blue-400 focus:outline-none w-full"
+                                                    />
+                                                </div>
                                                 {branch.dialogue.map((line: any, k: number) => (
                                                     <div key={k}>
                                                         <DialogueBox
@@ -245,9 +292,14 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                                                                 )
                                                             }
                                                         />
+
                                                         <ScriptContentButton
                                                             onAddDialogue={() => handleAddDialogueBox(i, j, k)}
                                                             onAddBranching={() => handleAddBranchingDialogue(i, j)}
+                                                            onAddImage={() => setImageEdit({
+                                                                path: `script.${i}.branch_options.${j}.dialogue.${k}`,
+                                                                currentImage: scenario.script[i].image || null,
+                                                            })}
                                                         />
                                                     </div>
                                                 ))}
@@ -256,6 +308,7 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                                     ))}
                                     <ScriptContentButton onAddDialogue={() => handleAddDialogueBox(i)}
                                                          onAddBranching={() => handleAddBranchingDialogue(i)}
+
                                     />
                                 </div>
                             ) : (
@@ -268,6 +321,10 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                                     />
                                     <ScriptContentButton onAddDialogue={() => handleAddDialogueBox(i)}
                                                          onAddBranching={() => handleAddBranchingDialogue(i)}
+                                                         onAddImage={() => setImageEdit({
+                                                             path: `script.${i}`,
+                                                             currentImage: scenario.script[i].image || null,
+                                                         })}
                                     />
                                 </div>
                             )}
@@ -333,6 +390,14 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            <VideoUploadModal
+                isOpen={!!imageEdit}
+                onClose={() => setImageEdit(null)}
+                currentImage={imageEdit?.currentImage || null}
+                onSave={handleAddImage}
+            />
+
 
             {/* Save JSON */}
             <div className="pt-6 border-t">

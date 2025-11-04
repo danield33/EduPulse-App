@@ -4,8 +4,6 @@ import {MouseEvent, useState} from "react";
 import {Button} from "@/components/ui/button";
 import {generateScriptFromPdf} from "@/app/openapi-client";
 import DialogueEditor, {Scenario} from "@/components/ui/DialogueEditor";
-import {useSortable} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 
 
 export default function CreateNewLessonPage() {
