@@ -315,7 +315,9 @@ export type DeleteVideoData = {
   };
 };
 
-export type DeleteVideoResponse = unknown;
+export type DeleteVideoResponse = {
+  [key: string]: string;
+};
 
 export type DeleteVideoError = HTTPValidationError;
 
@@ -417,6 +419,8 @@ export type HasNextVideoData = {
   };
 };
 
-export type HasNextVideoResponse = unknown;
+export type HasNextVideoResponse = {
+  [key: string]: boolean;
+};
 
 export type HasNextVideoError = HTTPValidationError;

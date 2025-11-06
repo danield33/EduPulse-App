@@ -20,7 +20,7 @@ def get_audio_duration(audio_path: str) -> float:
 """--- FFmpeg command to combine image + audio ---"""
 
 
-def make_video(image_path: str, audio_path: str, output_path: str):
+def make_video(image_path: str, audio_path: str, output_path: str) -> None:
     duration = get_audio_duration(audio_path)
     cmd = [
         "ffmpeg",

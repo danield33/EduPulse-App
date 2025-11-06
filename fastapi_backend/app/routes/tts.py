@@ -35,7 +35,7 @@ class TTSResponse(BaseModel):
 
 
 @router.post("/synthesize", response_model=TTSResponse)
-async def synthesize_speech(request: TTSRequest, user: User = Depends(current_active_user)):
+async def synthesize_speech(request: TTSRequest, user: User = Depends(current_active_user)) -> TTSResponse:
     """
     Generate speech from text using Hume.ai TTS API.
 

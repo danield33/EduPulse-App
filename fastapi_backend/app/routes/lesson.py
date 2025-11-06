@@ -1,4 +1,4 @@
-from typing import Literal, List
+from typing import Literal, List, Any
 
 from app.models import Lesson, LessonVideo, Video, Breakpoint, User
 from app.schemas import LessonCreate, LessonRead, LessonVideoAddResponse
@@ -28,7 +28,7 @@ async def get_my_lessons(
     offset: int = Query(
         0, ge=0, description="Number of lessons to skip for pagination"
     ),
-):
+) -> List[LessonRead]:
     """
     Get all lessons belonging to the current signed-in user.
     Supports sorting (by creation date or title) and pagination.
@@ -57,7 +57,7 @@ async def get_my_lessons(
     return lessons
 
 @router.post("/create", response_model=LessonRead)
-async def create_lesson(lesson: LessonCreate, db: AsyncSession = Depends(get_db)):
+async def create_lesson(lesson: LessonCreate, db: AsyncSession = Depends(get_db)) -> LessonRead:
     new_lesson = Lesson(title=lesson.title, user_id=lesson.user_id)
     db.add(new_lesson)
     await db.commit()
@@ -69,7 +69,7 @@ async def add_video_to_lesson(
     lesson_id: UUID,
     request: LessonVideoAddResponse,
     db: AsyncSession = Depends(get_db)
-):
+) -> LessonVideoAddResponse:
     # Check that the lesson exists
     lesson_result = await db.execute(select(Lesson).where(Lesson.id == lesson_id))
     lesson = lesson_result.scalar_one_or_none()
@@ -133,7 +133,7 @@ async def add_video_to_lesson(
     }
 
 @router.get("/{lesson_id}", response_model=LessonRead)
-def get_lesson(lesson_id: UUID, db: AsyncSession = Depends(get_db)):
+def get_lesson(lesson_id: UUID, db: AsyncSession = Depends(get_db)) -> LessonRead:
     lesson = db.query(Lesson).filter(Lesson.id == lesson_id).first()
     if not lesson:
         raise HTTPException(status_code=404, detail="Lesson not found")
@@ -141,7 +141,7 @@ def get_lesson(lesson_id: UUID, db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/{lesson_id}/video/{index}")
-def get_video_by_index(lesson_id: UUID, index: int, db: AsyncSession = Depends(get_db)):
+def get_video_by_index(lesson_id: UUID, index: int, db: AsyncSession = Depends(get_db)) -> Any:
     video = (
         db.query(LessonVideo)
         .filter(LessonVideo.lesson_id == lesson_id, LessonVideo.order_index == index)
@@ -153,7 +153,7 @@ def get_video_by_index(lesson_id: UUID, index: int, db: AsyncSession = Depends(g
 
 
 @router.get("/{lesson_id}/video/{index}/has_next")
-def has_next_video(lesson_id: UUID, index: int, db: AsyncSession = Depends(get_db)):
+def has_next_video(lesson_id: UUID, index: int, db: AsyncSession = Depends(get_db)) -> dict[str, bool]:
     next_exists = (
         db.query(LessonVideo)
         .filter(LessonVideo.lesson_id == lesson_id, LessonVideo.order_index == index + 1)
