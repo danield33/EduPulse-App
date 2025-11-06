@@ -133,31 +133,35 @@ async def add_video_to_lesson(
     }
 
 @router.get("/{lesson_id}", response_model=LessonRead)
-def get_lesson(lesson_id: UUID, db: AsyncSession = Depends(get_db)) -> LessonRead:
-    lesson = db.query(Lesson).filter(Lesson.id == lesson_id).first()
+async def get_lesson(lesson_id: UUID, db: AsyncSession = Depends(get_db)) -> LessonRead:
+    result = await db.execute(select(Lesson).where(Lesson.id == lesson_id))
+    lesson = result.scalar_one_or_none()
     if not lesson:
         raise HTTPException(status_code=404, detail="Lesson not found")
     return lesson
 
 
 @router.get("/{lesson_id}/video/{index}")
-def get_video_by_index(lesson_id: UUID, index: int, db: AsyncSession = Depends(get_db)) -> Any:
-    video = (
-        db.query(LessonVideo)
-        .filter(LessonVideo.lesson_id == lesson_id, LessonVideo.order_index == index)
-        .first()
+async def get_video_by_index(lesson_id: UUID, index: int, db: AsyncSession = Depends(get_db)) -> Any:
+    result = await db.execute(
+        select(LessonVideo).where(
+            LessonVideo.lesson_id == lesson_id,
+            LessonVideo.index == index
+        )
     )
+    video = result.scalar_one_or_none()
     if not video:
         raise HTTPException(status_code=404, detail="Video not found at this index")
     return video
 
 
 @router.get("/{lesson_id}/video/{index}/has_next")
-def has_next_video(lesson_id: UUID, index: int, db: AsyncSession = Depends(get_db)) -> dict[str, bool]:
-    next_exists = (
-        db.query(LessonVideo)
-        .filter(LessonVideo.lesson_id == lesson_id, LessonVideo.order_index == index + 1)
-        .first()
-        is not None
+async def has_next_video(lesson_id: UUID, index: int, db: AsyncSession = Depends(get_db)) -> dict[str, bool]:
+    result = await db.execute(
+        select(LessonVideo).where(
+            LessonVideo.lesson_id == lesson_id,
+            LessonVideo.index == index + 1
+        )
     )
+    next_exists = result.scalar_one_or_none() is not None
     return {"has_next": next_exists}
