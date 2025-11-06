@@ -87,7 +87,8 @@ export function ImageUploadModal({
 
                                     <label
                                         htmlFor="image-upload"
-                                        className="cursor-pointer inline-block px-4 py-2 rounded-md bg-blue-600 text-white text-sm hover:bg-blue-700 transition"
+                                        className="cursor-pointer inline-block px-4 py-2 rounded-md bg-blue-600
+                                        text-white text-sm hover:bg-blue-700 transition text-center"
                                     >
                                         {uploadFile ? "Replace Image" : "Upload Image"}
                                     </label>

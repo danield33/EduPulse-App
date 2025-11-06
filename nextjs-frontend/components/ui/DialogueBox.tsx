@@ -21,7 +21,6 @@ const DialogueBox = ({speaker, line, onEdit, image}: DialogueBoxProps) => {
                         <ImageIcon
                             size={18}
                             className="text-blue-500 dark:text-blue-400"
-                            // title="This dialogue has an image"
                         />
                     )}
                 </div>
