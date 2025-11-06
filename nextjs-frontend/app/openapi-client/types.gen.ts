@@ -424,3 +424,7 @@ export type HasNextVideoResponse = {
 };
 
 export type HasNextVideoError = HTTPValidationError;
+
+export type CreateTempLessonResponse = LessonRead;
+
+export type CreateTempLessonError = unknown;

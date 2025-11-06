@@ -9,6 +9,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 from sqlalchemy import select
 from app.users import current_active_user
+from app.routes.videos import generate_video, VideoGenerateRequest
+from app.routes.tts import TTSRequest
+from app.routes.ttimage import TTImageRequest
 
 router = APIRouter(tags=["lessons"])
 
@@ -161,3 +164,90 @@ def has_next_video(lesson_id: UUID, index: int, db: AsyncSession = Depends(get_d
         is not None
     )
     return {"has_next": next_exists}
+
+
+@router.post("/{lesson_id}/temp_lesson", response_model=LessonRead)
+async def create_temp_lesson(
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(current_active_user),
+) -> LessonRead:
+    """
+    Create a temporary lesson with 2 videos.
+    Video 1 will have a breakpoint, video 2 will not.
+    Uses existing APIs from videos.py and lesson.py.
+    """
+    
+    # Create video 1 using generate_video
+    video1_request = VideoGenerateRequest(
+        audio=TTSRequest(
+            text="This is temporary video 1 for testing purposes.",
+            voice_description="neutral voice",
+            format="mp3"
+        ),
+        images=TTImageRequest(
+            prompt="A simple educational image",
+            n=1,
+            size="1024x1024"
+        ),
+        lesson_id="950abebd-0b01-4f4b-a5fd-1490c6561b12",  # This will be ignored since we create a new lesson
+        title="Temp Video 1"
+    )
+    video1 = await generate_video(video1_request, user, db)
+    
+    # Create video 2 using generate_video
+    video2_request = VideoGenerateRequest(
+        audio=TTSRequest(
+            text="This is temporary video 2 for testing purposes.",
+            voice_description="neutral voice",
+            format="mp3"
+        ),
+        images=TTImageRequest(
+            prompt="A simple educational image",
+            n=1,
+            size="1024x1024"
+        ),
+        lesson_id="950abebd-0b01-4f4b-a5fd-1490c6561b12",  # This will be ignored since we create a new lesson
+        title="Temp Video 2"
+    )
+    video2 = await generate_video(video2_request, user, db)
+    
+    # Create lesson using create_lesson (from this same file)
+    lesson_create = LessonCreate(
+        title="Temp Lesson",
+        user_id=user.id
+    )
+    lesson = await create_lesson(lesson_create, db)
+    
+    # Add video 1 with breakpoint
+    # Note: There's a type mismatch in add_video_to_lesson - it expects LessonVideoAddResponse
+    # but uses request.breakpoints. We'll work around this by directly creating the association.
+    lesson_video1 = LessonVideo(
+        lesson_id=lesson.id,
+        video_id=video1.id,
+        index=0,
+    )
+    db.add(lesson_video1)
+    await db.flush()  # Flush to get lesson_video1.id
+    
+    # Create breakpoint for video 1
+    breakpoint1 = Breakpoint(
+        lesson_video_id=lesson_video1.id,
+        question="What is the main topic of this video?",
+        choices=["Topic A", "Topic B", "Topic C", "Topic D"],
+        correct_choice=0,
+    )
+    db.add(breakpoint1)
+    
+    # Add video 2 without breakpoint
+    lesson_video2 = LessonVideo(
+        lesson_id=lesson.id,
+        video_id=video2.id,
+        index=1,
+    )
+    db.add(lesson_video2)
+    
+    # Commit all changes
+    await db.commit()
+    await db.refresh(lesson)
+    
+    return lesson

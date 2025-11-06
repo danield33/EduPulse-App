@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Optional, Iterator
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, Query
 from fastapi.responses import StreamingResponse
@@ -93,11 +93,11 @@ async def generate_video(
         file_bytes = f.read()
     headers = {"content-type": "video/mp4"}
     upload_file = UploadFile(
-        filename=f"Clip.mp4",
+        filename=f"Clip_{str(uuid4())}.mp4",
         file=BytesIO(file_bytes),
         headers=headers
     )
-    return await upload_video(f"Clip", None, upload_file, db, user)
+    return await upload_video(f"testing_video", None, upload_file, db, user)
 
 
 @router.post("/upload", response_model=VideoRead)
