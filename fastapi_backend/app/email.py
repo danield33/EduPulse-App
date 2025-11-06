@@ -6,7 +6,7 @@ from .config import settings
 from .models import User
 
 
-def get_email_config():
+def get_email_config() -> ConnectionConfig:
     conf = ConnectionConfig(
         MAIL_USERNAME=settings.MAIL_USERNAME,
         MAIL_PASSWORD=settings.MAIL_PASSWORD,
@@ -23,7 +23,7 @@ def get_email_config():
     return conf
 
 
-async def send_reset_password_email(user: User, token: str):
+async def send_reset_password_email(user: User, token: str) -> None:
     conf = get_email_config()
     email = user.email
     base_url = f"{settings.FRONTEND_URL}/password-recovery/confirm?"

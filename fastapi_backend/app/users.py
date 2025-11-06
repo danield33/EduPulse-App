@@ -1,7 +1,7 @@
 import uuid
 import re
 
-from typing import Optional
+from typing import Optional, AsyncGenerator
 
 from fastapi import Depends, Request
 from fastapi_users import (
@@ -64,7 +64,7 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
             raise InvalidPasswordException(reason=errors)
 
 
-async def get_user_manager(user_db: SQLAlchemyUserDatabase = Depends(get_user_db)):
+async def get_user_manager(user_db: SQLAlchemyUserDatabase = Depends(get_user_db)) -> AsyncGenerator[UserManager, None]:
     yield UserManager(user_db)
 
 

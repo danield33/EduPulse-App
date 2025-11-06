@@ -24,7 +24,7 @@ class TTImageResponse(BaseModel):
     image_url: str
 
 @router.post("/generateImage", response_model=TTImageResponse)
-async def generate_image(request: TTImageRequest, user: User = Depends(current_active_user)):
+async def generate_image(request: TTImageRequest, user: User = Depends(current_active_user)) -> TTImageResponse:
     """
     Generate an image using DALL-E based on a text prompt.
 
