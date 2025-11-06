@@ -8,6 +8,7 @@ import {closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, use
 import {CSS} from "@dnd-kit/utilities";
 import {ScriptContentButton} from "@/components/ui/ScriptContentButton";
 import {ImageUploadModal} from "@/components/modals/ImageUploadModal";
+import {EditDialogueModal} from "@/components/modals/EditDialogueModal";
 
 export interface DialogueLine {
     role: string;
@@ -60,7 +61,7 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
         useSensor(KeyboardSensor, {coordinateGetter: sortableKeyboardCoordinates})
     );
 
-    const saveEdit = () => {
+    const saveEdit = (speaker: string, dialogue: string) => {
         if (!editing) return;
 
         const updated = structuredClone(scenario);
@@ -72,12 +73,13 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
         }
 
         const lastKey = pathParts[pathParts.length - 1];
-        target[lastKey].dialogue = newText;
-        target[lastKey].role = editing.speaker;
+        target[lastKey].role = speaker;
+        target[lastKey].dialogue = dialogue;
 
         setScenario(updated);
         setEditing(null);
     };
+
 
 
     const handleDragEnd = (event: any) => {
@@ -335,62 +337,16 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
 
             </DndContext>
 
-            {/* Edit Modal */}
-            <AnimatePresence>
-                {editing && (
-                    <motion.div
-                        initial={{opacity: 0}}
-                        animate={{opacity: 1}}
-                        exit={{opacity: 0}}
-                        className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-                    >
-                        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-96 shadow-lg">
-                            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">
-                                Edit Dialogue
-                            </h3>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Speaker
-                            </label>
-                            <input
-                                type="text"
-                                value={editing.speaker || ""}
-                                onChange={(e) =>
-                                    setEditing({...editing, speaker: e.target.value})
-                                }
-                                className="w-full border rounded-md p-2 mb-4 bg-gray-50 dark:bg-gray-900 dark:text-white focus:ring focus:ring-blue-300"
-                                placeholder="e.g. Teacher, Narrator, Character A"
-                            />
-                            <textarea
-                                value={newText}
-                                onChange={(e) => setNewText(e.target.value)}
-                                className="w-full h-32 border rounded-md p-2 mb-4 bg-gray-50 dark:bg-gray-900 dark:text-white resize-none focus:ring focus:ring-blue-300"
-                            />
-
-                            <div className="flex justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
-                                {/* Delete Button */}
-                                <Button
-                                    variant="destructive"
-                                    onClick={handleDeleteDialogueBox}
-                                    className="bg-red-600 hover:bg-red-700 text-white"
-                                >
-                                    Delete
-                                </Button>
-
-                                <div className="flex space-x-3">
-                                    <Button
-                                        variant="outline"
-                                        onClick={() => setEditing(null)}
-                                        className="text-gray-600"
-                                    >
-                                        Cancel
-                                    </Button>
-                                    <Button onClick={saveEdit}>Save</Button>
-                                </div>
-                            </div>
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+            <EditDialogueModal
+                isOpen={!!editing}
+                speaker={editing?.speaker || ""}
+                text={newText}
+                onClose={() => setEditing(null)}
+                onSave={({ speaker, dialogue }) => {
+                    saveEdit(speaker, dialogue);
+                }}
+                onDelete={handleDeleteDialogueBox}
+            />
 
             <ImageUploadModal
                 isOpen={!!imageEdit}
