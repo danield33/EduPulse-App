@@ -281,6 +281,7 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                                                             key={k}
                                                             speaker={line.role}
                                                             line={line.dialogue}
+                                                            image={scenario.script[i].branch_options?.[j].dialogue[k].image}
                                                             onEdit={() =>
                                                                 handleEdit(
                                                                     line.role,
@@ -314,6 +315,7 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                                         key={i}
                                         speaker={block.role!}
                                         line={block.dialogue!}
+                                        image={scenario.script[i].image}
                                         onEdit={() => handleEdit(block.role, block.dialogue, `script.${i}`)}
                                     />
                                     <ScriptContentButton onAddDialogue={() => handleAddDialogueBox(i)}
