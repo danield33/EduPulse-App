@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import DialogueBox from "@/components/ui/DialogueBox";
 import {Card} from "@/components/ui/card";
 import {AnimatePresence, motion} from "framer-motion";
@@ -229,14 +229,12 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
         const pathParts = imageEdit!.path.split(".").map((p) =>
             /^\d+$/.test(p) ? Number(p) : p
         );
-        console.log(pathParts, 'pp')
 
         let target: any = updated;
         for (const key of pathParts)
             target = target[key];
 
         target.image = data;
-        console.log(updated)
         setScenario(updated);
         setImageEdit(null);
     };
@@ -321,11 +319,11 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                                     <ScriptContentButton onAddDialogue={() => handleAddDialogueBox(i)}
                                                          onAddBranching={() => handleAddBranchingDialogue(i)}
                                                          onAddImage={() => {
-                                                             console.log(scenario.script[i] || null, "ASD")
                                                              setImageEdit({
-                                                             path: `script.${i}`,
-                                                             currentImage: scenario.script[i].image || null,
-                                                         })}}
+                                                                 path: `script.${i}`,
+                                                                 currentImage: scenario.script[i].image || null,
+                                                             })
+                                                         }}
                                     />
                                 </div>
                             )}
