@@ -1,7 +1,6 @@
 import {useState} from "react";
 import DialogueBox from "@/components/ui/DialogueBox";
 import {Card} from "@/components/ui/card";
-import {AnimatePresence, motion} from "framer-motion";
 import {Button} from "@/components/ui/button";
 import {arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable} from "@dnd-kit/sortable";
 import {closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors} from "@dnd-kit/core";
@@ -9,6 +8,7 @@ import {CSS} from "@dnd-kit/utilities";
 import {ScriptContentButton} from "@/components/ui/ScriptContentButton";
 import {ImageUploadModal} from "@/components/modals/ImageUploadModal";
 import {EditDialogueModal} from "@/components/modals/EditDialogueModal";
+import {BreakpointModal} from "@/components/modals/BreakpointModal";
 
 export interface DialogueLine {
     role: string;
@@ -34,11 +34,17 @@ export interface ScriptBlock {
         prompt?: string;
         base64?: string;
     };
+    breakpoint?: BreakpointQuestion;
 }
 
 export interface Scenario {
     title: string;
     script: ScriptBlock[];
+}
+
+export interface BreakpointQuestion {
+    question: string;
+    options: { text: string; isCorrect: boolean }[];
 }
 
 
@@ -50,6 +56,8 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
         path: string;
         currentImage: { url?: string; prompt?: string } | null;
     } | null>(null);
+    const [breakpointEdit, setBreakpointEdit] = useState<{ path: string } | null>(null);
+
 
     const handleEdit = (speaker: string, line: string, path: string) => {
         setEditing({speaker, line, path});
@@ -79,7 +87,6 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
         setScenario(updated);
         setEditing(null);
     };
-
 
 
     const handleDragEnd = (event: any) => {
@@ -284,6 +291,7 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                                                             speaker={line.role}
                                                             line={line.dialogue}
                                                             image={scenario.script[i].branch_options?.[j].dialogue[k].image}
+                                                            breakpoint={block.breakpoint}
                                                             onEdit={() =>
                                                                 handleEdit(
                                                                     line.role,
@@ -300,6 +308,11 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                                                                 path: `script.${i}.branch_options.${j}.dialogue.${k}`,
                                                                 currentImage: scenario.script[i].branch_options?.[j].dialogue[k].image || null,
                                                             })}
+                                                            onAddBreakpoint={() =>
+                                                                setBreakpointEdit({
+                                                                    path: `script.${i}.branch_options.${j}.dialogue.${k}`,
+                                                                })
+                                                            }
                                                         />
                                                     </div>
                                                 ))}
@@ -308,6 +321,11 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                                     ))}
                                     <ScriptContentButton onAddDialogue={() => handleAddDialogueBox(i)}
                                                          onAddBranching={() => handleAddBranchingDialogue(i)}
+                                                         onAddBreakpoint={() =>
+                                                             setBreakpointEdit({
+                                                                 path: `script.${i}`,
+                                                             })
+                                                         }
 
                                     />
                                 </div>
@@ -318,6 +336,7 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                                         speaker={block.role!}
                                         line={block.dialogue!}
                                         image={scenario.script[i].image}
+                                        breakpoint={block.breakpoint}
                                         onEdit={() => handleEdit(block.role, block.dialogue, `script.${i}`)}
                                     />
                                     <ScriptContentButton onAddDialogue={() => handleAddDialogueBox(i)}
@@ -328,7 +347,13 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                                                                  currentImage: scenario.script[i].image || null,
                                                              })
                                                          }}
+                                                         onAddBreakpoint={() =>
+                                                             setBreakpointEdit({
+                                                                 path: `script.${i}`,
+                                                             })
+                                                         }
                                     />
+
                                 </div>
                             )}
                         </SortableItem>
@@ -342,7 +367,7 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                 speaker={editing?.speaker || ""}
                 text={newText}
                 onClose={() => setEditing(null)}
-                onSave={({ speaker, dialogue }) => {
+                onSave={({speaker, dialogue}) => {
                     saveEdit(speaker, dialogue);
                 }}
                 onDelete={handleDeleteDialogueBox}
@@ -353,6 +378,25 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                 onClose={() => setImageEdit(null)}
                 currentImage={imageEdit?.currentImage || null}
                 onSave={handleAddImage}
+            />
+
+            <BreakpointModal
+                isOpen={!!breakpointEdit}
+                onClose={() => setBreakpointEdit(null)}
+                onSave={(data) => {
+                    if (!breakpointEdit) return;
+                    const updated = structuredClone(scenario);
+
+                    const pathParts = breakpointEdit.path.split(".").map((p) =>
+                        /^\d+$/.test(p) ? Number(p) : p
+                    );
+                    let target: any = updated;
+                    for (const key of pathParts) target = target[key];
+
+                    target.breakpoint = data;
+                    setScenario(updated);
+                    setBreakpointEdit(null);
+                }}
             />
 
 

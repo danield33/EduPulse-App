@@ -1,14 +1,16 @@
 import React from 'react';
-import { ImageIcon } from "lucide-react";
+import { ImageIcon, PuzzleIcon } from "lucide-react";
+import {BreakpointQuestion} from "@/components/ui/DialogueEditor";
 
 interface DialogueBoxProps {
     speaker: string,
     line: string,
     onEdit?: () => void;
     image?: {url?: string; prompt?: string};
+    breakpoint?: BreakpointQuestion
 }
 
-const DialogueBox = ({speaker, line, onEdit, image}: DialogueBoxProps) => {
+const DialogueBox = ({speaker, line, onEdit, image, breakpoint}: DialogueBoxProps) => {
     return (
         <div className="relative p-4 border rounded-lg shadow bg-white dark:bg-gray-700 w-full">
             <div className="flex justify-between items-start">
@@ -23,6 +25,14 @@ const DialogueBox = ({speaker, line, onEdit, image}: DialogueBoxProps) => {
                             className="text-blue-500 dark:text-blue-400"
                         />
                     )}
+
+                    {!!breakpoint && (
+                        <PuzzleIcon
+                            size={18}
+                            className="text-blue-500 dark:text-blue-400"
+                        />
+                    )}
+
                 </div>
 
                 <button
