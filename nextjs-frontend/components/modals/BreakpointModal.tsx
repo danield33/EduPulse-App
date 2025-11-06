@@ -7,6 +7,7 @@ interface BreakpointModalProps {
     onClose: () => void;
     onSave: (data: { question: string; options: { text: string; isCorrect: boolean }[] }) => void;
     breakpoint?: { question: string; options: { text: string; isCorrect: boolean }[] }
+    onDelete?: () => void;
 }
 
 export function BreakpointModal({ isOpen, onClose, onSave, breakpoint }: BreakpointModalProps) {
@@ -19,14 +20,24 @@ export function BreakpointModal({ isOpen, onClose, onSave, breakpoint }: Breakpo
     useEffect(() => {
         if(breakpoint){
             setQuestion(breakpoint.question);
-            setOptions(breakpoint.options);
+            setOptions(breakpoint.options || [
+                { text: "", isCorrect: false },
+                { text: "", isCorrect: false },
+            ]);
         }else{
             setQuestion("");
             setOptions([]);
         }
     }, [breakpoint]);
 
+    const removeOption = (index: number) => {
+        const updated = [...options];
+        updated.splice(index, 1);
+        setOptions(updated);
+    };
+
     const addOption = () => {
+        if(options.length >= 10) return; //max is 10
         setOptions([...options, { text: "", isCorrect: false }]);
     };
 
@@ -92,11 +103,31 @@ export function BreakpointModal({ isOpen, onClose, onSave, breakpoint }: Breakpo
                                         />
                                         Correct
                                     </label>
+                                    <button
+                                        type="button"
+                                        onClick={() => removeOption(i)}
+                                        className="text-red-500 hover:text-red-700 text-sm font-medium"
+                                    >
+                                        ✕
+                                    </button>
                                 </div>
                             ))}
-                            <Button variant="outline" size="sm" onClick={addOption}>
-                                + Add Option
-                            </Button>
+                            <div className="flex items-center justify-between">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={addOption}
+                                    disabled={options.length >= 10}
+                                >
+                                    + Add Option
+                                </Button>
+
+                                {options.length >= 10 && (
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                                        Maximum of 10 options reached.
+                                    </p>
+                                )}
+                            </div>
                         </div>
 
                         {/* Buttons */}
