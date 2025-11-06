@@ -7,7 +7,7 @@ import {arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable} fr
 import {closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors} from "@dnd-kit/core";
 import {CSS} from "@dnd-kit/utilities";
 import {ScriptContentButton} from "@/components/ui/ScriptContentButton";
-import {VideoUploadModal} from "@/components/modals/VideoUploadModal";
+import {ImageUploadModal} from "@/components/modals/ImageUploadModal";
 
 export interface DialogueLine {
     role: string;
@@ -49,10 +49,6 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
         path: string;
         currentImage: { url?: string; prompt?: string } | null;
     } | null>(null);
-
-    useEffect(() => {
-        console.log(imageEdit, 'img')
-    }, [imageEdit])
 
     const handleEdit = (speaker: string, line: string, path: string) => {
         setEditing({speaker, line, path});
@@ -233,12 +229,14 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
         const pathParts = imageEdit!.path.split(".").map((p) =>
             /^\d+$/.test(p) ? Number(p) : p
         );
+        console.log(pathParts, 'pp')
 
         let target: any = updated;
         for (const key of pathParts)
             target = target[key];
 
         target.image = data;
+        console.log(updated)
         setScenario(updated);
         setImageEdit(null);
     };
@@ -322,10 +320,12 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                                     />
                                     <ScriptContentButton onAddDialogue={() => handleAddDialogueBox(i)}
                                                          onAddBranching={() => handleAddBranchingDialogue(i)}
-                                                         onAddImage={() => setImageEdit({
+                                                         onAddImage={() => {
+                                                             console.log(scenario.script[i] || null, "ASD")
+                                                             setImageEdit({
                                                              path: `script.${i}`,
                                                              currentImage: scenario.script[i].image || null,
-                                                         })}
+                                                         })}}
                                     />
                                 </div>
                             )}
@@ -392,7 +392,7 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                 )}
             </AnimatePresence>
 
-            <VideoUploadModal
+            <ImageUploadModal
                 isOpen={!!imageEdit}
                 onClose={() => setImageEdit(null)}
                 currentImage={imageEdit?.currentImage || null}

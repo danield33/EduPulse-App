@@ -9,7 +9,7 @@ interface ImageModalProps {
     currentImage?: { url?: string; prompt?: string } | null;
 }
 
-export function VideoUploadModal({
+export function ImageUploadModal({
                                              isOpen,
                                              onClose,
                                              onSave,
@@ -20,14 +20,38 @@ export function VideoUploadModal({
         currentImage?.prompt || ""
     );
 
+    useEffect(() => {
+        (async () => {
+            if(currentImage?.url){
+                const res = await fetch(currentImage.url);
+                const blob = await res.blob();
+                const file = new File([blob], "tmp_image", { type: blob.type });
+                setUploadFile(file)
+            }else if(currentImage?.prompt){
+                setPromptText(currentImage.prompt)
+            }
+        })();
+
+    }, [currentImage]);
+
 
     const handleSave = () => {
-        if (uploadFile) {
-            const localUrl = URL.createObjectURL(uploadFile);
-            onSave({url: localUrl});
-        } else if (promptText.trim()) {
-            onSave({prompt: promptText.trim()});
+
+        const saveObj: {url?: string, prompt?: string} = {
+            url: undefined,
+            prompt: undefined,
         }
+
+        const localUrl = uploadFile ? URL.createObjectURL(uploadFile) : null;
+        if(localUrl)
+            saveObj.url = localUrl;
+
+        if(promptText.trim() && !localUrl) //prefer file upload
+            saveObj.prompt = promptText;
+
+        onSave(saveObj);
+
+        setPromptText("");
         setUploadFile(null);
         onClose();
     };
@@ -52,21 +76,41 @@ export function VideoUploadModal({
                                 <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
                                     Upload image file
                                 </label>
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={(e) =>
-                                        setUploadFile(e.target.files?.[0] || null)
-                                    }
-                                    className="w-full text-sm"
-                                />
-                                {uploadFile && (
-                                    <img
-                                        src={URL.createObjectURL(uploadFile)}
-                                        alt="preview"
-                                        className="mt-3 rounded-md max-h-48 object-cover"
+                                <div className="flex flex-col space-y-2">
+                                    <input
+                                        id="image-upload"
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
+                                        className="hidden"
                                     />
-                                )}
+
+                                    <label
+                                        htmlFor="image-upload"
+                                        className="cursor-pointer inline-block px-4 py-2 rounded-md bg-blue-600 text-white text-sm hover:bg-blue-700 transition"
+                                    >
+                                        {uploadFile ? "Replace Image" : "Upload Image"}
+                                    </label>
+
+                                    {uploadFile && (
+                                        <img
+                                            src={URL.createObjectURL(uploadFile)}
+                                            alt="Preview"
+                                            className="mt-3 rounded-md max-h-48 object-cover"
+                                        />
+                                    )}
+                                    {uploadFile && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setUploadFile(null)}
+                                            className="text-sm text-red-600 hover:underline mt-2"
+                                        >
+                                            Remove Image
+                                        </button>
+                                    )}
+
+                                </div>
+
                             </div>
 
                             <div className="text-center text-gray-400 text-sm">
@@ -87,8 +131,16 @@ export function VideoUploadModal({
                             </div>
                         </div>
 
+                        <div className="text-center text-gray-400 text-sm">
+                            *File upload will overwrite ai prompt
+                        </div>
+
                         <div className="flex justify-end space-x-3 mt-6">
-                            <Button variant="outline" onClick={onClose}>
+                            <Button variant="outline" onClick={() => {
+                                setPromptText("");
+                                setUploadFile(null);
+                                onClose()
+                            }}>
                                 Cancel
                             </Button>
                             <Button onClick={handleSave}>Save</Button>
