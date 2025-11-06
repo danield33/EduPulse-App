@@ -1,19 +1,30 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import {useEffect, useState} from "react";
 
 interface BreakpointModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSave: (data: { question: string; options: { text: string; isCorrect: boolean }[] }) => void;
+    breakpoint?: { question: string; options: { text: string; isCorrect: boolean }[] }
 }
 
-export function BreakpointModal({ isOpen, onClose, onSave }: BreakpointModalProps) {
+export function BreakpointModal({ isOpen, onClose, onSave, breakpoint }: BreakpointModalProps) {
     const [question, setQuestion] = useState("");
     const [options, setOptions] = useState([
         { text: "", isCorrect: false },
         { text: "", isCorrect: false },
     ]);
+
+    useEffect(() => {
+        if(breakpoint){
+            setQuestion(breakpoint.question);
+            setOptions(breakpoint.options);
+        }else{
+            setQuestion("");
+            setOptions([]);
+        }
+    }, [breakpoint]);
 
     const addOption = () => {
         setOptions([...options, { text: "", isCorrect: false }]);
@@ -27,6 +38,7 @@ export function BreakpointModal({ isOpen, onClose, onSave }: BreakpointModalProp
 
     const handleSave = () => {
         if (!question.trim()) return alert("Please enter a question.");
+        if(options.length <= 0) return alert("Please enter at least one option.")
         onSave({ question, options });
         setQuestion("");
         setOptions([

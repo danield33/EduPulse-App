@@ -56,7 +56,7 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
         path: string;
         currentImage: { url?: string; prompt?: string } | null;
     } | null>(null);
-    const [breakpointEdit, setBreakpointEdit] = useState<{ path: string } | null>(null);
+    const [breakpointEdit, setBreakpointEdit] = useState<{ path: string, data?: BreakpointQuestion } | null>(null);
 
 
     const handleEdit = (speaker: string, line: string, path: string) => {
@@ -311,6 +311,7 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                                                             onAddBreakpoint={() =>
                                                                 setBreakpointEdit({
                                                                     path: `script.${i}.branch_options.${j}.dialogue.${k}`,
+                                                                    data: block.breakpoint
                                                                 })
                                                             }
                                                         />
@@ -324,6 +325,7 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                                                          onAddBreakpoint={() =>
                                                              setBreakpointEdit({
                                                                  path: `script.${i}`,
+                                                                 data: block.breakpoint
                                                              })
                                                          }
 
@@ -350,6 +352,7 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                                                          onAddBreakpoint={() =>
                                                              setBreakpointEdit({
                                                                  path: `script.${i}`,
+                                                                 data: block.breakpoint
                                                              })
                                                          }
                                     />
@@ -383,6 +386,7 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
             <BreakpointModal
                 isOpen={!!breakpointEdit}
                 onClose={() => setBreakpointEdit(null)}
+                breakpoint={breakpointEdit?.data}
                 onSave={(data) => {
                     if (!breakpointEdit) return;
                     const updated = structuredClone(scenario);
