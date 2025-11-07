@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useMemo, useState} from "react";
 import DialogueBox from "@/components/ui/DialogueBox";
 import {Card} from "@/components/ui/card";
 import {Button} from "@/components/ui/button";
@@ -42,9 +42,15 @@ export interface Scenario {
     script: ScriptBlock[];
 }
 
+export interface BreakpointOption {
+    text: string;
+    isCorrect: boolean,
+    branchTarget?: string | null; // ✅ name or index of branch to go to
+}
+
 export interface BreakpointQuestion {
     question: string;
-    options: { text: string; isCorrect: boolean }[];
+    options: BreakpointOption[];
 }
 
 
@@ -57,6 +63,8 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
         currentImage: { url?: string; prompt?: string } | null;
     } | null>(null);
     const [breakpointEdit, setBreakpointEdit] = useState<{ path: string, data?: BreakpointQuestion } | null>(null);
+
+    const branches = useMemo(() => getAvailableBranches(scenario, breakpointEdit?.path), [scenario, breakpointEdit]);
 
 
     const handleEdit = (speaker: string, line: string, path: string) => {
@@ -401,6 +409,7 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                     setScenario(updated);
                     setBreakpointEdit(null);
                 }}
+                availableBranches={branches}
             />
 
 
@@ -449,4 +458,18 @@ function SortableItem({id, children}: { id: string; children: React.ReactNode })
             {children}
         </div>
     );
+}
+
+function getAvailableBranches(scenario: Scenario, path?: string|null): string[] | null {
+    if(!path) return null;
+    // Find the parent script block index
+    const parts = path.split(".");
+    const idx = Number(parts[1]);
+    const nextBlock = scenario.script[idx + 1];
+
+    if (nextBlock?.branch_options) {
+        return nextBlock.branch_options.map((b: any) => b.type);
+    }
+
+    return null;
 }

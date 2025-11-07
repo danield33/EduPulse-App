@@ -11,6 +11,7 @@ interface BreakpointModalProps {
 }
 
 export function BreakpointModal({ isOpen, onClose, onSave, breakpoint }: BreakpointModalProps) {
+
     const [question, setQuestion] = useState("");
     const [options, setOptions] = useState([
         { text: "", isCorrect: false },
