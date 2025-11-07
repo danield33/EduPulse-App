@@ -10,6 +10,7 @@ import {ImageUploadModal} from "@/components/modals/ImageUploadModal";
 import {EditDialogueModal} from "@/components/modals/EditDialogueModal";
 import {BreakpointModal} from "@/components/modals/BreakpointModal";
 import {getAvailableBranches, hasValidBreakpoint, isBeforeBranching, isBranchingBlock} from "@/lib/script-editor";
+import { SortableItem } from "./SortableItem";
 
 export interface DialogueLine {
     role: string;
@@ -468,31 +469,3 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
         </div>
     );
 }
-
-function SortableItem({id, children}: { id: string; children: React.ReactNode }) {
-    const {attributes, listeners, setNodeRef, transform, transition} = useSortable({id});
-    const style = {
-        transform: CSS.Transform.toString(transform),
-        transition,
-    };
-
-    return (
-        <div
-            ref={setNodeRef}
-            style={style}
-            className="relative group border border-transparent hover:border-gray-300 rounded-md"
-            {...attributes}
-        >
-            <div
-                {...listeners}
-                className="absolute -left-6 top-4 cursor-grab text-gray-400 group-hover:text-gray-600 select-none"
-                title="Drag to reorder"
-            >
-                ⋮⋮
-            </div>
-            {children}
-        </div>
-    );
-}
-
-
