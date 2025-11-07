@@ -46,7 +46,7 @@ export interface Scenario {
 export interface BreakpointOption {
     text: string;
     isCorrect: boolean,
-    branchTarget?: string | null; // ✅ name or index of branch to go to
+    branchTarget?: string | null; //  name or index of branch to go to
 }
 
 export interface BreakpointQuestion {
@@ -260,19 +260,6 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
         setImageEdit(null);
     };
 
-    if (isBranchingBlock(scenario.script[0])) {
-        return (
-            <div className="w-full border border-yellow-400 bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 rounded-md p-3 text-sm flex items-center justify-between">
-                <span>⚠️ Misconfigured start — a branching dialogue cannot be the first item.</span>
-                <button
-                    onClick={() => handleAddDialogueBox(0)}
-                    className="text-blue-600 dark:text-blue-400 hover:underline font-medium ml-2"
-                >
-                    Add Intro Dialogue
-                </button>
-            </div>
-        );
-    }
 
 
     return (
@@ -284,9 +271,20 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
             {/* Main Dialogue */}
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 <SortableContext items={scenario.script.map((_, i) => `item-${i}`)}>
-
                     {scenario.script.map((block, i) =>
                         <SortableItem key={`item-${i}`} id={`item-${i}`}>
+                            {isBranchingBlock(scenario.script[0]) && i === 0 && (
+                                <div
+                                    className="w-full border border-yellow-400 bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 rounded-md p-3 text-sm flex items-center justify-between">
+                                    <span>⚠️ Misconfigured start — a branching dialogue cannot be the first item.</span>
+                                    <button
+                                        onClick={() => handleAddDialogueBox(0)}
+                                        className="text-blue-600 dark:text-blue-400 hover:underline font-medium ml-2"
+                                    >
+                                        Add Intro Dialogue
+                                    </button>
+                                </div>
+                            )}
                             {block.branch_options ? (
                                 <div key={i} className="mt-4">
                                     <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200">
@@ -294,7 +292,7 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                                     </h3>
                                     {block.branch_options?.map((branch, j) => (
                                         <div key={j} className="group realtive items-center flex flex-col w-full">
-                                            <Card className="p-4 mt-3 bg-gray-50 dark:bg-gray-800 w-full">
+                                        <Card className="p-4 mt-3 bg-gray-50 dark:bg-gray-800 w-full">
                                                 <div className="
                                                       font-semibold text-blue-700 dark:text-blue-300
                                                       bg-transparent border-b border-transparent
