@@ -1,19 +1,22 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import {useEffect, useState} from "react";
+import {BreakpointOption, BreakpointQuestion} from "@/components/ui/DialogueEditor";
 
 interface BreakpointModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (data: { question: string; options: { text: string; isCorrect: boolean }[] }) => void;
-    breakpoint?: { question: string; options: { text: string; isCorrect: boolean }[] }
+    onSave: (data: BreakpointQuestion) => void;
+    breakpoint?: BreakpointQuestion
     onDelete?: () => void;
+    availableBranches?: string[] | null;
+
 }
 
-export function BreakpointModal({ isOpen, onClose, onSave, breakpoint }: BreakpointModalProps) {
+export function BreakpointModal({ isOpen, onClose, onSave, breakpoint, availableBranches }: BreakpointModalProps) {
 
     const [question, setQuestion] = useState("");
-    const [options, setOptions] = useState([
+    const [options, setOptions] = useState<BreakpointOption[]>([
         { text: "", isCorrect: false },
         { text: "", isCorrect: false },
     ]);
@@ -42,7 +45,7 @@ export function BreakpointModal({ isOpen, onClose, onSave, breakpoint }: Breakpo
         setOptions([...options, { text: "", isCorrect: false }]);
     };
 
-    const updateOption = (index: number, field: "text" | "isCorrect", value: string | boolean) => {
+    const updateOption = (index: number, field: keyof BreakpointOption, value: string | boolean | null) => {
         const updated = [...options];
         (updated[index] as any)[field] = value;
         setOptions(updated);
@@ -88,31 +91,58 @@ export function BreakpointModal({ isOpen, onClose, onSave, breakpoint }: Breakpo
                         {/* Options */}
                         <div className="space-y-3">
                             {options.map((opt, i) => (
-                                <div key={i} className="flex items-center gap-2">
-                                    <input
-                                        type="text"
-                                        value={opt.text}
-                                        onChange={(e) => updateOption(i, "text", e.target.value)}
-                                        placeholder={`Option ${i + 1}`}
-                                        className="flex-1 border rounded-md p-2 bg-gray-50 dark:bg-gray-900 dark:text-white focus:ring focus:ring-blue-300"
-                                    />
-                                    <label className="flex items-center gap-1 text-sm">
+                                <div key={i}
+                                     className="flex flex-col gap-2 border p-2 rounded-md bg-gray-50 dark:bg-gray-900">
+                                    <div className="flex items-center gap-2">
                                         <input
-                                            type="checkbox"
-                                            checked={opt.isCorrect}
-                                            onChange={(e) => updateOption(i, "isCorrect", e.target.checked)}
+                                            type="text"
+                                            value={opt.text}
+                                            onChange={(e) => updateOption(i, "text", e.target.value)}
+                                            placeholder={`Option ${i + 1}`}
+                                            className="flex-1 border rounded-md p-2 bg-gray-50 dark:bg-gray-900 dark:text-white focus:ring focus:ring-blue-300"
                                         />
-                                        Correct
-                                    </label>
-                                    <button
-                                        type="button"
-                                        onClick={() => removeOption(i)}
-                                        className="text-red-500 hover:text-red-700 text-sm font-medium"
-                                    >
-                                        ✕
-                                    </button>
+
+                                        {/* ✅ Correct checkbox */}
+                                        <label className="flex items-center gap-1 text-sm">
+                                            <input
+                                                type="checkbox"
+                                                checked={opt.isCorrect}
+                                                onChange={(e) => updateOption(i, "isCorrect", e.target.checked)}
+                                            />
+                                            Correct
+                                        </label>
+
+                                        {/* 🗑 Remove Option */}
+                                        <button
+                                            type="button"
+                                            onClick={() => removeOption(i)}
+                                            className="text-red-500 hover:text-red-700 text-sm font-medium"
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
+
+                                    {/* ✅ Only show this if branching dialogue follows */}
+                                    {availableBranches && (
+                                        <div className="flex items-center gap-2 text-sm ml-1">
+                                            <span className="text-gray-600 dark:text-gray-300">Next branch:</span>
+                                            <select
+                                                value={opt.branchTarget || ""}
+                                                onChange={(e) => updateOption(i, "branchTarget", e.target.value || null)}
+                                                className="border rounded-md px-2 py-1 bg-white dark:bg-gray-800 dark:text-white"
+                                            >
+                                                <option value="">None</option>
+                                                {availableBranches.map((branch, j) => (
+                                                    <option key={j} value={branch}>
+                                                        {branch}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    )}
                                 </div>
                             ))}
+
                             <div className="flex items-center justify-between">
                                 <Button
                                     variant="outline"
