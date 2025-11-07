@@ -4,7 +4,6 @@ import {Card} from "@/components/ui/card";
 import {Button} from "@/components/ui/button";
 import {arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable} from "@dnd-kit/sortable";
 import {closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors} from "@dnd-kit/core";
-import {CSS} from "@dnd-kit/utilities";
 import {ScriptContentButton} from "@/components/ui/ScriptContentButton";
 import {ImageUploadModal} from "@/components/modals/ImageUploadModal";
 import {EditDialogueModal} from "@/components/modals/EditDialogueModal";
