@@ -9,6 +9,7 @@ import {ScriptContentButton} from "@/components/ui/ScriptContentButton";
 import {ImageUploadModal} from "@/components/modals/ImageUploadModal";
 import {EditDialogueModal} from "@/components/modals/EditDialogueModal";
 import {BreakpointModal} from "@/components/modals/BreakpointModal";
+import {getAvailableBranches, hasValidBreakpoint, isBeforeBranching, isBranchingBlock} from "@/lib/script-editor";
 
 export interface DialogueLine {
     role: string;
@@ -121,6 +122,7 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
     ) => {
         const updated = structuredClone(scenario);
 
+        console.log(scriptIndex)
         const newDialogue = {
             role: "Narrator",
             dialogue: "New dialogue line...",
@@ -134,7 +136,9 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
             // Add to branch dialogue array
             const branch = updated.script[scriptIndex].branch_options![branchIndex];
             branch.dialogue.splice((dialogueIndex ?? branch.dialogue.length) + 1, 0, newDialogue);
-        } else {
+        } else if(scriptIndex === 0){
+           updated.script.unshift(newDialogue);
+        }else{
             // Add to main script array
             updated.script.splice(scriptIndex + 1, 0, newDialogue);
         }
@@ -256,6 +260,20 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
         setImageEdit(null);
     };
 
+    if (isBranchingBlock(scenario.script[0])) {
+        return (
+            <div className="w-full border border-yellow-400 bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 rounded-md p-3 text-sm flex items-center justify-between">
+                <span>⚠️ Misconfigured start — a branching dialogue cannot be the first item.</span>
+                <button
+                    onClick={() => handleAddDialogueBox(0)}
+                    className="text-blue-600 dark:text-blue-400 hover:underline font-medium ml-2"
+                >
+                    Add Intro Dialogue
+                </button>
+            </div>
+        );
+    }
+
 
     return (
         <div className="p-6 space-y-6 max-w-3xl mx-auto">
@@ -349,6 +367,23 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                                         breakpoint={block.breakpoint}
                                         onEdit={() => handleEdit(block.role, block.dialogue, `script.${i}`)}
                                     />
+                                    {/* Check for misconfiguration */}
+                                    {isBeforeBranching(scenario.script, i) && !hasValidBreakpoint(block) && (
+                                        <div className="my-2 w-full border border-yellow-400 bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 rounded-md p-3 text-sm flex items-center justify-between">
+                                            <span>⚠️ Misconfigured Breakpoint — no branch selected for next dialogue.</span>
+                                            <button
+                                                onClick={() =>
+                                                    setBreakpointEdit({
+                                                        path: `script.${i}`,
+                                                        data: block.breakpoint
+                                                    })
+                                                }
+                                                className="text-blue-600 dark:text-blue-400 hover:underline font-medium ml-2"
+                                            >
+                                                Fix
+                                            </button>
+                                        </div>
+                                    )}
                                     <ScriptContentButton onAddDialogue={() => handleAddDialogueBox(i)}
                                                          onAddBranching={() => handleAddBranchingDialogue(i)}
                                                          onAddImage={() => {
@@ -460,16 +495,4 @@ function SortableItem({id, children}: { id: string; children: React.ReactNode })
     );
 }
 
-function getAvailableBranches(scenario: Scenario, path?: string|null): string[] | null {
-    if(!path) return null;
-    // Find the parent script block index
-    const parts = path.split(".");
-    const idx = Number(parts[1]);
-    const nextBlock = scenario.script[idx + 1];
 
-    if (nextBlock?.branch_options) {
-        return nextBlock.branch_options.map((b: any) => b.type);
-    }
-
-    return null;
-}

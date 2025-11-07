@@ -122,7 +122,7 @@ export function BreakpointModal({ isOpen, onClose, onSave, breakpoint, available
                                         </button>
                                     </div>
 
-                                    {/* ✅ Only show this if branching dialogue follows */}
+                                    {/* Only show this if branching dialogue follows */}
                                     {availableBranches && (
                                         <div className="flex items-center gap-2 text-sm ml-1">
                                             <span className="text-gray-600 dark:text-gray-300">Next branch:</span>
