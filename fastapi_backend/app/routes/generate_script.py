@@ -6,6 +6,7 @@ from app.database import get_async_session
 from pydantic import BaseModel
 import io, os, uuid
 from datetime import datetime
+from script_system_prompt import SYSTEM_PROMPT, build_prompt
 
 router = APIRouter(tags=["genscript"])
 
@@ -21,12 +22,6 @@ def extract_pdf_text(pdf_bytes: bytes) -> str:
     return "\n\n".join(chunks).strip()
 
 
-SYSTEM_PROMPT = (
-    "You are EduPulse, an AI lesson designer for nursing education. "
-    "Given a human-written scenario, create a concise, emotionally engaging "
-    "teaching script for a narrated training video about ~2 minutes long (~260–320 words). "
-    "Use [Narrator], [Teacher], and [Taylor] for dialogue, and add 2–3 [BREAKPOINT] markers."
-)
 
 @router.post("/from_pdf")
 async def generate_script_from_pdf(file: UploadFile = File(...)):
@@ -40,12 +35,12 @@ async def generate_script_from_pdf(file: UploadFile = File(...)):
     if not scenario_text:
         raise HTTPException(status_code=422, detail="Could not extract text from PDF")
 
+    prompt = build_prompt(scenario_text)
     completion = client.chat.completions.create(
         model="gpt-4o-mini",
         temperature=0.7,
         messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": scenario_text},
+            {"role": "user", "content": prompt},
         ],
     )
 
