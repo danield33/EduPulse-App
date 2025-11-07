@@ -1,13 +1,14 @@
-from typing import Literal, List, Any
+from typing import Literal, List
 
 from app.models import Lesson, LessonVideo, Video, Breakpoint, User
-from app.schemas import LessonCreate, LessonRead, LessonVideoAddResponse
+from app.schemas import LessonCreate, LessonRead, LessonVideoAddResponse, LessonVideoRead
 from uuid import UUID
 from app.database import get_async_session as get_db
 from fastapi import Depends, HTTPException, APIRouter, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from app.users import current_active_user
 from app.routes.videos import generate_video, VideoGenerateRequest
 from app.routes.tts import TTSRequest
@@ -144,18 +145,20 @@ async def get_lesson(lesson_id: UUID, db: AsyncSession = Depends(get_db)) -> Les
     return lesson
 
 
-@router.get("/{lesson_id}/video/{index}")
-async def get_video_by_index(lesson_id: UUID, index: int, db: AsyncSession = Depends(get_db)) -> Any:
+@router.get("/{lesson_id}/video/{index}", response_model=LessonVideoRead)
+async def get_video_by_index(lesson_id: UUID, index: int, db: AsyncSession = Depends(get_db)) -> LessonVideoRead:
     result = await db.execute(
-        select(LessonVideo).where(
+        select(LessonVideo)
+        .options(selectinload(LessonVideo.video), selectinload(LessonVideo.breakpoints))
+        .where(
             LessonVideo.lesson_id == lesson_id,
             LessonVideo.index == index
         )
     )
-    video = result.scalar_one_or_none()
-    if not video:
+    lesson_video = result.scalar_one_or_none()
+    if not lesson_video:
         raise HTTPException(status_code=404, detail="Video not found at this index")
-    return video
+    return lesson_video
 
 
 @router.get("/{lesson_id}/video/{index}/has_next")
@@ -232,7 +235,7 @@ async def create_temp_lesson(
     db.add(lesson_video1)
     await db.flush()  # Flush to get lesson_video1.id
     
-    # Create breakpoint for video 1
+    # Create breakpoint 1 for video 1
     breakpoint1 = Breakpoint(
         lesson_video_id=lesson_video1.id,
         question="What is the main topic of this video?",
@@ -240,6 +243,15 @@ async def create_temp_lesson(
         correct_choice=0,
     )
     db.add(breakpoint1)
+    
+    # Create breakpoint 2 for video 1
+    breakpoint2 = Breakpoint(
+        lesson_video_id=lesson_video1.id,
+        question="What is a secondary topic in this video?",
+        choices=["Topic X", "Topic Y", "Topic Z", "Topic W"],
+        correct_choice=1,
+    )
+    db.add(breakpoint2)
     
     # Add video 2 without breakpoint
     lesson_video2 = LessonVideo(

@@ -942,11 +942,6 @@
         "summary": "Stream Video",
         "description": "Stream a video file",
         "operationId": "stream_video",
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
         "parameters": [
           {
             "name": "video_id",
@@ -1348,7 +1343,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Lessons-Get Video By Index"
+                  "$ref": "#/components/schemas/LessonVideoRead"
                 }
               }
             }
@@ -1559,6 +1554,44 @@
         ],
         "title": "Body_videos-upload_video"
       },
+      "BreakpointRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "question": {
+            "type": "string",
+            "title": "Question"
+          },
+          "choices": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Choices"
+          },
+          "correct_choice": {
+            "type": "integer",
+            "title": "Correct Choice"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "question",
+          "choices",
+          "correct_choice",
+          "created_at"
+        ],
+        "title": "BreakpointRead"
+      },
       "ErrorModel": {
         "properties": {
           "detail": {
@@ -1671,6 +1704,49 @@
           "index"
         ],
         "title": "LessonVideoAddResponse"
+      },
+      "LessonVideoRead": {
+        "properties": {
+          "video_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Video Id"
+          },
+          "index": {
+            "type": "integer",
+            "title": "Index"
+          },
+          "breakpoints": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/BreakpointRead"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Breakpoints"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "video": {
+            "$ref": "#/components/schemas/VideoRead"
+          }
+        },
+        "type": "object",
+        "required": [
+          "video_id",
+          "index",
+          "id",
+          "video"
+        ],
+        "title": "LessonVideoRead"
       },
       "Page_VideoRead_": {
         "properties": {

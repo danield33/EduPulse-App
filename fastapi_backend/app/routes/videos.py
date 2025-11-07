@@ -187,11 +187,13 @@ async def get_video(
 async def stream_video(
         video_id: UUID,
         db: AsyncSession = Depends(get_async_session),
-        user: User = Depends(current_active_user),
+        # user: User = Depends(current_active_user),
 ) -> StreamingResponse:
     """Stream a video file"""
     result = await db.execute(
-        select(Video).filter(Video.id == video_id, Video.user_id == user.id)
+        # select(Video).filter(Video.id == video_id, Video.user_id == user.id)
+        select(Video).filter(Video.id == video_id)
+
     )
     video = result.scalars().first()
 

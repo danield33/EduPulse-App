@@ -28,6 +28,14 @@ export type Body_videos_upload_video = {
   file: Blob | File;
 };
 
+export type BreakpointRead = {
+  id: string;
+  question: string;
+  choices: Array<string>;
+  correct_choice: number;
+  created_at: string;
+};
+
 export type ErrorModel = {
   detail:
     | string
@@ -62,6 +70,14 @@ export type LessonVideoAddResponse = {
   lesson_id: string;
   video_id: string;
   index: number;
+};
+
+export type LessonVideoRead = {
+  video_id: string;
+  index: number;
+  breakpoints?: Array<BreakpointRead> | null;
+  id: string;
+  video: VideoRead;
 };
 
 export type login = {
@@ -408,7 +424,7 @@ export type GetVideoByIndexData = {
   };
 };
 
-export type GetVideoByIndexResponse = unknown;
+export type GetVideoByIndexResponse = LessonVideoRead;
 
 export type GetVideoByIndexError = HTTPValidationError;
 
