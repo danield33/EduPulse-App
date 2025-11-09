@@ -445,6 +445,10 @@ export type HasNextVideoResponse = {
 
 export type HasNextVideoError = HTTPValidationError;
 
+export type CreateTempLessonResponse = LessonRead;
+
+export type CreateTempLessonError = unknown;
+
 export type GenerateScriptFromPdfData = {
   body: Body_genscript_generate_script_from_pdf;
 };

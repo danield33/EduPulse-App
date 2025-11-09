@@ -1417,6 +1417,33 @@
         }
       }
     },
+    "/lessons/{lesson_id}/temp_lesson": {
+      "post": {
+        "tags": [
+          "lessons"
+        ],
+        "summary": "Create Temp Lesson",
+        "description": "Create a temporary lesson with 2 videos.\nVideo 1 will have a breakpoint, video 2 will not.\nUses existing APIs from videos.py and lesson.py.",
+        "operationId": "create_temp_lesson",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LessonRead"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
     "/generate_script/from_pdf": {
       "post": {
         "tags": [

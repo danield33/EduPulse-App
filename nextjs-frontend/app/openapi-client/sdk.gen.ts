@@ -84,6 +84,8 @@ import type {
   HasNextVideoData,
   HasNextVideoError,
   HasNextVideoResponse,
+  CreateTempLessonError,
+  CreateTempLessonResponse,
   GenerateScriptFromPdfData,
   GenerateScriptFromPdfError,
   GenerateScriptFromPdfResponse,
@@ -535,6 +537,25 @@ export const hasNextVideo = <ThrowOnError extends boolean = false>(
   >({
     ...options,
     url: "/lessons/{lesson_id}/video/{index}/has_next",
+  });
+};
+
+/**
+ * Create Temp Lesson
+ * Create a temporary lesson with 2 videos.
+ * Video 1 will have a breakpoint, video 2 will not.
+ * Uses existing APIs from videos.py and lesson.py.
+ */
+export const createTempLesson = <ThrowOnError extends boolean = false>(
+  options?: OptionsLegacyParser<unknown, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<
+    CreateTempLessonResponse,
+    CreateTempLessonError,
+    ThrowOnError
+  >({
+    ...options,
+    url: "/lessons/{lesson_id}/temp_lesson",
   });
 };
 
