@@ -97,7 +97,37 @@ export default function CreateNewLessonPage() {
                         }
 
 
-                        {scenario && <DialogueEditor scenario={scenario}/>}
+                        {scenario && (
+                            <>
+                                <DialogueEditor scenario={scenario}/>
+                                {/* Save JSON */}
+                                <div className="pt-6 border-t w-full flex flex-row justify-between">
+                                    <Button
+                                        onClick={() => {
+                                            const blob = new Blob([JSON.stringify(scenario, null, 2)], {
+                                                type: "application/json",
+                                            });
+                                            const url = URL.createObjectURL(blob);
+                                            const a = document.createElement("a");
+                                            a.href = url;
+                                            a.download = "scenario.json";
+                                            a.click();
+                                        }}
+                                    >
+                                        Download JSON
+                                    </Button>
+
+                                    <Button
+                                        className="rounded-xl bg-lime-400 text-black hover:bg-lime-500 font-bold"
+                                        onClick={() => {
+
+                                        }}
+                                    >
+                                        Generate Video
+                                    </Button>
+                                </div>
+                            </>
+                        )}
 
                     </div>
                 </section>

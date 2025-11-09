@@ -122,7 +122,6 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
     ) => {
         const updated = structuredClone(scenario);
 
-        console.log(scriptIndex)
         const newDialogue = {
             role: "Narrator",
             dialogue: "New dialogue line...",
@@ -445,24 +444,6 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                 availableBranches={branches}
             />
 
-
-            {/* Save JSON */}
-            <div className="pt-6 border-t">
-                <Button
-                    onClick={() => {
-                        const blob = new Blob([JSON.stringify(scenario, null, 2)], {
-                            type: "application/json",
-                        });
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement("a");
-                        a.href = url;
-                        a.download = "scenario.json";
-                        a.click();
-                    }}
-                >
-                    Download Updated JSON
-                </Button>
-            </div>
         </div>
     );
 }
