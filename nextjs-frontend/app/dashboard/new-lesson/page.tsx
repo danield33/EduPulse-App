@@ -92,7 +92,7 @@ export default function CreateNewLessonPage() {
                         :
                             <Button className={"rounded-xl bg-lime-400 text-black hover:bg-lime-500"} type={"button"}
                                     onClick={createScript}>
-                                Submit!
+                                {!!scenario ? "Generate again!" : "Submit!"}
                             </Button>
                         }
 
