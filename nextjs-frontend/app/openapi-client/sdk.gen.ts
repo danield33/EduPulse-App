@@ -84,8 +84,9 @@ import type {
   HasNextVideoData,
   HasNextVideoError,
   HasNextVideoResponse,
-  CreateTempLessonError,
-  CreateTempLessonResponse,
+  GenerateScriptFromPdfData,
+  GenerateScriptFromPdfError,
+  GenerateScriptFromPdfResponse,
 } from "./types.gen";
 
 export const client = createClient(createConfig());
@@ -538,20 +539,23 @@ export const hasNextVideo = <ThrowOnError extends boolean = false>(
 };
 
 /**
- * Create Temp Lesson
- * Create a temporary lesson with 2 videos.
- * Video 1 will have a breakpoint, video 2 will not.
- * Uses existing APIs from videos.py and lesson.py.
+ * Generate Script From Pdf
+ * Accept a PDF upload and return a 2-minute teaching script.
  */
-export const createTempLesson = <ThrowOnError extends boolean = false>(
-  options?: OptionsLegacyParser<unknown, ThrowOnError>,
+export const generateScriptFromPdf = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<GenerateScriptFromPdfData, ThrowOnError>,
 ) => {
   return (options?.client ?? client).post<
-    CreateTempLessonResponse,
-    CreateTempLessonError,
+    GenerateScriptFromPdfResponse,
+    GenerateScriptFromPdfError,
     ThrowOnError
   >({
     ...options,
-    url: "/lessons/{lesson_id}/temp_lesson",
+    ...formDataBodySerializer,
+    headers: {
+      "Content-Type": null,
+      ...options?.headers,
+    },
+    url: "/generate_script/from_pdf",
   });
 };

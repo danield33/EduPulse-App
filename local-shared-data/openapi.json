@@ -1417,31 +1417,44 @@
         }
       }
     },
-    "/lessons/{lesson_id}/temp_lesson": {
+    "/generate_script/from_pdf": {
       "post": {
         "tags": [
-          "lessons"
+          "genscript"
         ],
-        "summary": "Create Temp Lesson",
-        "description": "Create a temporary lesson with 2 videos.\nVideo 1 will have a breakpoint, video 2 will not.\nUses existing APIs from videos.py and lesson.py.",
-        "operationId": "create_temp_lesson",
+        "summary": "Generate Script From Pdf",
+        "description": "Accept a PDF upload and return a 2-minute teaching script.",
+        "operationId": "generate_script_from_pdf",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_genscript-generate_script_from_pdf"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LessonRead"
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
           }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ]
+        }
       }
     }
   },
@@ -1523,6 +1536,20 @@
           "token"
         ],
         "title": "Body_auth-verify:verify"
+      },
+      "Body_genscript-generate_script_from_pdf": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_genscript-generate_script_from_pdf"
       },
       "Body_videos-upload_video": {
         "properties": {

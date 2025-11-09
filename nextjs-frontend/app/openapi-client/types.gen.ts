@@ -22,6 +22,10 @@ export type Body_auth_verify_verify = {
   token: string;
 };
 
+export type Body_genscript_generate_script_from_pdf = {
+  file: Blob | File;
+};
+
 export type Body_videos_upload_video = {
   title: string;
   description?: string | null;
@@ -441,6 +445,10 @@ export type HasNextVideoResponse = {
 
 export type HasNextVideoError = HTTPValidationError;
 
-export type CreateTempLessonResponse = LessonRead;
+export type GenerateScriptFromPdfData = {
+  body: Body_genscript_generate_script_from_pdf;
+};
 
-export type CreateTempLessonError = unknown;
+export type GenerateScriptFromPdfResponse = unknown;
+
+export type GenerateScriptFromPdfError = HTTPValidationError;
