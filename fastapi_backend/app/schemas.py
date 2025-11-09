@@ -44,6 +44,16 @@ class Breakpoint(BaseModel):
     correct_option: int
 
 
+class BreakpointRead(BaseModel):
+    id: UUID
+    question: str
+    choices: List[str]
+    correct_choice: int
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
 class LessonVideoBase(BaseModel):
     video_id: UUID
     index: int
@@ -53,6 +63,7 @@ class LessonVideoBase(BaseModel):
 class LessonVideoRead(LessonVideoBase):
     id: UUID
     video: VideoRead
+    breakpoints: Optional[List[BreakpointRead]] = None
 
     class Config:
         from_attributes = True

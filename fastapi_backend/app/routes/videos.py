@@ -1,6 +1,6 @@
 from pathlib import Path
-from typing import Optional
-from uuid import UUID
+from typing import Optional, Iterator
+from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, Query
 from fastapi.responses import StreamingResponse
@@ -32,7 +32,7 @@ VIDEO_DIR = Path(settings.VIDEO_UPLOAD_DIR)
 VIDEO_DIR.mkdir(exist_ok=True)
 
 
-def transform_videos(videos):
+def transform_videos(videos: list[Video]) -> list[VideoRead]:
     return [VideoRead.model_validate(video) for video in videos]
 
 
@@ -64,7 +64,7 @@ async def generate_video(
         request: VideoGenerateRequest,
         user: User = Depends(current_active_user),
         db: AsyncSession = Depends(get_async_session),
-):
+) -> VideoRead:
     # image_data = await generate_image(request.images)
     image_data = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBw8NDQ0NDw0NDw0PDQ0NDQ0NDw8NDw0NFREWFhURFRUYHSggGBolHRUVITEhJSkrLi4uFx8zODMsNygtLisBCgoKDQ0NEg4PFSsZFRkrKysrKysrKysrKys3KystLSsrKysrKysrKy0tKysrKysrKysrKysrKysrKysrKysrK//AABEIAKwBJgMBIgACEQEDEQH/xAAXAAEBAQEAAAAAAAAAAAAAAAAAAQIH/8QAIRABAQEAAQMEAwAAAAAAAAAAAAERIWGBoQIxcfAiQVH/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8A7iAAACW+3Hf+KAAAAJJgKAAAAAAAAAAAAAAAAz6rZfTkt25bx+My3fEndoAAAMAAAAACgAAAAAAAAAAAAAAAAAAACbz7d1AAAAAAAAAAACgAAAAAAAAAaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAABL08qAAAAAEAAAAAAAAAAAAAAAAANABL96qAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFAAAAAAAAABLAUAAEBQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAIoAAAAAAAAAAAACYoAAAACSqAAAAAAAAAAAAAAAAAAAAAAlgCgAAAAAJd/XHzN4UABKCgAAAAAAAAAAlBRMUAAAAAAAAEqgAAAAD/2Q=="
 
@@ -93,11 +93,11 @@ async def generate_video(
         file_bytes = f.read()
     headers = {"content-type": "video/mp4"}
     upload_file = UploadFile(
-        filename=f"Clip.mp4",
+        filename=f"Clip_{str(uuid4())}.mp4",
         file=BytesIO(file_bytes),
         headers=headers
     )
-    return await upload_video(f"Clip", None, upload_file, db, user)
+    return await upload_video(f"testing_video", None, upload_file, db, user)
 
 
 @router.post("/upload", response_model=VideoRead)
@@ -107,7 +107,7 @@ async def upload_video(
         file: UploadFile = File(...),
         db: AsyncSession = Depends(get_async_session),
         user: User = Depends(current_active_user),
-):
+) -> VideoRead:
     """Upload a video file to disk and save metadata to database"""
 
     # Validate file type
@@ -158,7 +158,7 @@ async def list_videos(
         user: User = Depends(current_active_user),
         page: int = Query(1, ge=1, description="Page number"),
         size: int = Query(10, ge=1, le=100, description="Page size"),
-):
+) -> Page[VideoRead]:
     """Get all videos for the authenticated user"""
     params = Params(page=page, size=size)
     query = select(Video).filter(Video.user_id == user.id).order_by(Video.created_at.desc())
@@ -170,7 +170,7 @@ async def get_video(
         video_id: UUID,
         db: AsyncSession = Depends(get_async_session),
         user: User = Depends(current_active_user),
-):
+) -> VideoRead:
     """Get a specific video's metadata"""
     result = await db.execute(
         select(Video).filter(Video.id == video_id, Video.user_id == user.id)
@@ -187,11 +187,13 @@ async def get_video(
 async def stream_video(
         video_id: UUID,
         db: AsyncSession = Depends(get_async_session),
-        user: User = Depends(current_active_user),
-):
+        # user: User = Depends(current_active_user),
+) -> StreamingResponse:
     """Stream a video file"""
     result = await db.execute(
-        select(Video).filter(Video.id == video_id, Video.user_id == user.id)
+        # select(Video).filter(Video.id == video_id, Video.user_id == user.id)
+        select(Video).filter(Video.id == video_id)
+
     )
     video = result.scalars().first()
 
@@ -202,7 +204,7 @@ async def stream_video(
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="Video file not found on disk")
 
-    def iterfile():
+    def iterfile() -> Iterator[bytes]:
         with open(file_path, mode="rb") as file_like:
             yield from file_like
 
@@ -220,7 +222,7 @@ async def delete_video(
         video_id: UUID,
         db: AsyncSession = Depends(get_async_session),
         user: User = Depends(current_active_user),
-):
+) -> dict[str, str]:
     """Delete a video and its file from disk"""
     result = await db.execute(
         select(Video).filter(Video.id == video_id, Video.user_id == user.id)
