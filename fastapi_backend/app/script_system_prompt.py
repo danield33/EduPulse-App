@@ -28,7 +28,7 @@ Your task is to convert this outline into a structured JSON object that can be u
           {
             "text": string,
             "isCorrect": boolean,
-            "branchTarget"?: string | null,  // which branch to go to if chosen
+            "branchTarget"?: string | null,  // which branch to go to if chosen. This should match the field "type" in the next branch_options
             "retryOnIncorrect"?: boolean     // default true
           }
         ]
@@ -71,9 +71,7 @@ Your task is to convert this outline into a structured JSON object that can be u
     },
     {
       "role": "Taylor",
-      "dialogue": "I just don’t feel like this class connects with me anymore."
-    },
-    {
+      "dialogue": "I just don’t feel like this class connects with me anymore.",
       "breakpoint": {
         "question": "What should the teacher do next?",
         "options": [

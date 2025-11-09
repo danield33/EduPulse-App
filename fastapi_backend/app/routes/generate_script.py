@@ -1,12 +1,9 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, UploadFile, File, HTTPException
 from PyPDF2 import PdfReader
 from openai import OpenAI
-from app.database import get_async_session
 from pydantic import BaseModel
-import io, os, uuid
-from datetime import datetime
-from script_system_prompt import SYSTEM_PROMPT, build_prompt
+import io, os
+from app.script_system_prompt import build_prompt;
 
 router = APIRouter(tags=["genscript"])
 
