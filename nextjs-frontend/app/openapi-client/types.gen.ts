@@ -32,12 +32,34 @@ export type Body_videos_upload_video = {
   file: Blob | File;
 };
 
+export type BranchOption = {
+  type: string;
+  dialogue: Array<DialogueLine>;
+};
+
+export type BreakpointOption = {
+  text: string;
+  isCorrect: boolean;
+  branchTarget?: string | null;
+};
+
+export type BreakpointQuestion = {
+  question: string;
+  options: Array<BreakpointOption>;
+};
+
 export type BreakpointRead = {
   id: string;
   question: string;
   choices: Array<string>;
   correct_choice: number;
   created_at: string;
+};
+
+export type DialogueLine = {
+  role: string;
+  dialogue: string;
+  image?: ImageData | null;
 };
 
 export type ErrorModel = {
@@ -50,6 +72,12 @@ export type ErrorModel = {
 
 export type HTTPValidationError = {
   detail?: Array<ValidationError>;
+};
+
+export type ImageData = {
+  url?: string | null;
+  prompt?: string | null;
+  base64?: string | null;
 };
 
 export type LessonCreate = {
@@ -99,6 +127,19 @@ export type Page_VideoRead_ = {
   page: number | null;
   size: number | null;
   pages?: number | null;
+};
+
+export type Scenario = {
+  title: string;
+  script: Array<ScriptBlock>;
+};
+
+export type ScriptBlock = {
+  role: string;
+  dialogue: string;
+  branch_options?: Array<BranchOption> | null;
+  image?: ImageData | null;
+  breakpoint?: BreakpointQuestion | null;
 };
 
 export type TTImageRequest = {
@@ -399,6 +440,14 @@ export type CreateLessonData = {
 export type CreateLessonResponse = LessonRead;
 
 export type CreateLessonError = HTTPValidationError;
+
+export type UploadScenarioData = {
+  body: Scenario;
+};
+
+export type UploadScenarioResponse = unknown;
+
+export type UploadScenarioError = HTTPValidationError;
 
 export type AddVideoToLessonData = {
   body: LessonVideoAddResponse;

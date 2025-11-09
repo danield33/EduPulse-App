@@ -1213,6 +1213,50 @@
         }
       }
     },
+    "/lessons/upload_scenario": {
+      "post": {
+        "tags": [
+          "lessons"
+        ],
+        "summary": "Upload Scenario",
+        "operationId": "upload_scenario",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Scenario"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
     "/lessons/{lesson_id}/add_video": {
       "post": {
         "tags": [
@@ -1608,6 +1652,77 @@
         ],
         "title": "Body_videos-upload_video"
       },
+      "BranchOption": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "dialogue": {
+            "items": {
+              "$ref": "#/components/schemas/DialogueLine"
+            },
+            "type": "array",
+            "title": "Dialogue"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "dialogue"
+        ],
+        "title": "BranchOption"
+      },
+      "BreakpointOption": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "isCorrect": {
+            "type": "boolean",
+            "title": "Iscorrect"
+          },
+          "branchTarget": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Branchtarget"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text",
+          "isCorrect"
+        ],
+        "title": "BreakpointOption"
+      },
+      "BreakpointQuestion": {
+        "properties": {
+          "question": {
+            "type": "string",
+            "title": "Question"
+          },
+          "options": {
+            "items": {
+              "$ref": "#/components/schemas/BreakpointOption"
+            },
+            "type": "array",
+            "title": "Options"
+          }
+        },
+        "type": "object",
+        "required": [
+          "question",
+          "options"
+        ],
+        "title": "BreakpointQuestion"
+      },
       "BreakpointRead": {
         "properties": {
           "id": {
@@ -1646,6 +1761,34 @@
         ],
         "title": "BreakpointRead"
       },
+      "DialogueLine": {
+        "properties": {
+          "role": {
+            "type": "string",
+            "title": "Role"
+          },
+          "dialogue": {
+            "type": "string",
+            "title": "Dialogue"
+          },
+          "image": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ImageData"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "role",
+          "dialogue"
+        ],
+        "title": "DialogueLine"
+      },
       "ErrorModel": {
         "properties": {
           "detail": {
@@ -1681,6 +1824,45 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "ImageData": {
+        "properties": {
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          },
+          "prompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt"
+          },
+          "base64": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Base64"
+          }
+        },
+        "type": "object",
+        "title": "ImageData"
       },
       "LessonCreate": {
         "properties": {
@@ -1867,6 +2049,79 @@
           "size"
         ],
         "title": "Page[VideoRead]"
+      },
+      "Scenario": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "script": {
+            "items": {
+              "$ref": "#/components/schemas/ScriptBlock"
+            },
+            "type": "array",
+            "title": "Script"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "script"
+        ],
+        "title": "Scenario"
+      },
+      "ScriptBlock": {
+        "properties": {
+          "role": {
+            "type": "string",
+            "title": "Role"
+          },
+          "dialogue": {
+            "type": "string",
+            "title": "Dialogue"
+          },
+          "branch_options": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/BranchOption"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Branch Options"
+          },
+          "image": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ImageData"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "breakpoint": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BreakpointQuestion"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "role",
+          "dialogue"
+        ],
+        "title": "ScriptBlock"
       },
       "TTImageRequest": {
         "properties": {

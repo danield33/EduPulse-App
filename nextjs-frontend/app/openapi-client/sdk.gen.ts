@@ -72,6 +72,9 @@ import type {
   CreateLessonData,
   CreateLessonError,
   CreateLessonResponse,
+  UploadScenarioData,
+  UploadScenarioError,
+  UploadScenarioResponse,
   AddVideoToLessonData,
   AddVideoToLessonError,
   AddVideoToLessonResponse,
@@ -473,6 +476,22 @@ export const createLesson = <ThrowOnError extends boolean = false>(
   >({
     ...options,
     url: "/lessons/create",
+  });
+};
+
+/**
+ * Upload Scenario
+ */
+export const uploadScenario = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<UploadScenarioData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<
+    UploadScenarioResponse,
+    UploadScenarioError,
+    ThrowOnError
+  >({
+    ...options,
+    url: "/lessons/upload_scenario",
   });
 };
 

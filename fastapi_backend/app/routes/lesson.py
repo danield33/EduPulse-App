@@ -13,6 +13,7 @@ from app.users import current_active_user
 from app.routes.videos import generate_video, VideoGenerateRequest
 from app.routes.tts import TTSRequest
 from app.routes.ttimage import TTImageRequest
+from app.schema_models.scenario import Scenario
 
 router = APIRouter(tags=["lessons"])
 
@@ -67,6 +68,14 @@ async def create_lesson(lesson: LessonCreate, db: AsyncSession = Depends(get_db)
     await db.commit()
     await db.refresh(new_lesson)
     return new_lesson
+
+@router.post("/upload_scenario")
+async def upload_scenario(scenario: Scenario,
+                          db: AsyncSession = Depends(get_db),
+                          user: User = Depends(current_active_user)):
+    print(scenario)
+
+    return "done"
 
 @router.post("/{lesson_id}/add_video", response_model=LessonVideoAddResponse)
 async def add_video_to_lesson(

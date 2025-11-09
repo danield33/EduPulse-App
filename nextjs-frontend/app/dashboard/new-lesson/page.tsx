@@ -2,9 +2,10 @@
 
 import {MouseEvent, useState} from "react";
 import {Button} from "@/components/ui/button";
-import {generateScriptFromPdf} from "@/app/openapi-client";
+import {generateScriptFromPdf, uploadScenario} from "@/app/openapi-client";
 import DialogueEditor, {Scenario} from "@/components/ui/DialogueEditor";
 import {LoadingOverlay} from "@/components/ui/LoadingOverlay";
+// import {getAccessToken} from "@/components/actions/cookie-action";
 
 
 export default function CreateNewLessonPage() {
@@ -38,6 +39,17 @@ export default function CreateNewLessonPage() {
             })
         }
         setGeneratingScript(false);
+    }
+
+    const generateLesson = async () => {
+        // const token = await getAccessToken();
+        if(!scenario) return;
+
+        console.log(scenario);
+        const res = await uploadScenario({
+            body: scenario,
+        });
+        console.log(res, 'res');
     }
 
     return (
@@ -119,9 +131,7 @@ export default function CreateNewLessonPage() {
 
                                     <Button
                                         className="rounded-xl bg-lime-400 text-black hover:bg-lime-500 font-bold"
-                                        onClick={() => {
-
-                                        }}
+                                        onClick={generateLesson}
                                     >
                                         Generate Video
                                     </Button>
