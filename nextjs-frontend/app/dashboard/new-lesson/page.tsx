@@ -5,6 +5,7 @@ import {Button} from "@/components/ui/button";
 import {generateScriptFromPdf} from "@/app/openapi-client";
 import DialogueEditor, {Scenario} from "@/components/ui/DialogueEditor";
 import {LoadingOverlay} from "@/components/ui/LoadingOverlay";
+import {CharacterPanel} from "@/components/ui/CharacterPanel";
 
 
 export default function CreateNewLessonPage() {
@@ -34,7 +35,8 @@ export default function CreateNewLessonPage() {
         } else {
             setScenario({
                 title: "No data found",
-                script: [{role: "No data found", dialogue: "The AI couldn't generate a script"}]
+                script: [{role: "No data found", dialogue: "The AI couldn't generate a script"}],
+                characters: {}
             })
         }
         setGeneratingScript(false);
@@ -97,7 +99,22 @@ export default function CreateNewLessonPage() {
                         }
 
 
-                        {scenario && <DialogueEditor scenario={scenario}/>}
+                        <div className="grid grid-cols-3 gap-4">
+                            <div className="col-span-2">
+                                {/* Existing Dialogue editor */}
+                                {scenario && <DialogueEditor scenario={scenario}/>}
+                            </div>
+
+                            <div className="col-span-1">
+                                <CharacterPanel
+                                    characters={scenario?.characters || {}}
+                                    onChange={(chars) =>
+                                        console.log(chars)
+                                        // setScenario({...scenario, characters: chars})
+                                    }
+                                />
+                            </div>
+                        </div>
 
                     </div>
                 </section>

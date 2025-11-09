@@ -10,6 +10,7 @@ import {EditDialogueModal} from "@/components/modals/EditDialogueModal";
 import {BreakpointModal} from "@/components/modals/BreakpointModal";
 import {getAvailableBranches, hasValidBreakpoint, isBeforeBranching, isBranchingBlock} from "@/lib/script-editor";
 import { SortableItem } from "./SortableItem";
+import {Character} from "@/components/ui/CharacterPanel";
 
 export interface DialogueLine {
     role: string;
@@ -41,6 +42,7 @@ export interface ScriptBlock {
 export interface Scenario {
     title: string;
     script: ScriptBlock[];
+    characters: Record<string, Character>;
 }
 
 export interface BreakpointOption {
