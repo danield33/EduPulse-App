@@ -4,16 +4,19 @@ import {MouseEvent, useState} from "react";
 import {Button} from "@/components/ui/button";
 import {generateScriptFromPdf} from "@/app/openapi-client";
 import DialogueEditor, {Scenario} from "@/components/ui/DialogueEditor";
+import {LoadingOverlay} from "@/components/ui/LoadingOverlay";
 
 
 export default function CreateNewLessonPage() {
 
     const [scenario, setScenario] = useState<Scenario>();
+    const [generatingScript, setGeneratingScript] = useState<boolean>(false);
 
     const createScript = async (e: MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
+        setGeneratingScript(true);
         const fileInput = document.getElementById("script-upload") as HTMLInputElement;
-        if (!fileInput?.files?.length) return;
+        if (!fileInput?.files?.length) return setGeneratingScript(false);
 
         const formData = new FormData();
         formData.append("file", fileInput.files[0]);
@@ -34,6 +37,7 @@ export default function CreateNewLessonPage() {
                 script: [{role: "No data found", dialogue: "The AI couldn't generate a script"}]
             })
         }
+        setGeneratingScript(false);
     }
 
     return (
@@ -83,10 +87,14 @@ export default function CreateNewLessonPage() {
 
                         </form>
 
-                        <Button className={"rounded-xl bg-lime-400 text-black hover:bg-lime-500"} type={"button"}
-                                onClick={createScript}>
-                            Submit!
-                        </Button>
+                        {generatingScript ?
+                        <LoadingOverlay isLoading={generatingScript} message={"Generating Script..."}/>
+                        :
+                            <Button className={"rounded-xl bg-lime-400 text-black hover:bg-lime-500"} type={"button"}
+                                    onClick={createScript}>
+                                Submit!
+                            </Button>
+                        }
 
 
                         {scenario && <DialogueEditor scenario={scenario}/>}
