@@ -18,7 +18,7 @@ import Link from "next/link";
 import { PageSizeSelector } from "@/components/page-size-selector";
 import { PagePagination } from "@/components/page-pagination";
 import {fetchMyLessons} from "@/components/actions/lesson-action";
-import {GetMyLessonsResponse, LessonRead} from "@/app/openapi-client";
+import {LessonRead} from "@/app/openapi-client";
 
 interface DashboardPageProps {
   searchParams: Promise<{

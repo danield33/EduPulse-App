@@ -5,7 +5,7 @@ import {Button} from "@/components/ui/button";
 import {generateScriptFromPdf, uploadScenario} from "@/app/openapi-client";
 import DialogueEditor, {Scenario} from "@/components/ui/DialogueEditor";
 import {LoadingOverlay} from "@/components/ui/LoadingOverlay";
-// import {getAccessToken} from "@/components/actions/cookie-action";
+import {prepareScenarioForBackend} from "@/lib/script-editor";
 
 
 export default function CreateNewLessonPage() {
@@ -41,15 +41,22 @@ export default function CreateNewLessonPage() {
         setGeneratingScript(false);
     }
 
-    const generateLesson = async () => {
-        // const token = await getAccessToken();
-        if(!scenario) return;
+    const generateLesson = async (scenario: Scenario) => {
+        const token = getClientSideCookie("accessToken");
+        if (!token || !scenario) return;
 
-        console.log(scenario);
+        setGeneratingScript(true);
+        const finalScenario = await prepareScenarioForBackend(scenario);
+
         const res = await uploadScenario({
-            body: scenario,
+            body: finalScenario,
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+            baseURL: "http://localhost:8000"
         });
         console.log(res, 'res');
+        setGeneratingScript(false);
     }
 
     return (
@@ -100,8 +107,8 @@ export default function CreateNewLessonPage() {
                         </form>
 
                         {generatingScript ?
-                        <LoadingOverlay isLoading={generatingScript} message={"Generating Script..."}/>
-                        :
+                            <LoadingOverlay isLoading={generatingScript} message={"Generating Script..."}/>
+                            :
                             <Button className={"rounded-xl bg-lime-400 text-black hover:bg-lime-500"} type={"button"}
                                     onClick={createScript}>
                                 {!!scenario ? "Generate again!" : "Submit!"}
@@ -110,33 +117,7 @@ export default function CreateNewLessonPage() {
 
 
                         {scenario && (
-                            <>
-                                <DialogueEditor scenario={scenario}/>
-                                {/* Save JSON */}
-                                <div className="pt-6 border-t w-full flex flex-row justify-between">
-                                    <Button
-                                        onClick={() => {
-                                            const blob = new Blob([JSON.stringify(scenario, null, 2)], {
-                                                type: "application/json",
-                                            });
-                                            const url = URL.createObjectURL(blob);
-                                            const a = document.createElement("a");
-                                            a.href = url;
-                                            a.download = "scenario.json";
-                                            a.click();
-                                        }}
-                                    >
-                                        Download JSON
-                                    </Button>
-
-                                    <Button
-                                        className="rounded-xl bg-lime-400 text-black hover:bg-lime-500 font-bold"
-                                        onClick={generateLesson}
-                                    >
-                                        Generate Video
-                                    </Button>
-                                </div>
-                            </>
+                            <DialogueEditor scenario={scenario} generateScenario={generateLesson}/>
                         )}
 
                     </div>
@@ -145,3 +126,10 @@ export default function CreateNewLessonPage() {
         </div>
     )
 }
+
+const getClientSideCookie = (name: string): string | undefined => {
+    return document.cookie
+        .split('; ')
+        .find((row) => row.startsWith(`${name}=`))
+        ?.split('=')[1];
+};

@@ -4,6 +4,8 @@ import subprocess
 import tempfile
 from typing import List, Optional
 
+from PIL import Image
+
 from app.schema_models.scenario import Scenario
 from app.schema_models.scenario import ScriptBlock
 from app.ffmpeg_cmds import stitch_base64_mp3s
@@ -59,13 +61,19 @@ def make_video_segment(image_path: str, audio_path: str, output_path: str):
     ]
     subprocess.run(cmd, check=True)
 
+def create_black_image(width=1280, height=720) -> str:
+    """Create a black placeholder image and return its path."""
+    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
+    Image.new("RGB", (width, height), color=(0, 0, 0)).save(tmp.name, "PNG")
+    return tmp.name
+
 async def generate_scenario(scenario: Scenario):
     """
     Stitch each image+audio group in a scenario into separate video files.
     Returns a list of paths to generated video segments.
     """
 
-    output_dir = f"./uploaded_videos/lesson/{scenario.title.replace(' ', '_')}/"
+    output_dir = f"{os.path.curdir}/uploaded_videos/lesson/{scenario.title.replace(' ', '_')}/"
     os.makedirs(output_dir, exist_ok=True)
 
     current_image_b64 = None
@@ -75,9 +83,15 @@ async def generate_scenario(scenario: Scenario):
 
     def flush_segment():
         nonlocal segment_index
-        if not current_audios or not current_image_b64:
+        if not current_audios:
             return
-        img_path = decode_base64_to_file(current_image_b64, ".png")
+
+        # Use fallback image if none available
+        if current_image_b64:
+            img_path = decode_base64_to_file(current_image_b64, ".png")
+        else:
+            img_path = create_black_image()
+
         audio_concat = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3").name
         concat_audio_files(current_audios, audio_concat)
 
@@ -101,12 +115,13 @@ async def generate_scenario(scenario: Scenario):
             current_image_b64 = block.image.base64
 
         # Add dialogue audio if available
-        if block.audio_base64:
-            audio_path = decode_base64_to_file(block.audio_base64, ".mp3")
+        if block.dialogue:
+            b64_audio = await get_b64_audio(block)
+            audio_path = decode_base64_to_file(b64_audio, ".mp3")
             current_audios.append(audio_path)
 
     # Flush any remaining lines into a final segment
     flush_segment()
 
-    print(f"✅ Created {len(segment_paths)} video segments in {output_dir}")
+    print(f"Created {len(segment_paths)} video segments in {output_dir}")
     return segment_paths
