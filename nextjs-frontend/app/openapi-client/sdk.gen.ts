@@ -403,11 +403,8 @@ export const streamVideo = <ThrowOnError extends boolean = false>(
  * Synthesize Speech
  * Generate speech from text using Hume.ai TTS API.
  *
- * Args:
- * request: TTS request containing text, voice description, and format
- *
- * Returns:
- * Audio URL or base64-encoded audio data
+ * - Ensures user is authenticated
+ * - Delegates to Hume TTS service for synthesis
  */
 export const synthesizeSpeech = <ThrowOnError extends boolean = false>(
   options: OptionsLegacyParser<SynthesizeSpeechData, ThrowOnError>,

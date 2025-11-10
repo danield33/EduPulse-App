@@ -135,8 +135,8 @@ export type Scenario = {
 };
 
 export type ScriptBlock = {
-  role: string;
-  dialogue: string;
+  role?: string | null;
+  dialogue?: string | null;
   branch_options?: Array<BranchOption> | null;
   image?: ImageData | null;
   breakpoint?: BreakpointQuestion | null;

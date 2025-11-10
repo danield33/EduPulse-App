@@ -14,6 +14,7 @@ from app.routes.videos import generate_video, VideoGenerateRequest
 from app.routes.tts import TTSRequest
 from app.routes.ttimage import TTImageRequest
 from app.schema_models.scenario import Scenario
+from app.scenario.generate_scenario import generate_scenario
 
 router = APIRouter(tags=["lessons"])
 
@@ -73,9 +74,12 @@ async def create_lesson(lesson: LessonCreate, db: AsyncSession = Depends(get_db)
 async def upload_scenario(scenario: Scenario,
                           db: AsyncSession = Depends(get_db),
                           user: User = Depends(current_active_user)):
-    print(scenario)
+    # lesson = LessonCreate(title=scenario.title, user_id=user.id)
+    # lesson = await create_lesson(lesson, db)
 
-    return "done"
+    files = await generate_scenario(scenario)
+
+    return {"mp3_files": files}
 
 @router.post("/{lesson_id}/add_video", response_model=LessonVideoAddResponse)
 async def add_video_to_lesson(

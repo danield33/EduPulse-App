@@ -982,7 +982,7 @@
           "tts"
         ],
         "summary": "Synthesize Speech",
-        "description": "Generate speech from text using Hume.ai TTS API.\n\nArgs:\n    request: TTS request containing text, voice description, and format\n\nReturns:\n    Audio URL or base64-encoded audio data",
+        "description": "Generate speech from text using Hume.ai TTS API.\n\n- Ensures user is authenticated\n- Delegates to Hume TTS service for synthesis",
         "operationId": "synthesize_speech",
         "requestBody": {
           "content": {
@@ -2074,11 +2074,25 @@
       "ScriptBlock": {
         "properties": {
           "role": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Role"
           },
           "dialogue": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Dialogue"
           },
           "branch_options": {
@@ -2117,10 +2131,6 @@
           }
         },
         "type": "object",
-        "required": [
-          "role",
-          "dialogue"
-        ],
         "title": "ScriptBlock"
       },
       "TTImageRequest": {
