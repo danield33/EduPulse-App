@@ -77,7 +77,7 @@ async def upload_scenario(scenario: Scenario,
     # lesson = LessonCreate(title=scenario.title, user_id=user.id)
     # lesson = await create_lesson(lesson, db)
 
-    print("Uploaded script: ", scenario.title)
+    # print("Uploaded script: ", scenario)
     files = await generate_scenario(scenario)
 
     return {"mp3_files": files}
