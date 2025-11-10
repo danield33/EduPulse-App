@@ -26,12 +26,31 @@ async def get_b64_audio(block: ScriptBlock):
     response = synthesize_with_hume(tts_request)
     return response.audio_url
 
-def decode_base64_to_file(data_b64: str, suffix: str) -> str:
-    """Write base64 data to a temporary file and return path."""
+def decode_base64_to_file(data_b64: str, suffix: Optional[str] = None) -> str:
+    """Write base64 data to a temporary file and return its path, detecting image/audio type if possible."""
+    # Clean up data URL if included
+    if data_b64.startswith("data:"):
+        header, data_b64 = data_b64.split(",", 1)
+
+    # Auto-detect format
+    header = data_b64[:10]
+    if header.startswith("/9j/"):          # JPEG
+        suffix = suffix or ".jpg"
+    elif header.startswith("iVBORw0K"):    # PNG
+        suffix = suffix or ".png"
+    elif header.startswith("UklGR"):       # WEBP
+        suffix = suffix or ".webp"
+    elif header.startswith("//uUx"):       # MP3
+        suffix = suffix or ".mp3"
+    else:
+        # Fallbacks
+        suffix = suffix or ".bin"
+
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=suffix)
     tmp.write(base64.b64decode(data_b64))
     tmp.close()
     return tmp.name
+
 
 def concat_audio_files(audio_files: List[str], output_path: str):
     """Use FFmpeg to concatenate audio files."""
@@ -47,19 +66,29 @@ def concat_audio_files(audio_files: List[str], output_path: str):
     os.remove(concat_file.name)
 
 def make_video_segment(image_path: str, audio_path: str, output_path: str):
-    """Create a static video from an image and an audio file."""
     cmd = [
         "ffmpeg", "-y",
         "-loop", "1",
+        "-framerate", "2",
         "-i", image_path,
         "-i", audio_path,
         "-c:v", "libx264",
-        "-c:a", "aac",
-        "-shortest",
+        "-tune", "stillimage",
         "-pix_fmt", "yuv420p",
-        output_path
+        "-shortest",
+        "-preset", "ultrafast",
+        output_path,
     ]
-    subprocess.run(cmd, check=True)
+
+    try:
+        subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    except subprocess.CalledProcessError as e:
+        print("FFmpeg failed!")
+        print("Command:", " ".join(e.cmd))
+        print("Return code:", e.returncode)
+        print("STDERR:", e.stderr.decode(errors="ignore"))
+        raise
+
 
 def create_black_image(width=1280, height=720) -> str:
     """Create a black placeholder image and return its path."""
