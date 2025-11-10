@@ -8,7 +8,7 @@ from PIL import Image
 
 from app.schema_models.scenario import Scenario
 from app.schema_models.scenario import ScriptBlock
-from app.ffmpeg_cmds import stitch_base64_mp3s
+from app.ffmpeg_cmds import stitch_base64_mp3s, make_video
 from app.routes.tts import synthesize_with_hume, TTSRequest
 
 # async def handle_dialogue_segment(segment: List[ScriptBlock], segment_name: Optional[str]):
@@ -66,28 +66,7 @@ def concat_audio_files(audio_files: List[str], output_path: str):
     os.remove(concat_file.name)
 
 def make_video_segment(image_path: str, audio_path: str, output_path: str):
-    cmd = [
-        "ffmpeg", "-y",
-        "-loop", "1",
-        "-framerate", "2",
-        "-i", image_path,
-        "-i", audio_path,
-        "-c:v", "libx264",
-        "-tune", "stillimage",
-        "-pix_fmt", "yuv420p",
-        "-shortest",
-        "-preset", "ultrafast",
-        output_path,
-    ]
-
-    try:
-        subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    except subprocess.CalledProcessError as e:
-        print("FFmpeg failed!")
-        print("Command:", " ".join(e.cmd))
-        print("Return code:", e.returncode)
-        print("STDERR:", e.stderr.decode(errors="ignore"))
-        raise
+    make_video(image_path, audio_path, output_path)
 
 
 def create_black_image(width=1280, height=720) -> str:
