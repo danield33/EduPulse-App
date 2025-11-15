@@ -47,6 +47,7 @@ export function usePlaybackManager({
     scriptBlockIndex: 0,
     isPlaying: true,
     hasEnded: false,
+    branchedFromSegmentNumber: undefined,
   });
 
   // Map of all segments: { main: [...], option_A: [...], option_B: [...] }
@@ -281,26 +282,30 @@ export function usePlaybackManager({
     const nextSegmentNumber = playbackState.currentSegmentNumber + 1;
     const nextSegment = segments.find((s) => s.segmentNumber === nextSegmentNumber);
 
+    console.log(nextSegment, nextSegmentNumber);
     if (nextSegment) {
       // Continue to next segment in current path
       setPlaybackState((prev) => ({
         ...prev,
         currentSegmentNumber: nextSegmentNumber,
       }));
-      onSegmentChange(nextSegmentNumber, segmentType === "main" ? undefined : segmentType);
+      onSegmentChange(nextSegmentNumber, segmentType);
       return;
     }
 
     // If we're in a branch and no more segments, return to main
     if (segmentType !== "main") {
-      // Find where we left off in main script
       const currentMainSegments = segmentMap.main;
-      const currentScriptBlockIndex = playbackState.scriptBlockIndex;
 
-      // Find the next main segment after the breakpoint
+      // Continue from the segment AFTER the one we branched from
+      const branchedFromSegment = playbackState.branchedFromSegmentNumber || playbackState.currentSegmentNumber;
+      const nextMainSegmentNumber = branchedFromSegment + 1;
+
+      console.log(`Branch finished. Branched from segment ${branchedFromSegment}, continuing to segment ${nextMainSegmentNumber}`);
+
+      // Find the next main segment
       const nextMainSegment = currentMainSegments.find(
-        (s) => s.scriptBlockIndices.length > 0 &&
-               Math.min(...s.scriptBlockIndices) > currentScriptBlockIndex
+        (s) => s.segmentNumber === nextMainSegmentNumber
       );
 
       if (nextMainSegment) {
@@ -309,6 +314,7 @@ export function usePlaybackManager({
           currentSegmentNumber: nextMainSegment.segmentNumber,
           currentSegmentType: undefined,
           scriptBlockIndex: Math.min(...nextMainSegment.scriptBlockIndices),
+          branchedFromSegmentNumber: undefined, // Clear the branched from tracking
         }));
         onSegmentChange(nextMainSegment.segmentNumber, undefined);
         return;
@@ -339,6 +345,7 @@ export function usePlaybackManager({
 
         if (targetBranch && segmentMap[targetBranch]) {
           // Start playing the branch from segment 1
+          // Remember which main segment we're branching from
           setPlaybackState((prev) => ({
             ...prev,
             currentSegmentNumber: 1,
@@ -346,6 +353,7 @@ export function usePlaybackManager({
             isAtBreakpoint: false,
             currentBreakpoint: undefined,
             isPlaying: true,
+            branchedFromSegmentNumber: prev.currentSegmentNumber, // Remember where we came from
             // Keep scriptBlockIndex to know where to return after branch
           }));
           onSegmentChange(1, targetBranch);
@@ -394,6 +402,7 @@ export function usePlaybackManager({
       scriptBlockIndex: 0,
       isPlaying: true,
       hasEnded: false,
+      branchedFromSegmentNumber: undefined,
     });
     onSegmentChange(1, undefined);
   }, [onSegmentChange]);

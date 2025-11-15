@@ -56,6 +56,7 @@ export interface PlaybackState {
   scriptBlockIndex: number; // Which script block we're currently on
   isPlaying: boolean;
   hasEnded: boolean;
+  branchedFromSegmentNumber?: number; // Track which main segment we branched from
 }
 
 export interface SegmentMetadata {
