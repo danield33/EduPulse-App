@@ -1490,6 +1490,78 @@
         ]
       }
     },
+    "/lessons/{lesson_id}/segment": {
+      "get": {
+        "tags": [
+          "lessons"
+        ],
+        "summary": "Stream Video Segment",
+        "description": "Stream a video segment for a lesson based on segment number and optional branch type.\n\nThis endpoint:\n1. Validates the lesson exists in the database\n2. Validates the segment exists in the lesson's scenario JSON\n3. Resolves the video file path on disk\n4. Streams the MP4 file to the client\n\nArgs:\n    lesson_id: UUID of the lesson\n    segment_number: The segment number to retrieve (1-indexed)\n    segment_type: Optional branch identifier (e.g., \"option_A\", \"option_B\")\n    db: Database session dependency\n\nReturns:\n    StreamingResponse with the video file\n\nRaises:\n    404: If lesson, segment, or video file not found\n    400: If segment_number is invalid\n\nExample:\n    GET /lessons/{lesson_id}/segment?segment_number=1\n    GET /lessons/{lesson_id}/segment?segment_number=3&segment_type=option_A",
+        "operationId": "stream_video_segment",
+        "parameters": [
+          {
+            "name": "lesson_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Lesson Id"
+            }
+          },
+          {
+            "name": "segment_number",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "The segment number (1-indexed)",
+              "title": "Segment Number"
+            },
+            "description": "The segment number (1-indexed)"
+          },
+          {
+            "name": "segment_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Branch type (e.g., 'option_A', 'option_B') or None for main segments",
+              "title": "Segment Type"
+            },
+            "description": "Branch type (e.g., 'option_A', 'option_B') or None for main segments"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/generate_script/from_pdf": {
       "post": {
         "tags": [

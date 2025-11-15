@@ -80,7 +80,7 @@ export default async function DashboardPage({
             ) : (
               myLessons.items.map((item: LessonRead, index: any) => (
                 <TableRow key={index}>
-                  <Link href={"/dashboard/new-lesson"} className="font-semibold mb-6 hover:underline hover:text-blue-500">
+                  <Link href={"/watch-lesson/"+item.id} className="font-semibold mb-6 hover:underline hover:text-blue-500">
                     <TableCell>{item.title}</TableCell>
                   </Link>
                   <TableCell className="text-center">{new Date(item.created_at).toDateString()}</TableCell>
