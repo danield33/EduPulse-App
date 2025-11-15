@@ -1,6 +1,6 @@
 from typing import Literal, List
 
-from app.models import Lesson, LessonVideo, Video, Breakpoint, User
+from app.models import Lesson, LessonVideo, Video, Breakpoint, User, LessonScenarioDB
 from app.schemas import LessonCreate, LessonRead, LessonVideoAddResponse, LessonVideoRead
 from uuid import UUID
 from app.database import get_async_session as get_db
@@ -77,9 +77,17 @@ async def upload_scenario(scenario: Scenario,
 
     new_lesson = await create_lesson(LessonCreate(title=scenario.title, user_id=user.id), db)
     await generate_scenario(scenario, new_lesson.id)
+    await save_scenario_json(scenario=scenario, lesson_id=new_lesson.id, session=db)
     return new_lesson
 
-    return {"mp3_files": files}
+async def save_scenario_json(scenario: Scenario, lesson_id: UUID, session: AsyncSession):
+    record = LessonScenarioDB(
+        lesson_id=lesson_id,
+        scenario_json=scenario.dict()
+    )
+    session.add(record)
+    await session.commit()
+    return record.id
 
 @router.post("/{lesson_id}/add_video", response_model=LessonVideoAddResponse)
 async def add_video_to_lesson(

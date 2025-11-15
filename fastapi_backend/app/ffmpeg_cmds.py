@@ -6,6 +6,8 @@ import subprocess
 import os
 from typing import List, Optional
 
+from PIL import Image
+
 
 def get_audio_duration(audio_path: str) -> float:
     result = subprocess.run(
@@ -27,6 +29,7 @@ def get_audio_duration(audio_path: str) -> float:
 
 
 def make_video(image_path: str, audio_path: str, output_path: str) -> None:
+    image_path = prepare_canvas_image(image_path, 1280, 720)
     duration = get_audio_duration(audio_path)
     cmd = [
         "ffmpeg",
@@ -101,3 +104,41 @@ def stitch_base64_mp3s(base64_list: List[str], output_path: Optional[str] = None
             )
 
     return output_path
+
+
+def prepare_canvas_image(img_path: str, target_w=1280, target_h=720) -> str:
+    """
+    Ensures the image fits inside a fixed-size canvas (letterboxed or pillarboxed)
+    so all output video segments have identical dimensions.
+    """
+    img = Image.open(img_path).convert("RGB")
+    iw, ih = img.size
+    aspect_img = iw / ih
+    aspect_target = target_w / target_h
+
+    # Resize image to fit inside target canvas while preserving aspect ratio
+    if aspect_img > aspect_target:
+        # Image is wider → fit width
+        new_w = target_w
+        new_h = int(target_w / aspect_img)
+    else:
+        # Image is taller → fit height
+        new_h = target_h
+        new_w = int(target_h * aspect_img)
+
+    # Resize
+    img_resized = img.resize((new_w, new_h), Image.LANCZOS)
+
+    # Create black canvas
+    canvas = Image.new("RGB", (target_w, target_h), (0, 0, 0))
+
+    # Center the resized image
+    offset_x = (target_w - new_w) // 2
+    offset_y = (target_h - new_h) // 2
+    canvas.paste(img_resized, (offset_x, offset_y))
+
+    # Save final canvas output
+    fixed_path = img_path.replace(".png", "_canvas.png")
+    canvas.save(fixed_path, format="PNG")
+
+    return fixed_path

@@ -5,21 +5,13 @@ import tempfile
 from typing import List, Optional
 
 from PIL import Image
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.schema_models.scenario import Scenario
 from app.schema_models.scenario import ScriptBlock
 from app.ffmpeg_cmds import stitch_base64_mp3s, make_video
 from app.routes.tts import synthesize_with_hume, TTSRequest
 
-# async def handle_dialogue_segment(segment: List[ScriptBlock], segment_name: Optional[str]):
-#     base64_mp3s = []
-#     for block in segment:
-#         print(block, 'BLOCK')
-#         audio_url = await handle_dialogue_block(block)
-#         base64_mp3s.append(audio_url)
-#
-#     file_path = stitch_base64_mp3s(base64_mp3s, segment_name)
-#     return file_path
 
 async def get_b64_audio(block: ScriptBlock):
     tts_request = TTSRequest(text=block.dialogue, voice_description="A deep lumberjack voice.")
@@ -154,7 +146,7 @@ async def generate_scenario(scenario: Scenario, lesson_id: str):
             current_audios.append(audio_path)
 
     # -------------------------------------------------
-    # 1️⃣ Process MAIN SCRIPT
+    # Process MAIN SCRIPT
     # -------------------------------------------------
     for block in scenario.script:
 
@@ -167,7 +159,7 @@ async def generate_scenario(scenario: Scenario, lesson_id: str):
             continue
 
         # -------------------------------------------------
-        # 2️⃣ Process BRANCHES on this block
+        # Process BRANCHES on this block
         # -------------------------------------------------
         if getattr(block, "branch_options", None):
             for branch in block.branch_options:
@@ -186,7 +178,7 @@ async def generate_scenario(scenario: Scenario, lesson_id: str):
                 current_audios.clear()
 
     # -------------------------------------------------
-    # 3️⃣ Flush trailing main content
+    # Flush trailing main content
     # -------------------------------------------------
     flush_segment(None)
 
