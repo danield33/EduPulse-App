@@ -383,6 +383,61 @@ async def validate_segment_in_scenario(
     return True
 
 
+@router.get("/{lesson_id}/scenario")
+async def get_lesson_scenario(
+    lesson_id: UUID,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Fetch the complete lesson scenario JSON including all segments, branches, and breakpoints.
+
+    This endpoint returns the full scenario structure which the frontend can use to:
+    - Determine segment ordering
+    - Detect breakpoints
+    - Map branch options to segment types
+    - Display questions and answers
+
+    Args:
+        lesson_id: UUID of the lesson
+        db: Database session dependency
+
+    Returns:
+        The complete scenario JSON with script blocks, breakpoints, and branch options
+
+    Raises:
+        404: If lesson or scenario not found
+    """
+    # Check that the lesson exists
+    lesson_result = await db.execute(
+        select(Lesson).where(Lesson.id == lesson_id)
+    )
+    lesson = lesson_result.scalar_one_or_none()
+
+    if not lesson:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Lesson not found: {lesson_id}"
+        )
+
+    # Query the scenario JSON
+    result = await db.execute(
+        select(LessonScenarioDB).where(LessonScenarioDB.lesson_id == lesson_id)
+    )
+    scenario_record = result.scalar_one_or_none()
+
+    if not scenario_record:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Lesson scenario not found for lesson_id: {lesson_id}"
+        )
+
+    return {
+        "lesson_id": lesson_id,
+        "title": lesson.title,
+        "scenario": scenario_record.scenario_json
+    }
+
+
 @router.get("/{lesson_id}/segment")
 async def stream_video_segment(
     lesson_id: UUID,
@@ -431,6 +486,8 @@ async def stream_video_segment(
     # 2. Validate segment exists in scenario JSON
     if segment_type:
         segment_type = segment_type.replace(" ", ":")
+    else:
+        segment_type = "main"
     await validate_segment_in_scenario(lesson_id, segment_number, segment_type, db)
 
     # 3. Resolve the video file path

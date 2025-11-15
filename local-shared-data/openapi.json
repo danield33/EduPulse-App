@@ -1490,6 +1490,48 @@
         ]
       }
     },
+    "/lessons/{lesson_id}/scenario": {
+      "get": {
+        "tags": [
+          "lessons"
+        ],
+        "summary": "Get Lesson Scenario",
+        "description": "Fetch the complete lesson scenario JSON including all segments, branches, and breakpoints.\n\nThis endpoint returns the full scenario structure which the frontend can use to:\n- Determine segment ordering\n- Detect breakpoints\n- Map branch options to segment types\n- Display questions and answers\n\nArgs:\n    lesson_id: UUID of the lesson\n    db: Database session dependency\n\nReturns:\n    The complete scenario JSON with script blocks, breakpoints, and branch options\n\nRaises:\n    404: If lesson or scenario not found",
+        "operationId": "get_lesson_scenario",
+        "parameters": [
+          {
+            "name": "lesson_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Lesson Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/lessons/{lesson_id}/segment": {
       "get": {
         "tags": [

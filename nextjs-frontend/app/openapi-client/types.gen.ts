@@ -498,6 +498,16 @@ export type CreateTempLessonResponse = LessonRead;
 
 export type CreateTempLessonError = unknown;
 
+export type GetLessonScenarioData = {
+  path: {
+    lesson_id: string;
+  };
+};
+
+export type GetLessonScenarioResponse = unknown;
+
+export type GetLessonScenarioError = HTTPValidationError;
+
 export type StreamVideoSegmentData = {
   path: {
     lesson_id: string;
