@@ -11,13 +11,13 @@ import {prepareScenarioForBackend} from "@/lib/script-editor";
 export default function CreateNewLessonPage() {
 
     const [scenario, setScenario] = useState<Scenario>();
-    const [generatingScript, setGeneratingScript] = useState<boolean>(false);
+    const [generatingScript, setGeneratingScript] = useState<[boolean, string|null]>([false, null]);
 
     const createScript = async (e: MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
-        setGeneratingScript(true);
+        setGeneratingScript([true, "Generating Script..."]);
         const fileInput = document.getElementById("script-upload") as HTMLInputElement;
-        if (!fileInput?.files?.length) return setGeneratingScript(false);
+        if (!fileInput?.files?.length) return setGeneratingScript([false, null]);
 
         const formData = new FormData();
         formData.append("file", fileInput.files[0]);
@@ -38,14 +38,14 @@ export default function CreateNewLessonPage() {
                 script: [{role: "No data found", dialogue: "The AI couldn't generate a script"}]
             })
         }
-        setGeneratingScript(false);
+        setGeneratingScript([false, null]);
     }
 
     const generateLesson = async (scenario: Scenario) => {
         const token = getClientSideCookie("accessToken");
         if (!token || !scenario) return;
 
-        setGeneratingScript(true);
+        setGeneratingScript([true, "Generating Video...\n This may take a few minutes"]);
         const finalScenario = await prepareScenarioForBackend(scenario);
 
         const res = await uploadScenario({
@@ -55,8 +55,7 @@ export default function CreateNewLessonPage() {
             },
             baseURL: "http://localhost:8000"
         });
-        console.log(res, 'res');
-        setGeneratingScript(false);
+        setGeneratingScript([false, null]);
     }
 
     return (
@@ -106,8 +105,8 @@ export default function CreateNewLessonPage() {
 
                         </form>
 
-                        {generatingScript ?
-                            <LoadingOverlay isLoading={generatingScript} message={"Generating Script..."}/>
+                        {generatingScript[0] ?
+                            <LoadingOverlay isLoading={generatingScript[0]} message={generatingScript[1] ?? ""}/>
                             :
                             <Button className={"rounded-xl bg-lime-400 text-black hover:bg-lime-500"} type={"button"}
                                     onClick={createScript}>
