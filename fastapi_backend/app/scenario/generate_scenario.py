@@ -171,6 +171,7 @@ async def generate_scenario(scenario: Scenario, lesson_id: str):
         # -------------------------------------------------
         if getattr(block, "branch_options", None):
             for branch in block.branch_options:
+                current_image_b64 = None
 
                 for line in branch.dialogue:
                     await process_dialogue(
