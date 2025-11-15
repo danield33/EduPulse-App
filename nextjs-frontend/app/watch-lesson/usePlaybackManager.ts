@@ -29,7 +29,6 @@ interface SegmentInfo {
   segmentType: string; // "main" or branch type like "option_A"
   hasBreakpoint: boolean;
   breakpoint?: BreakpointQuestion;
-  branchOptions?: BranchOption[];
   scriptBlockIndices: number[]; // Which script blocks are included in this segment
 }
 
@@ -86,11 +85,11 @@ export function usePlaybackManager({
   /**
    * Build a complete map of all video segments from the script.
    *
-   * Rules:
-   * - A new segment starts when there's an image
-   * - A segment ends when there's a new image OR a breakpoint
-   * - Multiple script blocks can be in one segment
-   * - Branches are processed separately and have their own segment numbering
+   * RULES:
+   * 1. A new segment starts when there's a new image
+   * 2. A segment ends at a breakpoint OR when a new image appears
+   * 3. Branches are SEPARATE video files with own segment numbering from 1
+   * 4. Multiple script blocks WITHOUT images belong to the SAME segment
    */
   const buildSegmentMap = (script: ScriptBlock[]): Record<string, SegmentInfo[]> => {
     const segments: Record<string, SegmentInfo[]> = { main: [] };
@@ -99,111 +98,70 @@ export function usePlaybackManager({
     let currentSegmentBlocks: number[] = [];
     let hasImageInCurrentSegment = false;
     let currentBreakpoint: BreakpointQuestion | undefined;
-    let currentBranchOptions: BranchOption[] | undefined;
 
     for (let i = 0; i < script.length; i++) {
       const block = script[i];
 
-      // If this block has an image and we already have content, end the previous segment
-      if (block.image && hasImageInCurrentSegment && currentSegmentBlocks.length > 0) {
-        segments.main.push({
-          segmentNumber: currentSegmentNumber,
-          segmentType: "main",
-          hasBreakpoint: !!currentBreakpoint,
-          breakpoint: currentBreakpoint,
-          branchOptions: currentBranchOptions,
-          scriptBlockIndices: [...currentSegmentBlocks],
-        });
-        currentSegmentNumber++;
-        currentSegmentBlocks = [];
-        currentBreakpoint = undefined;
-        currentBranchOptions = undefined;
-        hasImageInCurrentSegment = false;
-      }
-
-      // Add this block to current segment
-      if (block.image || block.dialogue || block.role) {
-        currentSegmentBlocks.push(i);
-        if (block.image) {
-          hasImageInCurrentSegment = true;
-        }
-      }
-
-      // Check for breakpoint
-      if (block.breakpoint) {
-        currentBreakpoint = block.breakpoint;
-        currentBranchOptions = block.branch_options;
-
-        // Breakpoint ends the segment
+      // If this block is ONLY branch_options (no dialogue/role/image)
+      if (block.branch_options && !block.dialogue && !block.role && !block.image) {
+        // Close any pending main segment before processing branches
         if (currentSegmentBlocks.length > 0) {
           segments.main.push({
             segmentNumber: currentSegmentNumber,
             segmentType: "main",
-            hasBreakpoint: true,
+            hasBreakpoint: !!currentBreakpoint,
             breakpoint: currentBreakpoint,
-            branchOptions: currentBranchOptions,
             scriptBlockIndices: [...currentSegmentBlocks],
           });
           currentSegmentNumber++;
           currentSegmentBlocks = [];
           currentBreakpoint = undefined;
-          currentBranchOptions = undefined;
-          hasImageInCurrentSegment = false;
-        }
-      }
-
-      // Process branches
-      if (block.branch_options) {
-        // Before processing branches, close any open main segment
-        if (currentSegmentBlocks.length > 0 && !block.breakpoint) {
-          segments.main.push({
-            segmentNumber: currentSegmentNumber,
-            segmentType: "main",
-            hasBreakpoint: false,
-            scriptBlockIndices: [...currentSegmentBlocks],
-          });
-          currentSegmentNumber++;
-          currentSegmentBlocks = [];
           hasImageInCurrentSegment = false;
         }
 
-        // Process each branch
+        // Process each branch as separate video path
         for (const branch of block.branch_options) {
           const branchType = branch.type;
+
           if (!segments[branchType]) {
             segments[branchType] = [];
           }
 
           let branchSegmentNumber = 1;
-          let branchSegmentHasImage = false;
-          let branchDialogueIndices: number[] = [];
+          let branchSegmentBlocks: number[] = [];
+          let branchHasImage = false;
 
+          // Analyze branch dialogue to determine segments
+          // Rule: New image = new segment (if we already have content)
+          // Lines without images belong to the current/previous segment
           for (let j = 0; j < branch.dialogue.length; j++) {
             const line = branch.dialogue[j];
 
-            // New image starts a new segment (if we have content)
-            if (line.image && branchSegmentHasImage && branchDialogueIndices.length > 0) {
-              segments[branchType].push({
-                segmentNumber: branchSegmentNumber,
-                segmentType: branchType,
-                hasBreakpoint: false,
-                scriptBlockIndices: [], // Branch segments don't map to script blocks
-              });
-              branchSegmentNumber++;
-              branchDialogueIndices = [];
-              branchSegmentHasImage = false;
+            // If this line has an image and we already have content in the current segment,
+            // close the current segment and start a new one
+            if (line.image) {
+              // If we have accumulated blocks, close the previous segment first
+              if (branchSegmentBlocks.length > 0) {
+                segments[branchType].push({
+                  segmentNumber: branchSegmentNumber,
+                  segmentType: branchType,
+                  hasBreakpoint: false,
+                  scriptBlockIndices: [],
+                });
+                branchSegmentNumber++;
+                branchSegmentBlocks = [];
+              }
+              branchHasImage = true;
             }
 
-            if (line.image || line.dialogue) {
-              branchDialogueIndices.push(j);
-              if (line.image) {
-                branchSegmentHasImage = true;
-              }
+            // Add line to current branch segment (has dialogue or role)
+            if (line.dialogue || line.role) {
+              branchSegmentBlocks.push(j);
             }
           }
 
           // Close final branch segment
-          if (branchDialogueIndices.length > 0) {
+          if (branchSegmentBlocks.length > 0) {
             segments[branchType].push({
               segmentNumber: branchSegmentNumber,
               segmentType: branchType,
@@ -211,6 +169,52 @@ export function usePlaybackManager({
               scriptBlockIndices: [],
             });
           }
+        }
+
+        // Skip to next block (don't process branch_options block as main content)
+        continue;
+      }
+
+      // Check if we need to close the previous segment due to NEW image
+      if (block.image && hasImageInCurrentSegment && currentSegmentBlocks.length > 0) {
+        segments.main.push({
+          segmentNumber: currentSegmentNumber,
+          segmentType: "main",
+          hasBreakpoint: !!currentBreakpoint,
+          breakpoint: currentBreakpoint,
+          scriptBlockIndices: [...currentSegmentBlocks],
+        });
+        currentSegmentNumber++;
+        currentSegmentBlocks = [];
+        currentBreakpoint = undefined;
+        hasImageInCurrentSegment = false;
+      }
+
+      // Add this block to current segment if it has main content
+      if (block.image || block.dialogue || block.role) {
+        currentSegmentBlocks.push(i);
+        if (block.image) {
+          hasImageInCurrentSegment = true;
+        }
+      }
+
+      // Handle breakpoint (ends the segment)
+      if (block.breakpoint) {
+        currentBreakpoint = block.breakpoint;
+
+        // Close the segment with breakpoint
+        if (currentSegmentBlocks.length > 0) {
+          segments.main.push({
+            segmentNumber: currentSegmentNumber,
+            segmentType: "main",
+            hasBreakpoint: true,
+            breakpoint: currentBreakpoint,
+            scriptBlockIndices: [...currentSegmentBlocks],
+          });
+          currentSegmentNumber++;
+          currentSegmentBlocks = [];
+          currentBreakpoint = undefined;
+          hasImageInCurrentSegment = false;
         }
       }
     }
@@ -222,7 +226,6 @@ export function usePlaybackManager({
         segmentType: "main",
         hasBreakpoint: !!currentBreakpoint,
         breakpoint: currentBreakpoint,
-        branchOptions: currentBranchOptions,
         scriptBlockIndices: [...currentSegmentBlocks],
       });
     }
@@ -238,17 +241,22 @@ export function usePlaybackManager({
     const segmentType = currentSegmentType || "main";
 
     const segments = segmentMap[segmentType];
-    if (!segments) return null;
+    if (!segments) {
+      console.warn(`No segments found for type: ${segmentType}`);
+      return null;
+    }
 
     const segment = segments.find((s) => s.segmentNumber === currentSegmentNumber);
-    if (!segment) return null;
+    if (!segment) {
+      console.warn(`Segment ${currentSegmentNumber} not found in ${segmentType}`);
+      return null;
+    }
 
     return {
       segmentNumber: segment.segmentNumber,
       segmentType: segment.segmentType === "main" ? undefined : segment.segmentType,
       hasBreakpoint: segment.hasBreakpoint,
       breakpoint: segment.breakpoint,
-      branchOptions: segment.branchOptions,
     };
   }, [scenario, segmentMap, playbackState]);
 
@@ -257,10 +265,13 @@ export function usePlaybackManager({
     if (!scenario || playbackState.hasEnded || Object.keys(segmentMap).length === 0) return;
 
     const metadata = getCurrentSegmentMetadata();
-    console.log("Video ended, metadata:", metadata);
+    console.log("Video ended. Current segment:", playbackState.currentSegmentNumber,
+                "Type:", playbackState.currentSegmentType || "main",
+                "Metadata:", metadata);
 
     // Check if this segment has a breakpoint
     if (metadata?.hasBreakpoint && metadata.breakpoint) {
+      console.log("Pausing at breakpoint:", metadata.breakpoint.question);
       setPlaybackState((prev) => ({
         ...prev,
         isAtBreakpoint: true,
@@ -275,53 +286,61 @@ export function usePlaybackManager({
 
     if (!segments) {
       console.error("No segments found for type:", segmentType);
+      setPlaybackState((prev) => ({ ...prev, hasEnded: true, isPlaying: false }));
       return;
     }
 
-    // Check if there's a next segment in the current branch/main
+    // Check if there's a next segment in the current path
     const nextSegmentNumber = playbackState.currentSegmentNumber + 1;
     const nextSegment = segments.find((s) => s.segmentNumber === nextSegmentNumber);
 
-    console.log(nextSegment, nextSegmentNumber);
     if (nextSegment) {
-      // Continue to next segment in current path
+      console.log(`Continuing to next segment: ${nextSegmentNumber} (${segmentType})`);
       setPlaybackState((prev) => ({
         ...prev,
         currentSegmentNumber: nextSegmentNumber,
       }));
-      onSegmentChange(nextSegmentNumber, segmentType);
+      onSegmentChange(nextSegmentNumber, segmentType === "main" ? undefined : segmentType);
       return;
     }
 
-    // If we're in a branch and no more segments, return to main
+    // If we're in a branch and there are no more segments, return to main
     if (segmentType !== "main") {
-      const currentMainSegments = segmentMap.main;
+      console.log(`Branch ${segmentType} complete. Returning to main path.`);
 
-      // Continue from the segment AFTER the one we branched from
-      const branchedFromSegment = playbackState.branchedFromSegmentNumber || playbackState.currentSegmentNumber;
-      const nextMainSegmentNumber = branchedFromSegment + 1;
+      // Find the next main segment after the branch_options block
+      const mainSegments = segmentMap.main;
 
-      console.log(`Branch finished. Branched from segment ${branchedFromSegment}, continuing to segment ${nextMainSegmentNumber}`);
+      // We branched from a breakpoint segment. The branch_options block is separate.
+      // We need to continue from the NEXT segment after the branch_options block.
+      // Since branch_options blocks don't become segments, we continue from branchedFromSegmentNumber + 1
+      const nextMainSegmentNumber = (playbackState.branchedFromSegmentNumber || 0) + 1;
 
-      // Find the next main segment
-      const nextMainSegment = currentMainSegments.find(
-        (s) => s.segmentNumber === nextMainSegmentNumber
-      );
+      console.log(`Looking for main segment ${nextMainSegmentNumber} (branched from ${playbackState.branchedFromSegmentNumber})`);
+
+      const nextMainSegment = mainSegments.find((s) => s.segmentNumber === nextMainSegmentNumber);
 
       if (nextMainSegment) {
+        console.log(`✓ Resuming main path at segment ${nextMainSegmentNumber}`);
         setPlaybackState((prev) => ({
           ...prev,
           currentSegmentNumber: nextMainSegment.segmentNumber,
           currentSegmentType: undefined,
-          scriptBlockIndex: Math.min(...nextMainSegment.scriptBlockIndices),
-          branchedFromSegmentNumber: undefined, // Clear the branched from tracking
+          scriptBlockIndex: nextMainSegment.scriptBlockIndices.length > 0
+            ? Math.min(...nextMainSegment.scriptBlockIndices)
+            : prev.scriptBlockIndex + 1,
+          branchedFromSegmentNumber: undefined,
+          isPlaying: true,
         }));
         onSegmentChange(nextMainSegment.segmentNumber, undefined);
         return;
+      } else {
+        console.log("✗ No more main segments after branch. Lesson complete.");
       }
     }
 
     // No more segments - lesson complete
+    console.log("Lesson complete.");
     setPlaybackState((prev) => ({
       ...prev,
       hasEnded: true,
@@ -332,20 +351,25 @@ export function usePlaybackManager({
   // Handle breakpoint answer selection
   const handleBreakpointAnswer = useCallback(
     (selectedOptionIndex: number) => {
-      if (!scenario || !playbackState.currentBreakpoint || Object.keys(segmentMap).length === 0) return;
+      if (!scenario || !playbackState.currentBreakpoint || Object.keys(segmentMap).length === 0) {
+        console.error("Cannot handle breakpoint answer: missing data");
+        return;
+      }
 
       const selectedOption = playbackState.currentBreakpoint.options[selectedOptionIndex];
-      const metadata = getCurrentSegmentMetadata();
-
-      console.log("Answer selected:", selectedOption);
+      console.log("User selected answer:", selectedOption.text,
+                  "Branch target:", selectedOption.branchTarget);
 
       // If there's a branch target, navigate to that branch
       if (selectedOption.branchTarget) {
-        const targetBranch = selectedOption.branchTarget
+        const targetBranch = selectedOption.branchTarget;
 
-        if (targetBranch && segmentMap[targetBranch]) {
-          // Start playing the branch from segment 1
-          // Remember which main segment we're branching from
+        if (segmentMap[targetBranch]) {
+          const branchSegments = segmentMap[targetBranch];
+          console.log(`✓ Branching to ${targetBranch}, starting at segment 1`);
+          console.log(`  Branch has ${branchSegments.length} segment(s):`, branchSegments.map(s => s.segmentNumber));
+          console.log(`  Calling onSegmentChange(1, "${targetBranch}")`);
+
           setPlaybackState((prev) => ({
             ...prev,
             currentSegmentNumber: 1,
@@ -353,20 +377,22 @@ export function usePlaybackManager({
             isAtBreakpoint: false,
             currentBreakpoint: undefined,
             isPlaying: true,
-            branchedFromSegmentNumber: prev.currentSegmentNumber, // Remember where we came from
-            // Keep scriptBlockIndex to know where to return after branch
+            branchedFromSegmentNumber: prev.currentSegmentNumber,
           }));
           onSegmentChange(1, targetBranch);
           return;
+        } else {
+          console.error(`✗ Branch ${targetBranch} not found in segment map. Available branches:`, Object.keys(segmentMap));
         }
       }
 
-      // No branch, continue to next main segment
-      const currentSegments = segmentMap.main;
+      // No branch or branch not found - continue to next main segment
       const nextSegmentNumber = playbackState.currentSegmentNumber + 1;
-      const nextSegment = currentSegments.find((s) => s.segmentNumber === nextSegmentNumber);
+      const mainSegments = segmentMap.main;
+      const nextSegment = mainSegments.find((s) => s.segmentNumber === nextSegmentNumber);
 
       if (nextSegment) {
+        console.log(`No branch selected. Continuing to main segment ${nextSegmentNumber}`);
         setPlaybackState((prev) => ({
           ...prev,
           currentSegmentNumber: nextSegmentNumber,
@@ -379,7 +405,7 @@ export function usePlaybackManager({
         }));
         onSegmentChange(nextSegmentNumber, undefined);
       } else {
-        // Lesson finished
+        console.log("No more segments after breakpoint. Lesson complete.");
         setPlaybackState((prev) => ({
           ...prev,
           hasEnded: true,
@@ -389,11 +415,12 @@ export function usePlaybackManager({
         }));
       }
     },
-    [scenario, playbackState, segmentMap, getCurrentSegmentMetadata, onSegmentChange]
+    [scenario, playbackState, segmentMap, onSegmentChange]
   );
 
   // Reset playback to beginning
   const resetPlayback = useCallback(() => {
+    console.log("Resetting playback to beginning");
     setPlaybackState({
       currentSegmentNumber: 1,
       currentSegmentType: undefined,

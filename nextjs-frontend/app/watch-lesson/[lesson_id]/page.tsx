@@ -35,6 +35,7 @@ export default function LessonVideoPlayer() {
           URL.revokeObjectURL(videoUrl);
         }
 
+        console.log(segmentNumber, segmentType, "QUERY")
         const response = await streamVideoSegment({
           path: {
             lesson_id: lessonId,
