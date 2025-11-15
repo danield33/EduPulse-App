@@ -334,23 +334,21 @@ export function usePlaybackManager({
       console.log("Answer selected:", selectedOption);
 
       // If there's a branch target, navigate to that branch
-      if (selectedOption.branchTarget && metadata?.branchOptions) {
-        const targetBranch = metadata.branchOptions.find(
-          (b) => b.type === selectedOption.branchTarget
-        );
+      if (selectedOption.branchTarget) {
+        const targetBranch = selectedOption.branchTarget
 
-        if (targetBranch && segmentMap[targetBranch.type]) {
+        if (targetBranch && segmentMap[targetBranch]) {
           // Start playing the branch from segment 1
           setPlaybackState((prev) => ({
             ...prev,
             currentSegmentNumber: 1,
-            currentSegmentType: targetBranch.type,
+            currentSegmentType: targetBranch,
             isAtBreakpoint: false,
             currentBreakpoint: undefined,
             isPlaying: true,
             // Keep scriptBlockIndex to know where to return after branch
           }));
-          onSegmentChange(1, targetBranch.type);
+          onSegmentChange(1, targetBranch);
           return;
         }
       }

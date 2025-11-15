@@ -101,6 +101,9 @@ async def generate_scenario(scenario: Scenario, lesson_id: str):
         if not current_audios:
             return
 
+        if branch_type:
+            branch_type = branch_type.replace(" ", "-")
+
         # Pick image
         if current_image_b64:
             img_path = decode_base64_to_file(current_image_b64, ".png")

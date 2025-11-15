@@ -485,7 +485,7 @@ async def stream_video_segment(
 
     # 2. Validate segment exists in scenario JSON
     if segment_type:
-        segment_type = segment_type.replace(" ", ":")
+        segment_type = segment_type.replace(" ", "-")
     else:
         segment_type = "main"
     await validate_segment_in_scenario(lesson_id, segment_number, segment_type, db)
