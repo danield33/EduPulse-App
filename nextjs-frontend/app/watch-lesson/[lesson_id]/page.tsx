@@ -46,8 +46,6 @@ export default function LessonVideoPlayer() {
                     responseType: "blob"
                 });
 
-                // @ts-ignore
-                console.log(response)
                 const blob = await response.data as Blob;
                 const url = URL.createObjectURL(blob);
 
