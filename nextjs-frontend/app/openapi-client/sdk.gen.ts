@@ -72,6 +72,9 @@ import type {
   CreateLessonData,
   CreateLessonError,
   CreateLessonResponse,
+  UploadScenarioData,
+  UploadScenarioError,
+  UploadScenarioResponse,
   AddVideoToLessonData,
   AddVideoToLessonError,
   AddVideoToLessonResponse,
@@ -400,11 +403,8 @@ export const streamVideo = <ThrowOnError extends boolean = false>(
  * Synthesize Speech
  * Generate speech from text using Hume.ai TTS API.
  *
- * Args:
- * request: TTS request containing text, voice description, and format
- *
- * Returns:
- * Audio URL or base64-encoded audio data
+ * - Ensures user is authenticated
+ * - Delegates to Hume TTS service for synthesis
  */
 export const synthesizeSpeech = <ThrowOnError extends boolean = false>(
   options: OptionsLegacyParser<SynthesizeSpeechData, ThrowOnError>,
@@ -473,6 +473,22 @@ export const createLesson = <ThrowOnError extends boolean = false>(
   >({
     ...options,
     url: "/lessons/create",
+  });
+};
+
+/**
+ * Upload Scenario
+ */
+export const uploadScenario = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<UploadScenarioData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<
+    UploadScenarioResponse,
+    UploadScenarioError,
+    ThrowOnError
+  >({
+    ...options,
+    url: "/lessons/upload_scenario",
   });
 };
 

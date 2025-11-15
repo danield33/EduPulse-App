@@ -1,6 +1,6 @@
 from typing import Literal, List
 
-from app.models import Lesson, LessonVideo, Video, Breakpoint, User
+from app.models import Lesson, LessonVideo, Video, Breakpoint, User, LessonScenarioDB
 from app.schemas import LessonCreate, LessonRead, LessonVideoAddResponse, LessonVideoRead
 from uuid import UUID
 from app.database import get_async_session as get_db
@@ -13,6 +13,8 @@ from app.users import current_active_user
 from app.routes.videos import generate_video, VideoGenerateRequest
 from app.routes.tts import TTSRequest
 from app.routes.ttimage import TTImageRequest
+from app.schema_models.scenario import Scenario
+from app.scenario.generate_scenario import generate_scenario
 
 router = APIRouter(tags=["lessons"])
 
@@ -67,6 +69,25 @@ async def create_lesson(lesson: LessonCreate, db: AsyncSession = Depends(get_db)
     await db.commit()
     await db.refresh(new_lesson)
     return new_lesson
+
+@router.post("/upload_scenario", response_model=LessonRead)
+async def upload_scenario(scenario: Scenario,
+                          db: AsyncSession = Depends(get_db),
+                          user: User = Depends(current_active_user)):
+
+    new_lesson = await create_lesson(LessonCreate(title=scenario.title, user_id=user.id), db)
+    await generate_scenario(scenario, new_lesson.id)
+    await save_scenario_json(scenario=scenario, lesson_id=new_lesson.id, session=db)
+    return new_lesson
+
+async def save_scenario_json(scenario: Scenario, lesson_id: UUID, session: AsyncSession):
+    record = LessonScenarioDB(
+        lesson_id=lesson_id,
+        scenario_json=scenario.dict()
+    )
+    session.add(record)
+    await session.commit()
+    return record.id
 
 @router.post("/{lesson_id}/add_video", response_model=LessonVideoAddResponse)
 async def add_video_to_lesson(

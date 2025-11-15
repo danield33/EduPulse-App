@@ -2,9 +2,10 @@
 
 import {MouseEvent, useState} from "react";
 import {Button} from "@/components/ui/button";
-import {generateScriptFromPdf} from "@/app/openapi-client";
+import {generateScriptFromPdf, uploadScenario} from "@/app/openapi-client";
 import DialogueEditor, {Scenario} from "@/components/ui/DialogueEditor";
 import {LoadingOverlay} from "@/components/ui/LoadingOverlay";
+import {prepareScenarioForBackend} from "@/lib/script-editor";
 
 
 export default function CreateNewLessonPage() {
@@ -37,6 +38,24 @@ export default function CreateNewLessonPage() {
                 script: [{role: "No data found", dialogue: "The AI couldn't generate a script"}]
             })
         }
+        setGeneratingScript(false);
+    }
+
+    const generateLesson = async (scenario: Scenario) => {
+        const token = getClientSideCookie("accessToken");
+        if (!token || !scenario) return;
+
+        setGeneratingScript(true);
+        const finalScenario = await prepareScenarioForBackend(scenario);
+
+        const res = await uploadScenario({
+            body: finalScenario,
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+            baseURL: "http://localhost:8000"
+        });
+        console.log(res, 'res');
         setGeneratingScript(false);
     }
 
@@ -88,8 +107,8 @@ export default function CreateNewLessonPage() {
                         </form>
 
                         {generatingScript ?
-                        <LoadingOverlay isLoading={generatingScript} message={"Generating Script..."}/>
-                        :
+                            <LoadingOverlay isLoading={generatingScript} message={"Generating Script..."}/>
+                            :
                             <Button className={"rounded-xl bg-lime-400 text-black hover:bg-lime-500"} type={"button"}
                                     onClick={createScript}>
                                 {!!scenario ? "Generate again!" : "Submit!"}
@@ -97,7 +116,9 @@ export default function CreateNewLessonPage() {
                         }
 
 
-                        {scenario && <DialogueEditor scenario={scenario}/>}
+                        {scenario && (
+                            <DialogueEditor scenario={scenario} generateScenario={generateLesson}/>
+                        )}
 
                     </div>
                 </section>
@@ -105,3 +126,10 @@ export default function CreateNewLessonPage() {
         </div>
     )
 }
+
+const getClientSideCookie = (name: string): string | undefined => {
+    return document.cookie
+        .split('; ')
+        .find((row) => row.startsWith(`${name}=`))
+        ?.split('=')[1];
+};

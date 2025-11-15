@@ -55,7 +55,7 @@ export interface BreakpointQuestion {
 }
 
 
-export default function DialogueEditor({scenario: globalScenario}: { scenario: Scenario }) {
+export default function DialogueEditor({scenario: globalScenario, generateScenario}: { scenario: Scenario, generateScenario: (scenario: Scenario) => void }) {
     const [scenario, setScenario] = useState<Scenario>(globalScenario);
     const [editing, setEditing] = useState<{ speaker?: string; line?: string; path?: string } | null>(null);
     const [newText, setNewText] = useState("");
@@ -122,7 +122,6 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
     ) => {
         const updated = structuredClone(scenario);
 
-        console.log(scriptIndex)
         const newDialogue = {
             role: "Narrator",
             dialogue: "New dialogue line...",
@@ -406,6 +405,35 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
 
             </DndContext>
 
+            {scenario && (
+                <>
+                    {/* Save JSON */}
+                    <div className="pt-6 border-t w-full flex flex-row justify-between">
+                        <Button
+                            onClick={() => {
+                                const blob = new Blob([JSON.stringify(scenario, null, 2)], {
+                                    type: "application/json",
+                                });
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement("a");
+                                a.href = url;
+                                a.download = "scenario.json";
+                                a.click();
+                            }}
+                        >
+                            Download JSON
+                        </Button>
+
+                        <Button
+                            className="rounded-xl bg-lime-400 text-black hover:bg-lime-500 font-bold"
+                            onClick={() => generateScenario(scenario)}
+                        >
+                            Generate Video
+                        </Button>
+                    </div>
+                </>
+            )}
+
             <EditDialogueModal
                 isOpen={!!editing}
                 speaker={editing?.speaker || ""}
@@ -445,24 +473,6 @@ export default function DialogueEditor({scenario: globalScenario}: { scenario: S
                 availableBranches={branches}
             />
 
-
-            {/* Save JSON */}
-            <div className="pt-6 border-t">
-                <Button
-                    onClick={() => {
-                        const blob = new Blob([JSON.stringify(scenario, null, 2)], {
-                            type: "application/json",
-                        });
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement("a");
-                        a.href = url;
-                        a.download = "scenario.json";
-                        a.click();
-                    }}
-                >
-                    Download Updated JSON
-                </Button>
-            </div>
         </div>
     );
 }

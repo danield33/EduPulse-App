@@ -4,8 +4,8 @@ from datetime import datetime
 
 from fastapi_users.db import SQLAlchemyBaseUserTableUUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
-from sqlalchemy import String, Integer, ForeignKey, DateTime, ARRAY
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import String, Integer, ForeignKey, DateTime, ARRAY, Column
+from sqlalchemy.dialects.postgresql import UUID, JSONB
 
 
 class Base(DeclarativeBase):
@@ -93,3 +93,12 @@ class Breakpoint(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     lesson_video: Mapped["LessonVideo"] = relationship("LessonVideo", back_populates="breakpoints")
+
+class LessonScenarioDB(Base):
+    __tablename__ = "lesson_scenario"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    lesson_id = Column(UUID(as_uuid=True), nullable=False)
+    scenario_json = Column(JSONB, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
