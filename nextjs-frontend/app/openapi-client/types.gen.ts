@@ -445,7 +445,7 @@ export type UploadScenarioData = {
   body: Scenario;
 };
 
-export type UploadScenarioResponse = unknown;
+export type UploadScenarioResponse = LessonRead;
 
 export type UploadScenarioError = HTTPValidationError;
 

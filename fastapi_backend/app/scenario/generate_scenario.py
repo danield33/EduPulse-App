@@ -75,61 +75,119 @@ def create_black_image(width=1280, height=720) -> str:
     Image.new("RGB", (width, height), color=(0, 0, 0)).save(tmp.name, "PNG")
     return tmp.name
 
-async def generate_scenario(scenario: Scenario):
+
+async def generate_scenario(scenario: Scenario, lesson_id: str):
     """
     Stitch each image+audio group in a scenario into separate video files.
+    Includes support for branch_options after the main script.
     Returns a list of paths to generated video segments.
     """
 
-    output_dir = f"{os.path.curdir}/uploaded_videos/lesson/{scenario.title.replace(' ', '_')}/"
+    output_dir = f"{os.path.curdir}/lessons/{lesson_id}/videos/"
     os.makedirs(output_dir, exist_ok=True)
 
+    # Trackers
     current_image_b64 = None
     current_audios = []
-    segment_paths = []
-    segment_index = 1
 
-    def flush_segment():
-        nonlocal segment_index
+    segment_paths = []
+    main_segment_index = 1  # independent numbering for main script
+    branch_segment_index = {}  # dict: branch_type -> counter
+
+    def get_branch_index(branch_type: str) -> int:
+        """Return and increment the index for this branch type."""
+        if branch_type not in branch_segment_index:
+            branch_segment_index[branch_type] = 1
+
+        idx = branch_segment_index[branch_type]
+        branch_segment_index[branch_type] += 1
+        return idx
+
+    def flush_segment(branch_type: Optional[str]):
+        nonlocal main_segment_index
+
         if not current_audios:
             return
 
-        # Use fallback image if none available
+        # Pick image
         if current_image_b64:
             img_path = decode_base64_to_file(current_image_b64, ".png")
         else:
             img_path = create_black_image()
 
+        # Combine audio
         audio_concat = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3").name
         concat_audio_files(current_audios, audio_concat)
 
-        seg_path = os.path.join(output_dir, f"segment_{segment_index:03d}.mp4")
+        # Filename
+        if branch_type:
+            idx = get_branch_index(branch_type)
+            filename = f"segment_{branch_type}_{idx:03d}.mp4"
+        else:
+            filename = f"segment_main_{main_segment_index:03d}.mp4"
+            main_segment_index += 1
+
+        seg_path = os.path.join(output_dir, filename)
+
+        # Make video
         make_video_segment(img_path, audio_concat, seg_path)
         segment_paths.append(seg_path)
-        segment_index += 1
 
-    for block in scenario.script:
-        # Breakpoints end the current segment
-        if block.breakpoint:
-            flush_segment()
-            current_audios.clear()
-            continue
+    # -------------------------------------------------
+    # Helper to process one DialogueLine-like structure
+    # -------------------------------------------------
+    async def process_dialogue(role, dialogue, image, branch_type: Optional[str]):
+        nonlocal current_image_b64, current_audios
 
-        # A new image starts a new segment
-        if block.image and block.image.base64:
+        # Image begins a new segment
+        if image and image.base64:
             if current_audios:
-                flush_segment()
+                flush_segment(branch_type)
                 current_audios.clear()
-            current_image_b64 = block.image.base64
+            current_image_b64 = image.base64
 
-        # Add dialogue audio if available
-        if block.dialogue:
-            b64_audio = await get_b64_audio(block)
+        # Generate speech
+        if dialogue:
+            dummy = ScriptBlock(dialogue=dialogue, image=image)
+            b64_audio = await get_b64_audio(dummy)
             audio_path = decode_base64_to_file(b64_audio, ".mp3")
             current_audios.append(audio_path)
 
-    # Flush any remaining lines into a final segment
-    flush_segment()
+    # -------------------------------------------------
+    # 1️⃣ Process MAIN SCRIPT
+    # -------------------------------------------------
+    for block in scenario.script:
+
+        await process_dialogue(block.role, block.dialogue, block.image, None)
+
+        # Breakpoint ends main segment
+        if block.breakpoint:
+            flush_segment(None)
+            current_audios.clear()
+            continue
+
+        # -------------------------------------------------
+        # 2️⃣ Process BRANCHES on this block
+        # -------------------------------------------------
+        if getattr(block, "branch_options", None):
+            for branch in block.branch_options:
+
+                for line in branch.dialogue:
+                    await process_dialogue(
+                        role=line.role,
+                        dialogue=line.dialogue,
+                        image=line.image,
+                        branch_type=branch.type
+                    )
+
+                # End of branch = flush independently
+                flush_segment(branch.type)
+                current_audios.clear()
+
+    # -------------------------------------------------
+    # 3️⃣ Flush trailing main content
+    # -------------------------------------------------
+    flush_segment(None)
 
     print(f"Created {len(segment_paths)} video segments in {output_dir}")
     return segment_paths

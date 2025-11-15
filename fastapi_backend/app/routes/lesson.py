@@ -70,15 +70,14 @@ async def create_lesson(lesson: LessonCreate, db: AsyncSession = Depends(get_db)
     await db.refresh(new_lesson)
     return new_lesson
 
-@router.post("/upload_scenario")
+@router.post("/upload_scenario", response_model=LessonRead)
 async def upload_scenario(scenario: Scenario,
                           db: AsyncSession = Depends(get_db),
                           user: User = Depends(current_active_user)):
-    # lesson = LessonCreate(title=scenario.title, user_id=user.id)
-    # lesson = await create_lesson(lesson, db)
 
-    # print("Uploaded script: ", scenario)
-    files = await generate_scenario(scenario)
+    new_lesson = await create_lesson(LessonCreate(title=scenario.title, user_id=user.id), db)
+    await generate_scenario(scenario, new_lesson.id)
+    return new_lesson
 
     return {"mp3_files": files}
 
