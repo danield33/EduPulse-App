@@ -80,19 +80,32 @@ export default async function DashboardPage({
             ) : (
               myLessons.items.map((item: LessonRead, index: any) => (
                 <TableRow key={index}>
-                  <Link href={"/watch-lesson/"+item.id} className="font-semibold mb-6 hover:underline hover:text-blue-500">
-                    <TableCell>{item.title}</TableCell>
-                  </Link>
-                  <TableCell className="text-center">{new Date(item.created_at).toDateString()}</TableCell>
+                  <TableCell>
+                    <Link
+                      href={"/watch-lesson/" + item.id}
+                      className="font-semibold hover:underline hover:text-blue-500"
+                    >
+                      {item.title}
+                    </Link>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {new Date(item.created_at).toDateString()}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {/* Watch count - placeholder */}
+                    0
+                  </TableCell>
                   <TableCell className="text-center">
                     <DropdownMenu>
                       <DropdownMenuTrigger className="cursor-pointer p-1 text-gray-600 hover:text-gray-800">
                         <span className="text-lg font-semibold">...</span>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent className="p-2">
-                        <DropdownMenuItem disabled={true}>
-                          Edit
-                        </DropdownMenuItem>
+                        <Link href={`/dashboard/new-lesson?lessonId=${item.id}`}>
+                          <DropdownMenuItem className="cursor-pointer">
+                            Edit
+                          </DropdownMenuItem>
+                        </Link>
                         <DeleteButton itemId={item.id} />
                       </DropdownMenuContent>
                     </DropdownMenu>
