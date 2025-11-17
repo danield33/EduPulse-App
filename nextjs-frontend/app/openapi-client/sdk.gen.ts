@@ -75,20 +75,21 @@ import type {
   UploadScenarioData,
   UploadScenarioError,
   UploadScenarioResponse,
-  AddVideoToLessonData,
-  AddVideoToLessonError,
-  AddVideoToLessonResponse,
+  UpdateLessonData,
+  UpdateLessonError,
+  UpdateLessonResponse,
   GetLessonData,
   GetLessonError,
   GetLessonResponse,
+  AddVideoToLessonData,
+  AddVideoToLessonError,
+  AddVideoToLessonResponse,
   GetVideoByIndexData,
   GetVideoByIndexError,
   GetVideoByIndexResponse,
   HasNextVideoData,
   HasNextVideoError,
   HasNextVideoResponse,
-  CreateTempLessonError,
-  CreateTempLessonResponse,
   GetLessonScenarioData,
   GetLessonScenarioError,
   GetLessonScenarioResponse,
@@ -499,18 +500,40 @@ export const uploadScenario = <ThrowOnError extends boolean = false>(
 };
 
 /**
- * Add Video To Lesson
+ * Update Lesson
+ * Update an existing lesson by replacing its scenario and regenerating all video segments.
+ *
+ * This endpoint:
+ * 1. Validates that the lesson exists and belongs to the current user
+ * 2. Deletes all existing video segments from disk
+ * 3. Updates the lesson title if changed
+ * 4. Regenerates all video segments based on the new scenario
+ * 5. Updates the scenario JSON in the database
+ *
+ * Args:
+ * lesson_id: UUID of the lesson to update
+ * scenario: New scenario structure with script blocks, breakpoints, and branch options
+ * db: Database session dependency
+ * user: Current authenticated user
+ *
+ * Returns:
+ * Updated lesson information
+ *
+ * Raises:
+ * 404: If lesson not found
+ * 403: If user doesn't own the lesson
+ * 500: If video generation or file deletion fails
  */
-export const addVideoToLesson = <ThrowOnError extends boolean = false>(
-  options: OptionsLegacyParser<AddVideoToLessonData, ThrowOnError>,
+export const updateLesson = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<UpdateLessonData, ThrowOnError>,
 ) => {
-  return (options?.client ?? client).post<
-    AddVideoToLessonResponse,
-    AddVideoToLessonError,
+  return (options?.client ?? client).put<
+    UpdateLessonResponse,
+    UpdateLessonError,
     ThrowOnError
   >({
     ...options,
-    url: "/lessons/{lesson_id}/add_video",
+    url: "/lessons/{lesson_id}",
   });
 };
 
@@ -527,6 +550,22 @@ export const getLesson = <ThrowOnError extends boolean = false>(
   >({
     ...options,
     url: "/lessons/{lesson_id}",
+  });
+};
+
+/**
+ * Add Video To Lesson
+ */
+export const addVideoToLesson = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<AddVideoToLessonData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<
+    AddVideoToLessonResponse,
+    AddVideoToLessonError,
+    ThrowOnError
+  >({
+    ...options,
+    url: "/lessons/{lesson_id}/add_video",
   });
 };
 
@@ -559,25 +598,6 @@ export const hasNextVideo = <ThrowOnError extends boolean = false>(
   >({
     ...options,
     url: "/lessons/{lesson_id}/video/{index}/has_next",
-  });
-};
-
-/**
- * Create Temp Lesson
- * Create a temporary lesson with 2 videos.
- * Video 1 will have a breakpoint, video 2 will not.
- * Uses existing APIs from videos.py and lesson.py.
- */
-export const createTempLesson = <ThrowOnError extends boolean = false>(
-  options?: OptionsLegacyParser<unknown, ThrowOnError>,
-) => {
-  return (options?.client ?? client).post<
-    CreateTempLessonResponse,
-    CreateTempLessonError,
-    ThrowOnError
-  >({
-    ...options,
-    url: "/lessons/{lesson_id}/temp_lesson",
   });
 };
 

@@ -449,16 +449,16 @@ export type UploadScenarioResponse = LessonRead;
 
 export type UploadScenarioError = HTTPValidationError;
 
-export type AddVideoToLessonData = {
-  body: LessonVideoAddResponse;
+export type UpdateLessonData = {
+  body: Scenario;
   path: {
     lesson_id: string;
   };
 };
 
-export type AddVideoToLessonResponse = LessonVideoAddResponse;
+export type UpdateLessonResponse = LessonRead;
 
-export type AddVideoToLessonError = HTTPValidationError;
+export type UpdateLessonError = HTTPValidationError;
 
 export type GetLessonData = {
   path: {
@@ -469,6 +469,17 @@ export type GetLessonData = {
 export type GetLessonResponse = LessonRead;
 
 export type GetLessonError = HTTPValidationError;
+
+export type AddVideoToLessonData = {
+  body: LessonVideoAddResponse;
+  path: {
+    lesson_id: string;
+  };
+};
+
+export type AddVideoToLessonResponse = LessonVideoAddResponse;
+
+export type AddVideoToLessonError = HTTPValidationError;
 
 export type GetVideoByIndexData = {
   path: {
@@ -493,10 +504,6 @@ export type HasNextVideoResponse = {
 };
 
 export type HasNextVideoError = HTTPValidationError;
-
-export type CreateTempLessonResponse = LessonRead;
-
-export type CreateTempLessonError = unknown;
 
 export type GetLessonScenarioData = {
   path: {

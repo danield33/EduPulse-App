@@ -1259,6 +1259,106 @@
         ]
       }
     },
+    "/lessons/{lesson_id}": {
+      "put": {
+        "tags": [
+          "lessons"
+        ],
+        "summary": "Update Lesson",
+        "description": "Update an existing lesson by replacing its scenario and regenerating all video segments.\n\nThis endpoint:\n1. Validates that the lesson exists and belongs to the current user\n2. Deletes all existing video segments from disk\n3. Updates the lesson title if changed\n4. Regenerates all video segments based on the new scenario\n5. Updates the scenario JSON in the database\n\nArgs:\n    lesson_id: UUID of the lesson to update\n    scenario: New scenario structure with script blocks, breakpoints, and branch options\n    db: Database session dependency\n    user: Current authenticated user\n\nReturns:\n    Updated lesson information\n\nRaises:\n    404: If lesson not found\n    403: If user doesn't own the lesson\n    500: If video generation or file deletion fails",
+        "operationId": "update_lesson",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "lesson_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Lesson Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Scenario"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LessonRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "lessons"
+        ],
+        "summary": "Get Lesson",
+        "operationId": "get_lesson",
+        "parameters": [
+          {
+            "name": "lesson_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Lesson Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LessonRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/lessons/{lesson_id}/add_video": {
       "post": {
         "tags": [
@@ -1295,49 +1395,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/LessonVideoAddResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/lessons/{lesson_id}": {
-      "get": {
-        "tags": [
-          "lessons"
-        ],
-        "summary": "Get Lesson",
-        "operationId": "get_lesson",
-        "parameters": [
-          {
-            "name": "lesson_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Lesson Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LessonRead"
                 }
               }
             }
@@ -1461,33 +1518,6 @@
             }
           }
         }
-      }
-    },
-    "/lessons/{lesson_id}/temp_lesson": {
-      "post": {
-        "tags": [
-          "lessons"
-        ],
-        "summary": "Create Temp Lesson",
-        "description": "Create a temporary lesson with 2 videos.\nVideo 1 will have a breakpoint, video 2 will not.\nUses existing APIs from videos.py and lesson.py.",
-        "operationId": "create_temp_lesson",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LessonRead"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ]
       }
     },
     "/lessons/{lesson_id}/scenario": {
