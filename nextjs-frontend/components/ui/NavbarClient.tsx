@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +17,7 @@ export function NavbarClient() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     // Check if user is logged in by looking for auth token
@@ -28,18 +29,34 @@ export function NavbarClient() {
 
     checkAuth();
 
-    // Listen for storage events
+    // Optional: Listen for storage events (login/logout in other tabs)
     window.addEventListener("storage", checkAuth);
-    return () => window.removeEventListener("storage", checkAuth);
-  }, []);
 
-  const handleLogout = () => {
+    // Listen for focus events (user returns to tab)
+    window.addEventListener("focus", checkAuth);
+
+    return () => {
+      window.removeEventListener("storage", checkAuth);
+      window.removeEventListener("focus", checkAuth);
+    };
+  }, [pathname]); // Re-check when pathname changes (after navigation)
+
+  const handleLogout = async () => {
     // Clear auth cookies
     document.cookie = "accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     document.cookie = "refreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 
     setIsLoggedIn(false);
-    router.push("/");
+
+    // Call server action for proper logout
+    try {
+      const { logout } = await import("@/components/actions/logout-action");
+      await logout();
+    } catch (error) {
+      console.error("Logout error:", error);
+    }finally{
+        router.push("/login");
+    }
   };
 
   // Show nothing while checking auth state

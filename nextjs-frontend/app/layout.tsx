@@ -29,11 +29,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} bg-gray-50`}>
 
-        {/* Navbar with client-side auth check */}
         <nav className="w-full sticky top-0 z-50 bg-gray-900 text-white">
           <div className="mx-auto max-w-6xl px-4 py-4 flex items-center justify-between">
 
-            {/* Brand */}
             <Link href="/" className="font-bold text-lg tracking-tight">
               <Image
                 src="/images/logo.svg"
@@ -44,7 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               />
             </Link>
 
-            {/* Right controls - Client component for auth state */}
+            {/* Right controls, client component for auth state */}
             <NavbarClient />
           </div>
         </nav>
