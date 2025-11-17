@@ -37,14 +37,27 @@ def make_video(image_path: str, audio_path: str, output_path: str) -> None:
         "-loop", "1",
         "-i", image_path,
         "-i", audio_path,
+
+        # Video
         "-c:v", "libx264",
+        "-preset", "ultrafast",  # massively boosts speed
         "-tune", "stillimage",
+        "-crf", "18",  # visually lossless for static images
+        "-r", "1",  # 1 FPS good for still image
+        "-pix_fmt", "yuv420p",
+        "-vsync", "0",
+
+        # Audio
         "-c:a", "aac",
         "-b:a", "192k",
+
+        # Duration
+        "-shortest",  # ensures video ends at audio
         "-t", str(duration),
-        "-pix_fmt", "yuv420p",
+
         output_path,
     ]
+
     subprocess.run(cmd, check=True)
 
 def stitch_base64_mp3s(base64_list: List[str], output_path: Optional[str] = None) -> str:

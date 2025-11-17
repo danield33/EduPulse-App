@@ -86,6 +86,108 @@ async def upload_scenario(scenario: Scenario,
 
     return new_lesson
 
+
+@router.put("/{lesson_id}", response_model=LessonRead)
+async def update_lesson(
+        lesson_id: UUID,
+        scenario: Scenario,
+        db: AsyncSession = Depends(get_db),
+        user: User = Depends(current_active_user)
+):
+    """
+    Update an existing lesson by replacing its scenario and regenerating all video segments.
+
+    This endpoint:
+    1. Validates that the lesson exists and belongs to the current user
+    2. Deletes all existing video segments from disk
+    3. Updates the lesson title if changed
+    4. Regenerates all video segments based on the new scenario
+    5. Updates the scenario JSON in the database
+
+    Args:
+        lesson_id: UUID of the lesson to update
+        scenario: New scenario structure with script blocks, breakpoints, and branch options
+        db: Database session dependency
+        user: Current authenticated user
+
+    Returns:
+        Updated lesson information
+
+    Raises:
+        404: If lesson not found
+        403: If user doesn't own the lesson
+        500: If video generation or file deletion fails
+    """
+    # 1. Check that the lesson exists and belongs to the user
+    lesson_result = await db.execute(
+        select(Lesson).where(Lesson.id == lesson_id)
+    )
+    lesson = lesson_result.scalar_one_or_none()
+
+    if not lesson:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Lesson not found: {lesson_id}"
+        )
+
+    # Verify ownership
+    if lesson.user_id != user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission to update this lesson"
+        )
+
+    # 2. Delete all existing video segments from disk
+    videos_dir = Path.cwd() / "lessons" / str(lesson_id) / "videos"
+
+    if videos_dir.exists():
+        try:
+            # Delete all video files in the directory
+            for video_file in videos_dir.glob("segment_*.mp4"):
+                video_file.unlink()
+                print(f"Deleted: {video_file}")
+
+            # Optionally delete the entire videos directory and recreate it
+            # shutil.rmtree(videos_dir)
+            # videos_dir.mkdir(parents=True, exist_ok=True)
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Error deleting existing video segments: {str(e)}"
+            )
+
+    # 3. Update the lesson title if it changed
+    if lesson.title != scenario.title:
+        lesson.title = scenario.title
+        await db.commit()
+        await db.refresh(lesson)
+
+    # 4. Regenerate all video segments using the new scenario
+    try:
+        video_paths = await generate_scenario(scenario, lesson_id)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error generating video segments: {str(e)}"
+        )
+
+    # 5. Update the scenario JSON in the database
+    # First, delete the old scenario record
+    old_scenario_result = await db.execute(
+        select(LessonScenarioDB).where(LessonScenarioDB.lesson_id == lesson_id)
+    )
+    old_scenario = old_scenario_result.scalar_one_or_none()
+
+    if old_scenario:
+        await db.delete(old_scenario)
+        await db.commit()
+
+    # Save the new scenario
+    await save_scenario_json(scenario=scenario, lesson_id=lesson_id, session=db)
+
+    return lesson
+
 async def save_scenario_json(scenario: Scenario, lesson_id: UUID, session: AsyncSession):
     record = LessonScenarioDB(
         lesson_id=lesson_id,
@@ -198,101 +300,6 @@ async def has_next_video(lesson_id: UUID, index: int, db: AsyncSession = Depends
     )
     next_exists = result.scalar_one_or_none() is not None
     return {"has_next": next_exists}
-
-@router.post("/{lesson_id}/temp_lesson", response_model=LessonRead)
-async def create_temp_lesson(
-    db: AsyncSession = Depends(get_db),
-    user: User = Depends(current_active_user),
-) -> LessonRead:
-    """
-    Create a temporary lesson with 2 videos.
-    Video 1 will have a breakpoint, video 2 will not.
-    Uses existing APIs from videos.py and lesson.py.
-    """
-    
-    # Create video 1 using generate_video
-    video1_request = VideoGenerateRequest(
-        audio=TTSRequest(
-            text="This is temporary video 1 for testing purposes.",
-            voice_description="neutral voice",
-            format="mp3"
-        ),
-        images=TTImageRequest(
-            prompt="A simple educational image",
-            n=1,
-            size="1024x1024"
-        ),
-        lesson_id="950abebd-0b01-4f4b-a5fd-1490c6561b12",  # This will be ignored since we create a new lesson
-        title="Temp Video 1"
-    )
-    video1 = await generate_video(video1_request, user, db)
-    
-    # Create video 2 using generate_video
-    video2_request = VideoGenerateRequest(
-        audio=TTSRequest(
-            text="This is temporary video 2 for testing purposes.",
-            voice_description="neutral voice",
-            format="mp3"
-        ),
-        images=TTImageRequest(
-            prompt="A simple educational image",
-            n=1,
-            size="1024x1024"
-        ),
-        lesson_id="950abebd-0b01-4f4b-a5fd-1490c6561b12",  # This will be ignored since we create a new lesson
-        title="Temp Video 2"
-    )
-    video2 = await generate_video(video2_request, user, db)
-    
-    # Create lesson using create_lesson (from this same file)
-    lesson_create = LessonCreate(
-        title="Temp Lesson",
-        user_id=user.id
-    )
-    lesson = await create_lesson(lesson_create, db)
-    
-    # Add video 1 with breakpoint
-    # Note: There's a type mismatch in add_video_to_lesson - it expects LessonVideoAddResponse
-    # but uses request.breakpoints. We'll work around this by directly creating the association.
-    lesson_video1 = LessonVideo(
-        lesson_id=lesson.id,
-        video_id=video1.id,
-        index=0,
-    )
-    db.add(lesson_video1)
-    await db.flush()  # Flush to get lesson_video1.id
-    
-    # Create breakpoint 1 for video 1
-    breakpoint1 = Breakpoint(
-        lesson_video_id=lesson_video1.id,
-        question="What is the main topic of this video?",
-        choices=["Topic A", "Topic B", "Topic C", "Topic D"],
-        correct_choice=0,
-    )
-    db.add(breakpoint1)
-    
-    # Create breakpoint 2 for video 1
-    breakpoint2 = Breakpoint(
-        lesson_video_id=lesson_video1.id,
-        question="What is a secondary topic in this video?",
-        choices=["Topic X", "Topic Y", "Topic Z", "Topic W"],
-        correct_choice=1,
-    )
-    db.add(breakpoint2)
-    
-    # Add video 2 without breakpoint
-    lesson_video2 = LessonVideo(
-        lesson_id=lesson.id,
-        video_id=video2.id,
-        index=1,
-    )
-    db.add(lesson_video2)
-    
-    # Commit all changes
-    await db.commit()
-    await db.refresh(lesson)
-
-    return lesson
 
 
 # Helper function to resolve segment file path

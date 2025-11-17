@@ -2,7 +2,7 @@
 
 import {MouseEvent, useState, useEffect} from "react";
 import {Button} from "@/components/ui/button";
-import {generateScriptFromPdf, uploadScenario, getLessonScenario} from "@/app/openapi-client";
+import {generateScriptFromPdf, uploadScenario, getLessonScenario, updateLesson} from "@/app/openapi-client";
 import DialogueEditor, {Scenario} from "@/components/ui/DialogueEditor";
 import {LoadingOverlay} from "@/components/ui/LoadingOverlay";
 import {prepareScenarioForBackend} from "@/lib/script-editor";
@@ -15,7 +15,7 @@ export default function CreateNewLessonPage() {
     const isEditMode = !!lessonId;
 
     const [scenario, setScenario] = useState<Scenario>();
-    const [generatingScript, setGeneratingScript] = useState<[boolean, string|null]>([false, null]);
+    const [generatingScript, setGeneratingScript] = useState<[boolean, string | null]>([false, null]);
     const [loadingExisting, setLoadingExisting] = useState(false);
 
     // Load existing lesson if in edit mode
@@ -35,9 +35,9 @@ export default function CreateNewLessonPage() {
                 baseURL: "http://localhost:8000"
             });
 
-            if (response.data && "scenario" in response.data) {
+            if (response.data && "scenario" in (response.data as any)) {
                 // response.data contains { lesson_id, title, scenario }
-                setScenario(response.data.scenario as Scenario);
+                setScenario((response.data as {scenario: Scenario}).scenario as Scenario);
             } else {
                 throw new Error("Invalid response format");
             }
@@ -114,24 +114,31 @@ export default function CreateNewLessonPage() {
         setGeneratingScript([true, actionMessage]);
         const finalScenario = await prepareScenarioForBackend(scenario);
 
+        console.log(finalScenario, 1)
         try {
             if (isEditMode && lessonId) {
-                // Update existing lesson
-                const response = await fetch(`http://localhost:8000/lessons/${lessonId}`, {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}`,
+                console.log(2)
+                // Update existing lesson using PUT endpoint
+                const response = await updateLesson({
+                    path: {
+                        lesson_id: lessonId
                     },
-                    body: JSON.stringify(finalScenario),
+                    body: finalScenario,
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                    baseURL: "http://localhost:8000"
                 });
 
-                if (!response.ok) {
-                    throw new Error("Failed to update lesson");
+                if (response.data) {
+                    alert("Lesson updated successfully!");
+                    // Optionally redirect back to dashboard
+                    window.location.href = "/watch-lesson/"+lessonId;
+                } else {
+                    throw new Error("Update failed - no data returned");
                 }
-
-                alert("Lesson updated successfully!");
             } else {
+                console.log(3)
                 // Create new lesson
                 const res = await uploadScenario({
                     body: finalScenario,
@@ -143,18 +150,21 @@ export default function CreateNewLessonPage() {
 
                 if (res.data) {
                     alert("Lesson created successfully!");
+                    // Optionally redirect to watch the lesson
+                    // window.location.href = `/watch-lesson/${res.data.id}`;
                 }
             }
         } catch (error) {
             console.error("Error saving lesson:", error);
-            alert(`Failed to ${isEditMode ? 'update' : 'create'} lesson`);
+            const errorMessage = error instanceof Error ? error.message : "Unknown error";
+            alert(`Failed to ${isEditMode ? 'update' : 'create'} lesson: ${errorMessage}`);
         } finally {
             setGeneratingScript([false, null]);
         }
     }
 
     if (loadingExisting) {
-        return <LoadingOverlay isLoading={true} message="Loading lesson..." />;
+        return <LoadingOverlay isLoading={true} message="Loading lesson..."/>;
     }
 
     return (
@@ -213,7 +223,8 @@ export default function CreateNewLessonPage() {
 
                                 <div className="flex gap-4 mb-6">
                                     {generatingScript[0] ?
-                                        <LoadingOverlay isLoading={generatingScript[0]} message={generatingScript[1] ?? ""}/>
+                                        <LoadingOverlay isLoading={generatingScript[0]}
+                                                        message={generatingScript[1] ?? ""}/>
                                         :
                                         <>
                                             <Button
