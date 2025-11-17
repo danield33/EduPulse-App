@@ -136,7 +136,6 @@ export default function CreateNewLessonPage() {
                     throw new Error("Update failed - no data returned");
                 }
             } else {
-                console.log(3)
                 // Create new lesson
                 const res = await uploadScenario({
                     body: finalScenario,
@@ -204,7 +203,6 @@ export default function CreateNewLessonPage() {
                                         }}
                                     />
 
-                                    {/* Custom clickable label */}
                                     <label
                                         htmlFor="script-upload"
                                         className="cursor-pointer px-6 py-3 mb-4 rounded-lg bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
