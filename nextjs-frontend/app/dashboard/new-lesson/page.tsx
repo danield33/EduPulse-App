@@ -37,7 +37,7 @@ export default function CreateNewLessonPage() {
 
             if (response.data && "scenario" in (response.data as any)) {
                 // response.data contains { lesson_id, title, scenario }
-                setScenario((response.data as {scenario: Scenario}).scenario as Scenario);
+                setScenario((response.data as { scenario: Scenario }).scenario as Scenario);
             } else {
                 throw new Error("Invalid response format");
             }
@@ -114,10 +114,8 @@ export default function CreateNewLessonPage() {
         setGeneratingScript([true, actionMessage]);
         const finalScenario = await prepareScenarioForBackend(scenario);
 
-        console.log(finalScenario, 1)
         try {
             if (isEditMode && lessonId) {
-                console.log(2)
                 // Update existing lesson using PUT endpoint
                 const response = await updateLesson({
                     path: {
@@ -132,8 +130,8 @@ export default function CreateNewLessonPage() {
 
                 if (response.data) {
                     alert("Lesson updated successfully!");
-                    // Optionally redirect back to dashboard
-                    window.location.href = "/watch-lesson/"+lessonId;
+                    // redirect back to dashboard
+                    window.location.href = "/watch-lesson/" + lessonId;
                 } else {
                     throw new Error("Update failed - no data returned");
                 }
@@ -150,8 +148,8 @@ export default function CreateNewLessonPage() {
 
                 if (res.data) {
                     alert("Lesson created successfully!");
-                    // Optionally redirect to watch the lesson
-                    // window.location.href = `/watch-lesson/${res.data.id}`;
+                    // redirect to watch the lesson
+                    window.location.href = `/watch-lesson/${res.data.id}`;
                 }
             }
         } catch (error) {
@@ -222,27 +220,21 @@ export default function CreateNewLessonPage() {
                                 </form>
 
                                 <div className="flex gap-4 mb-6">
-                                    {generatingScript[0] ?
-                                        <LoadingOverlay isLoading={generatingScript[0]}
-                                                        message={generatingScript[1] ?? ""}/>
-                                        :
-                                        <>
-                                            <Button
-                                                className={"rounded-xl bg-lime-400 text-black hover:bg-lime-500"}
-                                                type={"button"}
-                                                onClick={createScript}
-                                            >
-                                                {!!scenario ? "Regenerate from File" : "Generate from File"}
-                                            </Button>
-                                            <Button
-                                                className={"rounded-xl bg-blue-400 text-white hover:bg-blue-500"}
-                                                type={"button"}
-                                                onClick={startFromScratch}
-                                            >
-                                                Start from Scratch
-                                            </Button>
-                                        </>
-                                    }
+
+                                    <Button
+                                        className={"rounded-xl bg-lime-400 text-black hover:bg-lime-500"}
+                                        type={"button"}
+                                        onClick={createScript}
+                                    >
+                                        {!!scenario ? "Regenerate from File" : "Generate from File"}
+                                    </Button>
+                                    <Button
+                                        className={"rounded-xl bg-blue-400 text-white hover:bg-blue-500"}
+                                        type={"button"}
+                                        onClick={startFromScratch}
+                                    >
+                                        Start from Scratch
+                                    </Button>
                                 </div>
                             </>
                         )}
@@ -254,6 +246,11 @@ export default function CreateNewLessonPage() {
                                 generateScenario={generateLesson}
                             />
                         )}
+
+                        {generatingScript[0] && (
+                            <LoadingOverlay isLoading={generatingScript[0]}
+                                            message={generatingScript[1] ?? ""}/>)
+                        }
 
                     </div>
                 </section>

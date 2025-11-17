@@ -8,7 +8,7 @@ interface LoadingOverlayProps {
 
 export function LoadingOverlay({
                                            isLoading,
-                                           message = "Generating script...",
+                                           message = "Generating...",
                                        }: LoadingOverlayProps) {
     return (
         <AnimatePresence>
