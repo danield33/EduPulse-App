@@ -1,6 +1,5 @@
 "use client";
 
-// import { removeItem } from "@/components/actions/items-action";
 import {DropdownMenuItem} from "@/components/ui/dropdown-menu";
 
 interface DeleteButtonProps {
