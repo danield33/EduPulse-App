@@ -1,243 +1,258 @@
 "use client";
 
-import { getLesson, getVideoByIndex, hasNextVideo } from "@/app/clientService";
-import { notFound } from "next/navigation";
-import { useState, useEffect, use } from "react";
-import { getApiBaseUrl } from "@/lib/clientConfig";
-import type { LessonVideoRead } from "@/app/openapi-client/types.gen";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Card, CardContent } from "@/components/ui/card";
 
-export default function WatchLessonPage({params}: {params: Promise<{lesson_id: string}>}) {
+// OpenAPI client
+import { streamVideoSegment } from "@/app/openapi-client";
 
-    const {lesson_id} = use(params);
-    const [loading, setLoading] = useState(true);
-    const [lessonNotFound, setLessonNotFound] = useState<boolean>(false);
-    const [lessonVideoIndex, setLessonVideoIndex] = useState(0);
+// Local imports
+import { usePlaybackManager } from "../usePlaybackManager";
+import { BreakpointOverlay } from "../BreakpointOverlay";
 
-    const [videoId, setVideoId] = useState<string | null>(null);
-    const [videoData, setVideoData] = useState<LessonVideoRead | null>(null);
-    const [showQuestionDialog, setShowQuestionDialog] = useState(false);
-    const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
-    const [showResult, setShowResult] = useState(false);
-    const [currentBreakpointIndex, setCurrentBreakpointIndex] = useState(0);
-    const [answeredBreakpoints, setAnsweredBreakpoints] = useState<Set<number>>(new Set());
+export default function LessonVideoPlayer() {
+  const params = useParams();
+  const lessonId = params.lesson_id as string;
 
-    useEffect(() => {
-        const checkLesson = async () => {
-            const response = await getLesson({
-                path: {
-                    lesson_id: lesson_id
-                }
-            });
-            if (response.error) {
-                setLessonNotFound(true);
-            }
-            setLoading(false);
-        };
-        void checkLesson();
-    }, [lesson_id]);
+  const [videoUrl, setVideoUrl] = useState<string>("");
+  const [isLoadingVideo, setIsLoadingVideo] = useState(false);
+  const [videoError, setVideoError] = useState<string | null>(null);
 
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
-    useEffect(() => {
-        const getVideoId = async () => {
-            const response = await getVideoByIndex({
-            path: {
-                lesson_id: lesson_id,
-                index: lessonVideoIndex
-            }
+  // Callback to load a specific video segment
+  const loadVideoSegment = useCallback(
+    async (segmentNumber: number, segmentType?: string) => {
+      setIsLoadingVideo(true);
+      setVideoError(null);
+
+      try {
+        // Revoke previous URL to prevent memory leaks
+        if (videoUrl) {
+          URL.revokeObjectURL(videoUrl);
+        }
+
+        console.log(segmentNumber, segmentType, "QUERY")
+        const response = await streamVideoSegment({
+          path: {
+            lesson_id: lessonId,
+          },
+          query: {
+            segment_number: segmentNumber,
+            segment_type: segmentType,
+          },
+          baseURL: "http://localhost:8000",
+          responseType: "blob",
         });
-            if (response.error) {
-                notFound();
-            }
-            console.log(response);
-            setVideoId(response.data?.video_id);
-            setVideoData(response.data || null);
-            // Reset breakpoint state when video changes
-            setCurrentBreakpointIndex(0);
-            setAnsweredBreakpoints(new Set());
-            setShowQuestionDialog(false);
-            setSelectedAnswer(null);
-            setShowResult(false);
-        };
-        void getVideoId();
-    }, [lessonVideoIndex, lesson_id]);
 
-    const handleVideoEnd = async () => {
-        // If there are breakpoints, show the first one
-        if (videoData?.breakpoints && videoData.breakpoints.length > 0) {
-            setCurrentBreakpointIndex(0);
-            setShowQuestionDialog(true);
-            setSelectedAnswer(null);
-            setShowResult(false);
-        } else {
-            // No breakpoints, check if there's a next video and advance
-            await checkAndAdvanceToNextVideo();
+        const blob = (await response.data) as Blob;
+        const url = URL.createObjectURL(blob);
+
+        setVideoUrl(url);
+
+        // Auto-play the video when loaded
+        if (videoRef.current) {
+          videoRef.current.load();
+          // Attempt to play (may be blocked by browser autoplay policy)
+          videoRef.current.play().catch((err) => {
+            console.warn("Autoplay prevented:", err);
+          });
         }
-    };
-
-    // Construct the video stream URL
-    const videoStreamUrl = videoId 
-        ? `${getApiBaseUrl()}/videos/${videoId}/stream`
-        : null;
-
-    if (loading) {
-        return <div>Loading...</div>;
-    }
-
-    if (lessonNotFound) {
-        return <div>Lesson not found</div>;
-    }
-
-    const handleAnswerSelect = (choiceIndex: number) => {
-        setSelectedAnswer(choiceIndex);
-        setShowResult(true);
-        // Mark this breakpoint as answered
-        setAnsweredBreakpoints(prev => new Set(prev).add(currentBreakpointIndex));
-    };
-
-    const checkAndAdvanceToNextVideo = async () => {
-        const response = await hasNextVideo({
-            path: {
-                lesson_id: lesson_id,
-                index: lessonVideoIndex
-            }
-        });
-        
-        if (!response.error && response.data) {
-            // The response is {has_next: boolean} - access via bracket notation
-            const hasNext = (response.data as Record<string, boolean>)['has_next'] ?? false;
-            if (hasNext) {
-                // Advance to next video
-                setLessonVideoIndex(prev => prev + 1);
-            }
-        }
-    };
-
-    const handleCloseDialog = async () => {
-        setShowQuestionDialog(false);
-        setSelectedAnswer(null);
-        setShowResult(false);
-
-        // Check if all breakpoints have been answered
-        const allBreakpointsAnswered = videoData?.breakpoints 
-            ? videoData.breakpoints.every((_, index) => answeredBreakpoints.has(index))
-            : true;
-
-        if (allBreakpointsAnswered) {
-            // All questions answered, check if there's a next video and advance
-            await checkAndAdvanceToNextVideo();
-        } else {
-            // Move to next unanswered breakpoint
-            const nextBreakpointIndex = videoData?.breakpoints?.findIndex((_, index) => !answeredBreakpoints.has(index));
-            if (nextBreakpointIndex !== undefined && nextBreakpointIndex !== -1) {
-                setCurrentBreakpointIndex(nextBreakpointIndex);
-                setShowQuestionDialog(true);
-            } else {
-                // All breakpoints answered (shouldn't happen, but just in case)
-                await checkAndAdvanceToNextVideo();
-            }
-        }
-    };
-
-    // Get the current breakpoint based on currentBreakpointIndex
-    const currentBreakpoint = videoData?.breakpoints?.[currentBreakpointIndex] || null;
-
-    // If lesson is found and video is available, play the video
-    if (videoStreamUrl) {
-        return (
-            <div className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
-                <div className="w-full max-w-6xl">
-                    <video
-                        key={videoId}
-                        className="w-full rounded-lg shadow-lg"
-                        style={{ aspectRatio: "16 / 9" }}
-                        controls
-                        autoPlay
-                        onEnded={handleVideoEnd}
-                    >
-                        <source src={videoStreamUrl} type="video/mp4" />
-                        Your browser does not support the video tag.
-                    </video>
-                </div>
-
-                {/* Question Dialog Modal */}
-                {showQuestionDialog && currentBreakpoint && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
-                        <Card className="w-full max-w-2xl mx-4">
-                            <CardHeader>
-                                <CardTitle>Question</CardTitle>
-                                <CardDescription>{currentBreakpoint.question}</CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="space-y-2">
-                                    {currentBreakpoint.choices.map((choice, index) => {
-                                        const isSelected = selectedAnswer === index;
-                                        const isCorrect = index === currentBreakpoint.correct_choice;
-                                        let buttonVariant: "default" | "outline" | "secondary" | "destructive" = "outline";
-                                        
-                                        if (showResult) {
-                                            if (isCorrect) {
-                                                buttonVariant = "default";
-                                            } else if (isSelected && !isCorrect) {
-                                                buttonVariant = "destructive";
-                                            }
-                                        }
-
-                                        return (
-                                            <Button
-                                                key={index}
-                                                variant={buttonVariant}
-                                                className="w-full justify-start text-left h-auto py-3 px-4"
-                                                onClick={() => !showResult && handleAnswerSelect(index)}
-                                                disabled={showResult}
-                                            >
-                                                <span className="font-semibold mr-2">{String.fromCharCode(65 + index)}.</span>
-                                                <span>{choice}</span>
-                                                {showResult && isCorrect && (
-                                                    <span className="ml-auto">✓ Correct</span>
-                                                )}
-                                                {showResult && isSelected && !isCorrect && (
-                                                    <span className="ml-auto">✗ Incorrect</span>
-                                                )}
-                                            </Button>
-                                        );
-                                    })}
-                                </div>
-                                {showResult && (
-                                    <div className="pt-4 border-t">
-                                        <p className={`text-sm font-medium ${selectedAnswer === currentBreakpoint.correct_choice ? 'text-green-600' : 'text-red-600'}`}>
-                                            {selectedAnswer === currentBreakpoint.correct_choice
-                                                ? "Correct! Well done."
-                                                : `Incorrect. The correct answer is: ${currentBreakpoint.choices[currentBreakpoint.correct_choice]}`}
-                                        </p>
-                                    </div>
-                                )}
-                                <div className="flex justify-end pt-4">
-                                    <Button onClick={handleCloseDialog}>
-                                        {showResult ? (
-                                            (() => {
-                                                // Check if there are more unanswered questions
-                                                const allBreakpointsAnswered = videoData?.breakpoints 
-                                                    ? videoData.breakpoints.every((_, index) => answeredBreakpoints.has(index))
-                                                    : true;
-                                                
-                                                if (allBreakpointsAnswered) {
-                                                    return "Done";
-                                                } else {
-                                                    return "Next Question";
-                                                }
-                                            })()
-                                        ) : "Skip"}
-                                    </Button>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
-                )}
-            </div>
+      } catch (err) {
+        console.error("Error loading video segment:", err);
+        setVideoError(
+          err instanceof Error
+            ? err.message
+            : "Failed to load video segment"
         );
-    }
+      } finally {
+        setIsLoadingVideo(false);
+      }
+    },
+    [lessonId, videoUrl]
+  );
 
-    return <div>Loading video...</div>;
+  // Use the playback manager hook
+  const {
+    playbackState,
+    currentSegmentMetadata,
+    scenarioLoaded,
+    scenarioError,
+    handleVideoEnded,
+    handleBreakpointAnswer,
+    resetPlayback,
+  } = usePlaybackManager({
+    lessonId,
+    onSegmentChange: loadVideoSegment,
+  });
+
+  // Load initial video segment
+  useEffect(() => {
+    loadVideoSegment(
+      playbackState.currentSegmentNumber,
+      playbackState.currentSegmentType
+    );
+
+    // Cleanup on unmount
+    return () => {
+      if (videoUrl) {
+        URL.revokeObjectURL(videoUrl);
+      }
+    };
+    // Only run on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Handle scenario loading errors
+  if (scenarioError) {
+    return (
+      <div className="max-w-3xl mx-auto p-8">
+        <Alert variant="destructive">
+          <AlertTitle>Error Loading Lesson</AlertTitle>
+          <AlertDescription>{scenarioError}</AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  // Loading state
+  if (!scenarioLoaded) {
+    return (
+      <div className="max-w-3xl mx-auto p-8">
+        <div className="text-center py-12">
+          <div className="animate-pulse text-lg text-muted-foreground">
+            Loading lesson...
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto p-8 space-y-6">
+      <header>
+        <h1 className="text-3xl font-bold mb-2">Interactive Lesson</h1>
+        <p className="text-muted-foreground">
+          Lesson ID: {lessonId}
+        </p>
+      </header>
+
+      {/* Video Player Container */}
+      <div className="relative">
+        <Card>
+          <CardContent className="p-0">
+            <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
+              {isLoadingVideo && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-20">
+                  <div className="text-white text-lg">Loading segment...</div>
+                </div>
+              )}
+
+              {videoError && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black z-20">
+                  <Alert variant="destructive" className="max-w-md">
+                    <AlertTitle>Video Error</AlertTitle>
+                    <AlertDescription>{videoError}</AlertDescription>
+                  </Alert>
+                </div>
+              )}
+
+              {videoUrl && !videoError ? (
+                <video
+                  ref={videoRef}
+                  key={videoUrl}
+                  src={videoUrl}
+                  controls
+                  onEnded={handleVideoEnded}
+                  className="w-full h-full"
+                  autoPlay
+                />
+              ) : (
+                !isLoadingVideo &&
+                !videoError && (
+                  <div className="absolute inset-0 flex items-center justify-center text-white">
+                    No video loaded
+                  </div>
+                )
+              )}
+
+              {/* Breakpoint Overlay */}
+              {playbackState.isAtBreakpoint &&
+                playbackState.currentBreakpoint && (
+                  <BreakpointOverlay
+                    breakpoint={playbackState.currentBreakpoint}
+                    onAnswerSelected={handleBreakpointAnswer}
+                    showCorrectAnswer={true}
+                  />
+                )}
+
+              {/* Lesson Completed Overlay */}
+              {playbackState.hasEnded && (
+                <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-10">
+                  <Card className="max-w-md">
+                    <CardContent className="text-center py-8 space-y-4">
+                      <div className="text-4xl mb-4">🎉</div>
+                      <h2 className="text-2xl font-bold">Lesson Complete!</h2>
+                      <p className="text-muted-foreground">
+                        You've finished this lesson.
+                      </p>
+                      <Button onClick={resetPlayback} className="w-full">
+                        Restart Lesson
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Debug Info / Playback Status */}
+      <Card>
+        <CardContent className="py-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div>
+              <div className="text-muted-foreground">Segment</div>
+              <div className="font-semibold">
+                #{playbackState.currentSegmentNumber}
+              </div>
+            </div>
+            <div>
+              <div className="text-muted-foreground">Branch</div>
+              <div className="font-semibold">
+                {playbackState.currentSegmentType || "Main"}
+              </div>
+            </div>
+            <div>
+              <div className="text-muted-foreground">Status</div>
+              <div className="font-semibold">
+                {playbackState.isAtBreakpoint
+                  ? "At Breakpoint"
+                  : playbackState.hasEnded
+                  ? "Completed"
+                  : "Playing"}
+              </div>
+            </div>
+            <div>
+              <div className="text-muted-foreground">Block Index</div>
+              <div className="font-semibold">
+                {playbackState.scriptBlockIndex + 1}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Controls */}
+      <div className="flex gap-4">
+        <Button onClick={resetPlayback} variant="outline" className="flex-1">
+          Restart Lesson
+        </Button>
+      </div>
+    </div>
+  );
 }

@@ -1,10 +1,13 @@
-from typing import Literal, List
+from typing import Literal, List, Optional
+import os
+from pathlib import Path
 
 from app.models import Lesson, LessonVideo, Video, Breakpoint, User, LessonScenarioDB
 from app.schemas import LessonCreate, LessonRead, LessonVideoAddResponse, LessonVideoRead
 from uuid import UUID
 from app.database import get_async_session as get_db
 from fastapi import Depends, HTTPException, APIRouter, Query
+from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 from sqlalchemy import select
@@ -76,8 +79,11 @@ async def upload_scenario(scenario: Scenario,
                           user: User = Depends(current_active_user)):
 
     new_lesson = await create_lesson(LessonCreate(title=scenario.title, user_id=user.id), db)
-    await generate_scenario(scenario, new_lesson.id)
+    video_paths = await generate_scenario(scenario, new_lesson.id)
     await save_scenario_json(scenario=scenario, lesson_id=new_lesson.id, session=db)
+
+    LessonVideo(lesson_id=new_lesson.id, )
+
     return new_lesson
 
 async def save_scenario_json(scenario: Scenario, lesson_id: UUID, session: AsyncSession):
@@ -285,5 +291,228 @@ async def create_temp_lesson(
     # Commit all changes
     await db.commit()
     await db.refresh(lesson)
-    
+
     return lesson
+
+
+# Helper function to resolve segment file path
+def resolve_segment_file_path(
+    lesson_id: UUID,
+    segment_number: int,
+    segment_type: Optional[str] = None
+) -> str:
+    """
+    Resolve the video file path based on lesson_id, segment_number, and segment_type.
+
+    Args:
+        lesson_id: UUID of the lesson
+        segment_number: The segment number (1-indexed)
+        segment_type: The branch type (e.g., "option_A", "option_B") or None for main segments
+
+    Returns:
+        Absolute path to the video file
+
+    Raises:
+        HTTPException if the file doesn't exist
+    """
+    # Base directory for lesson videos
+    base_dir = Path.cwd() / "lessons" / str(lesson_id) / "videos"
+
+    # Construct filename based on segment type
+    if segment_type and segment_type != "main":
+        # Branch segment: segment_{branch_type}_{number:03d}.mp4
+        filename = f"segment_{segment_type}_{segment_number:03d}.mp4"
+    else:
+        # Main segment: segment_main_{number:03d}.mp4
+        filename = f"segment_main_{segment_number:03d}.mp4"
+
+    file_path = base_dir / filename
+
+    if not file_path.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Video file not found: {filename}"
+        )
+
+    return str(file_path)
+
+
+# Helper function to validate segment exists in scenario JSON
+async def validate_segment_in_scenario(
+    lesson_id: UUID,
+    segment_number: int,
+    segment_type: Optional[str],
+    db: AsyncSession
+) -> bool:
+    """
+    Validate that the requested segment exists in the lesson's scenario JSON.
+
+    Args:
+        lesson_id: UUID of the lesson
+        segment_number: The segment number to validate
+        segment_type: The branch type or None for main segments
+        db: Database session
+
+    Returns:
+        True if segment exists and is valid
+
+    Raises:
+        HTTPException if lesson or segment doesn't exist
+    """
+    # Query the scenario JSON from database
+    result = await db.execute(
+        select(LessonScenarioDB).where(LessonScenarioDB.lesson_id == lesson_id)
+    )
+    scenario_record = result.scalar_one_or_none()
+
+    if not scenario_record:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Lesson scenario not found for lesson_id: {lesson_id}"
+        )
+
+    # The scenario_json contains the full Scenario structure
+    # We validate that the segment_number is reasonable (>= 1)
+    # More detailed validation could be added based on the JSON structure
+    if segment_number < 1:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Segment number must be >= 1"
+        )
+
+    return True
+
+
+@router.get("/{lesson_id}/scenario")
+async def get_lesson_scenario(
+    lesson_id: UUID,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Fetch the complete lesson scenario JSON including all segments, branches, and breakpoints.
+
+    This endpoint returns the full scenario structure which the frontend can use to:
+    - Determine segment ordering
+    - Detect breakpoints
+    - Map branch options to segment types
+    - Display questions and answers
+
+    Args:
+        lesson_id: UUID of the lesson
+        db: Database session dependency
+
+    Returns:
+        The complete scenario JSON with script blocks, breakpoints, and branch options
+
+    Raises:
+        404: If lesson or scenario not found
+    """
+    # Check that the lesson exists
+    lesson_result = await db.execute(
+        select(Lesson).where(Lesson.id == lesson_id)
+    )
+    lesson = lesson_result.scalar_one_or_none()
+
+    if not lesson:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Lesson not found: {lesson_id}"
+        )
+
+    # Query the scenario JSON
+    result = await db.execute(
+        select(LessonScenarioDB).where(LessonScenarioDB.lesson_id == lesson_id)
+    )
+    scenario_record = result.scalar_one_or_none()
+
+    if not scenario_record:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Lesson scenario not found for lesson_id: {lesson_id}"
+        )
+
+    return {
+        "lesson_id": lesson_id,
+        "title": lesson.title,
+        "scenario": scenario_record.scenario_json
+    }
+
+
+@router.get("/{lesson_id}/segment")
+async def stream_video_segment(
+    lesson_id: UUID,
+    segment_number: int = Query(..., ge=1, description="The segment number (1-indexed)"),
+    segment_type: Optional[str] = Query(None, description="Branch type (e.g., 'option_A', 'option_B') or None for main segments"),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Stream a video segment for a lesson based on segment number and optional branch type.
+
+    This endpoint:
+    1. Validates the lesson exists in the database
+    2. Validates the segment exists in the lesson's scenario JSON
+    3. Resolves the video file path on disk
+    4. Streams the MP4 file to the client
+
+    Args:
+        lesson_id: UUID of the lesson
+        segment_number: The segment number to retrieve (1-indexed)
+        segment_type: Optional branch identifier (e.g., "option_A", "option_B")
+        db: Database session dependency
+
+    Returns:
+        StreamingResponse with the video file
+
+    Raises:
+        404: If lesson, segment, or video file not found
+        400: If segment_number is invalid
+
+    Example:
+        GET /lessons/{lesson_id}/segment?segment_number=1
+        GET /lessons/{lesson_id}/segment?segment_number=3&segment_type=option_A
+    """
+    # 1. Check that the lesson exists
+    lesson_result = await db.execute(
+        select(Lesson).where(Lesson.id == lesson_id)
+    )
+    lesson = lesson_result.scalar_one_or_none()
+
+    if not lesson:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Lesson not found: {lesson_id}"
+        )
+
+    # 2. Validate segment exists in scenario JSON
+    if segment_type:
+        segment_type = segment_type.replace(" ", "-")
+    else:
+        segment_type = "main"
+    await validate_segment_in_scenario(lesson_id, segment_number, segment_type, db)
+
+    # 3. Resolve the video file path
+    try:
+        video_path = resolve_segment_file_path(lesson_id, segment_number, segment_type)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error resolving video path: {str(e)}"
+        )
+
+    # 4. Stream the video file
+    def iterfile():
+        """Generator to stream the file in chunks."""
+        with open(video_path, mode="rb") as file_like:
+            while chunk := file_like.read(65536):  # 64KB chunks
+                yield chunk
+
+    return StreamingResponse(
+        iterfile(),
+        media_type="video/mp4",
+        headers={
+            "Content-Disposition": f"inline; filename=segment_{segment_number}.mp4",
+            "Accept-Ranges": "bytes"
+        }
+    )

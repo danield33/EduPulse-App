@@ -40,7 +40,6 @@ export default async function DashboardPage({
   const totalPages = Math.ceil((items.items.length || 0) / size);
 
 
-
   return (
     <div>
       <h2 className="text-2xl font-semibold mb-6">Welcome to your Dashboard</h2>
@@ -65,34 +64,48 @@ export default async function DashboardPage({
         <Table className="min-w-full text-sm">
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[120px]">Name</TableHead>
-              <TableHead>Description</TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Created At</TableHead>
               <TableHead className="text-center">Watch Count</TableHead>
               <TableHead className="text-center">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {!myLessons.length ? (
+            {!myLessons.items.length ? (
               <TableRow>
                 <TableCell colSpan={4} className="text-center">
                   No results.
                 </TableCell>
               </TableRow>
             ) : (
-              myLessons.map((item: LessonRead, index: any) => (
+              myLessons.items.map((item: LessonRead, index: any) => (
                 <TableRow key={index}>
-                  <TableCell>{item.title}</TableCell>
-                  {/*<TableCell>{item.}</TableCell>*/}
-                  <TableCell className="text-center">{item.created_at}</TableCell>
+                  <TableCell>
+                    <Link
+                      href={"/watch-lesson/" + item.id}
+                      className="font-semibold hover:underline hover:text-blue-500"
+                    >
+                      {item.title}
+                    </Link>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {new Date(item.created_at).toDateString()}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {/* Watch count - placeholder */}
+                    0
+                  </TableCell>
                   <TableCell className="text-center">
                     <DropdownMenu>
                       <DropdownMenuTrigger className="cursor-pointer p-1 text-gray-600 hover:text-gray-800">
                         <span className="text-lg font-semibold">...</span>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent className="p-2">
-                        <DropdownMenuItem disabled={true}>
-                          Edit
-                        </DropdownMenuItem>
+                        <Link href={`/dashboard/new-lesson?lessonId=${item.id}`}>
+                          <DropdownMenuItem className="cursor-pointer">
+                            Edit
+                          </DropdownMenuItem>
+                        </Link>
                         <DeleteButton itemId={item.id} />
                       </DropdownMenuContent>
                     </DropdownMenu>

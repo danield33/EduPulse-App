@@ -32,8 +32,8 @@ export default function DashboardLayout({
             className="flex items-center justify-center rounded-full"
           >
             <Image
-              src="/images/vinta.png"
-              alt="Vinta"
+              src="/images/favicon.svg"
+              alt="Edpulse logo"
               width={64}
               height={64}
               className="object-cover transition-transform duration-200 hover:scale-105"
@@ -45,12 +45,7 @@ export default function DashboardLayout({
           >
             <List className="h-5 w-5" />
           </Link>
-          <Link
-            href="/customers"
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
-          >
-            <Users2 className="h-5 w-5" />
-          </Link>
+          
         </div>
       </aside>
       <main className="ml-16 w-full p-8 bg-muted/40">

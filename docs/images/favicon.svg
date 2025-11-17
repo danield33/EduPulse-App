@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="260" height="260"
+     viewBox="0 0 260 260"
+     role="img" aria-labelledby="title desc">
+  <title id="title">EdPulse Favicon</title>
+  <desc id="desc">Square favicon with teal pulse waveform.</desc>
+
+  <!-- Background -->
+  <rect x="0" y="0" width="260" height="260" rx="28" fill="#E9F8FB"/>
+
+  <!-- Pulse waveform -->
+  <polyline
+    points="40,130 90,130 115,90 140,160 170,110 200,130 220,130"
+    fill="none"
+    stroke="#18A39A"
+    stroke-width="16"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>

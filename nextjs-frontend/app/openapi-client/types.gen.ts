@@ -498,6 +498,36 @@ export type CreateTempLessonResponse = LessonRead;
 
 export type CreateTempLessonError = unknown;
 
+export type GetLessonScenarioData = {
+  path: {
+    lesson_id: string;
+  };
+};
+
+export type GetLessonScenarioResponse = unknown;
+
+export type GetLessonScenarioError = HTTPValidationError;
+
+export type StreamVideoSegmentData = {
+  path: {
+    lesson_id: string;
+  };
+  query: {
+    /**
+     * The segment number (1-indexed)
+     */
+    segment_number: number;
+    /**
+     * Branch type (e.g., 'option_A', 'option_B') or None for main segments
+     */
+    segment_type?: string | null;
+  };
+};
+
+export type StreamVideoSegmentResponse = unknown;
+
+export type StreamVideoSegmentError = HTTPValidationError;
+
 export type GenerateScriptFromPdfData = {
   body: Body_genscript_generate_script_from_pdf;
 };

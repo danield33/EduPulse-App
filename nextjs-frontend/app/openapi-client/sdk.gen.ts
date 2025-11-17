@@ -89,6 +89,12 @@ import type {
   HasNextVideoResponse,
   CreateTempLessonError,
   CreateTempLessonResponse,
+  GetLessonScenarioData,
+  GetLessonScenarioError,
+  GetLessonScenarioResponse,
+  StreamVideoSegmentData,
+  StreamVideoSegmentError,
+  StreamVideoSegmentResponse,
   GenerateScriptFromPdfData,
   GenerateScriptFromPdfError,
   GenerateScriptFromPdfResponse,
@@ -572,6 +578,79 @@ export const createTempLesson = <ThrowOnError extends boolean = false>(
   >({
     ...options,
     url: "/lessons/{lesson_id}/temp_lesson",
+  });
+};
+
+/**
+ * Get Lesson Scenario
+ * Fetch the complete lesson scenario JSON including all segments, branches, and breakpoints.
+ *
+ * This endpoint returns the full scenario structure which the frontend can use to:
+ * - Determine segment ordering
+ * - Detect breakpoints
+ * - Map branch options to segment types
+ * - Display questions and answers
+ *
+ * Args:
+ * lesson_id: UUID of the lesson
+ * db: Database session dependency
+ *
+ * Returns:
+ * The complete scenario JSON with script blocks, breakpoints, and branch options
+ *
+ * Raises:
+ * 404: If lesson or scenario not found
+ */
+export const getLessonScenario = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<GetLessonScenarioData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<
+    GetLessonScenarioResponse,
+    GetLessonScenarioError,
+    ThrowOnError
+  >({
+    ...options,
+    url: "/lessons/{lesson_id}/scenario",
+  });
+};
+
+/**
+ * Stream Video Segment
+ * Stream a video segment for a lesson based on segment number and optional branch type.
+ *
+ * This endpoint:
+ * 1. Validates the lesson exists in the database
+ * 2. Validates the segment exists in the lesson's scenario JSON
+ * 3. Resolves the video file path on disk
+ * 4. Streams the MP4 file to the client
+ *
+ * Args:
+ * lesson_id: UUID of the lesson
+ * segment_number: The segment number to retrieve (1-indexed)
+ * segment_type: Optional branch identifier (e.g., "option_A", "option_B")
+ * db: Database session dependency
+ *
+ * Returns:
+ * StreamingResponse with the video file
+ *
+ * Raises:
+ * 404: If lesson, segment, or video file not found
+ * 400: If segment_number is invalid
+ *
+ * Example:
+ * GET /lessons/{lesson_id}/segment?segment_number=1
+ * GET /lessons/{lesson_id}/segment?segment_number=3&segment_type=option_A
+ */
+export const streamVideoSegment = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<StreamVideoSegmentData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<
+    StreamVideoSegmentResponse,
+    StreamVideoSegmentError,
+    ThrowOnError
+  >({
+    ...options,
+    url: "/lessons/{lesson_id}/segment",
   });
 };
 
