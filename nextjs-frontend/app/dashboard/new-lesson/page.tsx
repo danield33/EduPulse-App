@@ -2,7 +2,7 @@
 
 import {MouseEvent, useState, useEffect} from "react";
 import {Button} from "@/components/ui/button";
-import {generateScriptFromPdf, uploadScenario} from "@/app/openapi-client";
+import {generateScriptFromPdf, uploadScenario, getLessonScenario} from "@/app/openapi-client";
 import DialogueEditor, {Scenario} from "@/components/ui/DialogueEditor";
 import {LoadingOverlay} from "@/components/ui/LoadingOverlay";
 import {prepareScenarioForBackend} from "@/lib/script-editor";
@@ -28,17 +28,18 @@ export default function CreateNewLessonPage() {
     const loadExistingLesson = async (lessonId: string) => {
         setLoadingExisting(true);
         try {
-            const response = await fetch(`http://localhost:8000/lessons/${lessonId}/scenario`);
+            const response = await getLessonScenario({
+                path: {
+                    lesson_id: lessonId
+                },
+                baseURL: "http://localhost:8000"
+            });
 
-            if (!response.ok) {
-                throw new Error("Failed to load lesson");
-            }
-
-            const data = await response.json();
-
-            // data.scenario contains the scenario object
-            if (data.scenario) {
-                setScenario(data.scenario);
+            if (response.data && "scenario" in response.data) {
+                // response.data contains { lesson_id, title, scenario }
+                setScenario(response.data.scenario as Scenario);
+            } else {
+                throw new Error("Invalid response format");
             }
         } catch (error) {
             console.error("Error loading lesson:", error);
@@ -69,7 +70,6 @@ export default function CreateNewLessonPage() {
                 baseURL: "http://localhost:8000"
             });
 
-            console.log(res)
             if ("script" in (res.data as any)) {
                 const scenario = JSON.parse(((res.data as any).script));
                 setScenario(scenario);
@@ -237,7 +237,11 @@ export default function CreateNewLessonPage() {
                         )}
 
                         {scenario && (
-                            <DialogueEditor key={JSON.stringify(scenario)} scenario={scenario} generateScenario={generateLesson}/>
+                            <DialogueEditor
+                                key={JSON.stringify(scenario)}
+                                scenario={scenario}
+                                generateScenario={generateLesson}
+                            />
                         )}
 
                     </div>
