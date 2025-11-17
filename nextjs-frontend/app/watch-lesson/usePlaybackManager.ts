@@ -366,7 +366,7 @@ export function usePlaybackManager({
 
         if (segmentMap[targetBranch]) {
           const branchSegments = segmentMap[targetBranch];
-          console.log(`✓ Branching to ${targetBranch}, starting at segment 1`);
+          console.log(` Branching to ${targetBranch}, starting at segment 1`);
           console.log(`  Branch has ${branchSegments.length} segment(s):`, branchSegments.map(s => s.segmentNumber));
           console.log(`  Calling onSegmentChange(1, "${targetBranch}")`);
 
