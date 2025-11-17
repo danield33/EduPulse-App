@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
+import { NavbarClient } from "@/components/ui/NavbarClient";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -19,17 +19,17 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "Edpulse",
   description: "Generate AI tailored lessons",
-    icons: {
-      icon: 'images/favicon.svg'
-    }
+  icons: {
+    icon: 'images/favicon.svg'
+  }
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="bg-gray-50">
+      <body className={`${geistSans.variable} ${geistMono.variable} bg-gray-50`}>
 
-        {/* 👇 Your navbar goes here — now global */}
+        {/* Navbar with client-side auth check */}
         <nav className="w-full sticky top-0 z-50 bg-gray-900 text-white">
           <div className="mx-auto max-w-6xl px-4 py-4 flex items-center justify-between">
 
@@ -44,23 +44,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               />
             </Link>
 
-            {/* Right controls */}
-            <div className="flex items-center gap-3">
-              <Link href="/register">
-                <Button
-                  variant="outline"
-                  className="rounded-xl border-white text-white bg-transparent shadow-none hover:bg-gray-800/60 hover:text-white focus:ring-0"
-                >
-                  Sign up
-                </Button>
-              </Link>
-
-              <Link href="/login">
-                <Button className="rounded-xl bg-lime-400 text-black hover:bg-lime-500">
-                  Log in
-                </Button>
-              </Link>
-            </div>
+            {/* Right controls - Client component for auth state */}
+            <NavbarClient />
           </div>
         </nav>
 

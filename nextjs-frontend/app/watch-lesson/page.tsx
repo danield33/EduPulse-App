@@ -75,7 +75,7 @@ export default function WatchLesson() {
                                     </p>
                                 )}
                                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                                    You can find the lesson ID in the URL or from your dashboard
+                                    You can ask the owner of a lesson for an ID
                                 </p>
                             </div>
 
