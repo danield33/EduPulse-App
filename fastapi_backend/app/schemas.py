@@ -86,6 +86,9 @@ class LessonRead(LessonBase):
     class Config:
         from_attributes = True
 
+class LessonListResponse(BaseModel):
+    items: List[LessonRead]
+    total: int
 
 class LessonVideoAdd(BaseModel):
     video_id: UUID

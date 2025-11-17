@@ -4,7 +4,7 @@ from uuid import UUID
 
 from fastapi import Depends, HTTPException, APIRouter, Query
 from fastapi.responses import StreamingResponse
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from starlette import status
@@ -13,35 +13,36 @@ from app.database import get_async_session as get_db
 from app.models import Lesson, LessonVideo, Video, Breakpoint, User, LessonScenarioDB
 from app.scenario.generate_scenario import generate_scenario
 from app.schema_models.scenario import Scenario
-from app.schemas import LessonCreate, LessonRead, LessonVideoAddResponse, LessonVideoRead
+from app.schemas import LessonCreate, LessonRead, LessonVideoAddResponse, LessonVideoRead, LessonListResponse
 from app.users import current_active_user
 
 router = APIRouter(tags=["lessons"])
 
 
-@router.get("/my", response_model=List[LessonRead])
+@router.get("/my", response_model=LessonListResponse)
 async def get_my_lessons(
-        db: AsyncSession = Depends(get_db),
-        user: User = Depends(current_active_user),
-        sort_by: Literal["created_at", "title"] = Query(
-            "created_at", description="Sort lessons by 'created_at' or 'title'"
-        ),
-        order: Literal["asc", "desc"] = Query(
-            "desc", description="Sort order: 'asc' for ascending, 'desc' for descending"
-        ),
-        limit: int = Query(
-            20, ge=1, le=100, description="Number of lessons to return per page (1–100)"
-        ),
-        offset: int = Query(
-            0, ge=0, description="Number of lessons to skip for pagination"
-        ),
-) -> List[LessonRead]:
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(current_active_user),
+    sort_by: Literal["created_at", "title"] = Query(
+        "created_at", description="Sort lessons by 'created_at' or 'title'"
+    ),
+    order: Literal["asc", "desc"] = Query(
+        "desc", description="Sort order: ascending or descending"
+    ),
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+):
     """
-    Get all lessons belonging to the current signed-in user.
-    Supports sorting (by creation date or title) and pagination.
+    Get lessons for the current user with sorting & pagination.
+    Returns both paginated items and total count.
     """
 
-    # Base query
+    # Count total lessons for this user
+    total_query = select(func.count()).select_from(Lesson).where(Lesson.user_id == user.id)
+    total_result = await db.execute(total_query)
+    total = total_result.scalar() or 0
+
+    # Main query: fetch paginated items
     query = select(Lesson).where(Lesson.user_id == user.id)
 
     # Apply sorting
@@ -49,7 +50,7 @@ async def get_my_lessons(
         query = query.order_by(
             Lesson.created_at.asc() if order == "asc" else Lesson.created_at.desc()
         )
-    elif sort_by == "title":
+    else:
         query = query.order_by(
             Lesson.title.asc() if order == "asc" else Lesson.title.desc()
         )
@@ -57,11 +58,12 @@ async def get_my_lessons(
     # Apply pagination
     query = query.limit(limit).offset(offset)
 
-    # Execute query
+    # Execute
     result = await db.execute(query)
-    lessons = result.scalars().all()
+    items = result.scalars().all()
 
-    return lessons
+    # Return paginated response
+    return LessonListResponse(items=items, total=total)
 
 
 @router.post("/create", response_model=LessonRead)

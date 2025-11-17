@@ -6,7 +6,7 @@ import Link from "next/link";
 import {PageSizeSelector} from "@/components/page-size-selector";
 import {PagePagination} from "@/components/page-pagination";
 import {fetchMyLessons} from "@/components/actions/lesson-action";
-import {LessonRead} from "@/app/openapi-client";
+import {type GetMyLessonsResponse, LessonRead} from "@/app/openapi-client";
 
 interface DashboardPageProps {
     searchParams: Promise<{
@@ -19,14 +19,21 @@ export default async function DashboardPage({
                                                 searchParams,
                                             }: DashboardPageProps) {
     const params = await searchParams;
-    const myLessons = await fetchMyLessons();
 
     const page = Number(params.page) || 1;
     const size = Number(params.size) || 10;
 
-    const items = {items: [], total: 0}
-    const totalPages = Math.ceil((items.items.length || 0) / size);
+    const myLessons: {items: GetMyLessonsResponse} = await fetchMyLessons({
+        query: {
+            limit: size,
+            offset: page,
+            order: "desc",
+            sort_by: "created_at"
+        }
+    });
+    const totalPages = Math.ceil((myLessons.items.total) / size);
 
+    console.log(myLessons, 'mylessons')
 
     return (
         <div>
@@ -59,14 +66,14 @@ export default async function DashboardPage({
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {!myLessons.items.length ? (
+                        {!myLessons.items.items.length ? (
                             <TableRow>
                                 <TableCell colSpan={4} className="text-center">
                                     No results.
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            myLessons.items.map((item: LessonRead, index: any) => (
+                            myLessons.items.items.map((item: LessonRead, index: any) => (
                                 <TableRow key={index}>
                                     <TableCell>
                                         <Link
@@ -110,7 +117,7 @@ export default async function DashboardPage({
                     currentPage={page}
                     totalPages={totalPages}
                     pageSize={size}
-                    totalItems={items.items.length || 0}
+                    totalItems={myLessons.items.total || 0}
                     basePath="/dashboard"
                 />
             </section>

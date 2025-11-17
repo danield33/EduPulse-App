@@ -1076,7 +1076,7 @@
           "lessons"
         ],
         "summary": "Get My Lessons",
-        "description": "Get all lessons belonging to the current signed-in user.\nSupports sorting (by creation date or title) and pagination.",
+        "description": "Get lessons for the current user with sorting & pagination.\nReturns both paginated items and total count.",
         "operationId": "get_my_lessons",
         "security": [
           {
@@ -1110,11 +1110,11 @@
                 "desc"
               ],
               "type": "string",
-              "description": "Sort order: 'asc' for ascending, 'desc' for descending",
+              "description": "Sort order: ascending or descending",
               "default": "desc",
               "title": "Order"
             },
-            "description": "Sort order: 'asc' for ascending, 'desc' for descending"
+            "description": "Sort order: ascending or descending"
           },
           {
             "name": "limit",
@@ -1124,11 +1124,9 @@
               "type": "integer",
               "maximum": 100,
               "minimum": 1,
-              "description": "Number of lessons to return per page (1\u2013100)",
               "default": 20,
               "title": "Limit"
-            },
-            "description": "Number of lessons to return per page (1\u2013100)"
+            }
           },
           {
             "name": "offset",
@@ -1137,11 +1135,9 @@
             "schema": {
               "type": "integer",
               "minimum": 0,
-              "description": "Number of lessons to skip for pagination",
               "default": 0,
               "title": "Offset"
-            },
-            "description": "Number of lessons to skip for pagination"
+            }
           }
         ],
         "responses": {
@@ -1150,11 +1146,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/LessonRead"
-                  },
-                  "title": "Response Lessons-Get My Lessons"
+                  "$ref": "#/components/schemas/LessonListResponse"
                 }
               }
             }
@@ -2029,6 +2021,27 @@
           "user_id"
         ],
         "title": "LessonCreate"
+      },
+      "LessonListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/LessonRead"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "LessonListResponse"
       },
       "LessonRead": {
         "properties": {

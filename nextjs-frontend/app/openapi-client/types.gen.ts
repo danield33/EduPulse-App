@@ -88,6 +88,11 @@ export type LessonCreate = {
   user_id: string;
 };
 
+export type LessonListResponse = {
+  items: Array<LessonRead>;
+  total: number;
+};
+
 export type LessonRead = {
   /**
    * Lesson title
@@ -410,16 +415,10 @@ export type GenerateImageError = HTTPValidationError;
 
 export type GetMyLessonsData = {
   query?: {
-    /**
-     * Number of lessons to return per page (1–100)
-     */
     limit?: number;
-    /**
-     * Number of lessons to skip for pagination
-     */
     offset?: number;
     /**
-     * Sort order: 'asc' for ascending, 'desc' for descending
+     * Sort order: ascending or descending
      */
     order?: "asc" | "desc";
     /**
@@ -429,7 +428,7 @@ export type GetMyLessonsData = {
   };
 };
 
-export type GetMyLessonsResponse = Array<LessonRead>;
+export type GetMyLessonsResponse = LessonListResponse;
 
 export type GetMyLessonsError = HTTPValidationError;
 

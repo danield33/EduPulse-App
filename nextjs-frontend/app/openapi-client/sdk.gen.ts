@@ -451,8 +451,8 @@ export const generateImage = <ThrowOnError extends boolean = false>(
 
 /**
  * Get My Lessons
- * Get all lessons belonging to the current signed-in user.
- * Supports sorting (by creation date or title) and pagination.
+ * Get lessons for the current user with sorting & pagination.
+ * Returns both paginated items and total count.
  */
 export const getMyLessons = <ThrowOnError extends boolean = false>(
   options?: OptionsLegacyParser<GetMyLessonsData, ThrowOnError>,
