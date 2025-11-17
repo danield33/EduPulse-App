@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 export default function Home() {
 
@@ -15,7 +16,13 @@ export default function Home() {
         <div className="mx-auto max-w-6xl px-4 py-4 flex items-center justify-between">
           {/* Brand */}
           <Link href="/" className="font-bold text-lg tracking-tight">
-            EduPulse
+            <Image
+              src="/images/logo.svg"
+              alt="Edpulse logo"
+              width={128}
+              height={128}
+              className="object-cover transition-transform duration-200 hover:scale-105 bg-gray-300 rounded"
+            />
           </Link>
 
           {/* Right controls */}
@@ -44,7 +51,7 @@ export default function Home() {
 
         {/* ROLE-BASED SECTION */}
         <section className="mt-12 w-full max-w-3xl rounded-2xl bg-white dark:bg-gray-800 shadow p-6">
-              <h2 className="text-2xl font-semibold mb-3">Welcome to Edupulse!</h2>
+              <h2 className="text-2xl font-semibold mb-3">Welcome to Edpulse!</h2>
               <p className="text-gray-600 dark:text-gray-300 mb-4">
                 We're an AI lesson video creation tool. Learn from curated lessons designed for students by educators.
                 To start creating lessons, log in or sign up to get started!
