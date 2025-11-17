@@ -1,128 +1,131 @@
-"use client";
+"use client"
 
 import { useState } from "react";
-import Link from "next/link";
-import { FaGithub } from "react-icons/fa";
-
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-    DropdownMenu,
-    DropdownMenuTrigger,
-    DropdownMenuContent,
-    DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { useRouter } from "next/navigation";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PlayCircle } from "lucide-react";
 
-export default function Home() {
-    // 🔹 role toggle
-    const [role, setRole] = useState<"student" | "instructor">("student");
+export default function WatchLesson() {
+    const [lessonId, setLessonId] = useState("");
+    const [error, setError] = useState("");
+    const router = useRouter();
 
-    // 🔹 lessons state (used for instructor uploads)
-    const [lessons, setLessons] = useState<any[]>([]);
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        
+        if (!lessonId.trim()) {
+            setError("Please enter a lesson ID");
+            return;
+        }
+
+        // Basic UUID validation
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        if (!uuidRegex.test(lessonId.trim())) {
+            setError("Please enter a valid lesson ID (UUID format)");
+            return;
+        }
+
+        router.push(`/watch-lesson/${lessonId.trim()}`);
+    };
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setLessonId(e.target.value);
+        if (error) setError(""); // Clear err when onType
+    };
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-            {/* NAVBAR */}
-
-            {/* MAIN */}
-            <main className="flex flex-col items-center justify-center px-8 py-14">
-
-                {/* ROLE-BASED SECTION */}
-                <section className="mt-12 w-full max-w-3xl rounded-2xl bg-white dark:bg-gray-800 shadow p-6">
-                    {role === "student" ? (
-                        <>
-                            <h2 className="text-2xl font-semibold mb-3">🎓 Student Video</h2>
-                            <p className="text-gray-600 dark:text-gray-300 mb-4">
-                                Learn from curated lessons designed for students.
-                            </p>
-                            <video controls className="w-full rounded-lg">
-                                <source src="/videos/student-lesson.mp4" type="video/mp4" />
-                            </video>
-                        </>
-                    ) : (
-                        <>
-                            <h2 className="text-2xl font-semibold mb-3">🧑‍🏫 Instructor Dashboard</h2>
-                            <p className="text-gray-600 dark:text-gray-300 mb-6">
-                                Upload a teaching script and let AI generate a learning course.
-                            </p>
-
-                            {/* Upload script form */}
-
-                            <form
-                                className="mb-6 flex flex-col items-center justify-center border-2 border-dashed border-gray-400 dark:border-gray-600 rounded-lg p-8 bg-gray-100 dark:bg-gray-800"
-                                onSubmit={async (e) => {
-                                    e.preventDefault();
-                                    const fileInput = document.getElementById("script-upload") as HTMLInputElement;
-                                    if (!fileInput?.files?.length) return;
-
-                                    const formData = new FormData();
-                                    formData.append("file", fileInput.files[0]);
-
-                                    const res = await fetch("/api/generate-lessons", {
-                                        method: "POST",
-                                        body: formData,
-                                    });
-
-                                    const data = await res.json();
-                                    setLessons(data.lessons || []);
-                                }}
-                            >
-                                {/* Hidden native input */}
-                                <input
-                                    id="script-upload"
-                                    type="file"
-                                    accept=".txt,.pdf"
-                                    className="hidden"
-                                    onChange={(e) => {
-                                        const label = document.getElementById("file-label");
-                                        if (label && e.target.files?.[0]) {
-                                            label.textContent = e.target.files[0].name;
-                                        }
-                                    }}
-                                />
-
-                                {/* Custom clickable label */}
-                                <label
-                                    htmlFor="script-upload"
-                                    className="cursor-pointer px-6 py-3 mb-4 rounded-lg bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+            <main className="flex flex-col items-center justify-center px-8 py-14 min-h-screen">
+                <Card className="w-full max-w-2xl">
+                    <CardHeader className="text-center">
+                        <div className="flex justify-center mb-4">
+                            <PlayCircle className="h-16 w-16 text-blue-500" />
+                        </div>
+                        <CardTitle className="text-3xl font-bold">
+                            Watch a Lesson
+                        </CardTitle>
+                        <CardDescription className="text-lg mt-2">
+                            Enter a lesson ID to start watching
+                        </CardDescription>
+                    </CardHeader>
+                    
+                    <CardContent>
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div className="space-y-2">
+                                <label 
+                                    htmlFor="lesson-id" 
+                                    className="text-sm font-medium text-gray-700 dark:text-gray-300"
                                 >
-                                    Choose File
+                                    Lesson ID
                                 </label>
-
-                                {/* File name placeholder */}
-                                <p id="file-label" className="text-sm text-gray-500 mb-4">
-                                    No file selected
+                                <Input
+                                    id="lesson-id"
+                                    type="text"
+                                    placeholder="e.g., 123e4567-e89b-12d3-a456-426614174000"
+                                    value={lessonId}
+                                    onChange={handleInputChange}
+                                    className={`w-full ${error ? 'border-red-500' : ''}`}
+                                    autoFocus
+                                />
+                                {error && (
+                                    <p className="text-sm text-red-500 mt-1">
+                                        {error}
+                                    </p>
+                                )}
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    You can find the lesson ID in the URL or from your dashboard
                                 </p>
+                            </div>
 
-                            </form>
+                            <Button 
+                                type="submit" 
+                                className="w-full bg-blue-500 hover:bg-blue-600 text-white"
+                                size="lg"
+                            >
+                                Watch Lesson
+                            </Button>
+                        </form>
 
+                        {/*Quick access */}
+                        <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+                            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                                Quick Access
+                            </h3>
+                            <div className="space-y-2">
+                                <Button
+                                    variant="outline"
+                                    className="w-full justify-start"
+                                    onClick={() => router.push("/dashboard")}
+                                >
+                                    <PlayCircle className="h-4 w-4 mr-2" />
+                                    View My Lessons
+                                </Button>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
 
-                            {/* Generated Lessons */}
-                            {lessons.length > 0 && (
-                                <div className="mt-6 w-full max-w-2xl">
-                                    <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
-                                        Generated Lesson Plan
-                                    </h3>
-                                    <ul className="space-y-3">
-                                        {lessons.map((lesson, idx) => (
-                                            <li
-                                                key={idx}
-                                                className="p-4 border rounded-lg shadow bg-white dark:bg-gray-700"
-                                            >
-                                                <h4 className="font-bold text-gray-800 dark:text-white">
-                                                    {lesson.title || `Lesson ${idx + 1}`}
-                                                </h4>
-                                                <p className="text-gray-600 dark:text-gray-300">
-                                                    {lesson.description}
-                                                </p>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
-                        </>
-                    )}
-                </section>
+                {/* Info */}
+                <div className="mt-8 text-center max-w-2xl">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Don't have a lesson ID?{" "}
+                        <a 
+                            href="/dashboard/new-lesson" 
+                            className="text-blue-500 hover:text-blue-600 underline"
+                        >
+                            Create a new lesson
+                        </a>
+                        {" "}or{" "}
+                        <a 
+                            href="/dashboard" 
+                            className="text-blue-500 hover:text-blue-600 underline"
+                        >
+                            browse your lessons
+                        </a>
+                    </p>
+                </div>
             </main>
         </div>
     );
