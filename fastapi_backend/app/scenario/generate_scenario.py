@@ -52,7 +52,7 @@ def concat_audio_files(audio_files: List[str], output_path: str):
     concat_file.close()
     cmd = [
         "ffmpeg", "-y", "-f", "concat", "-safe", "0",
-        "-i", concat_file.name, "-c", "copy", output_path
+        "-i", concat_file.name, "-c:a", "copy", output_path
     ]
     subprocess.run(cmd, check=True)
     os.remove(concat_file.name)

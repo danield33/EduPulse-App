@@ -103,9 +103,7 @@ def stitch_base64_mp3s(base64_list: List[str], output_path: Optional[str] = None
             "-f", "concat",
             "-safe", "0",
             "-i", list_path,
-            "-acodec", "libmp3lame",
-            "-ar", "44100",
-            "-b:a", "192k",
+            "-c:a", "copy",
             output_path
         ]
 
