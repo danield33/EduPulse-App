@@ -33,7 +33,6 @@ export default async function DashboardPage({
     });
     const totalPages = Math.ceil((myLessons.items.total) / size);
 
-    console.log(myLessons, 'mylessons')
 
     return (
         <div>
