@@ -1,42 +1,40 @@
-from typing import Literal, List, Optional
-import os
 from pathlib import Path
-
-from app.models import Lesson, LessonVideo, Video, Breakpoint, User, LessonScenarioDB
-from app.schemas import LessonCreate, LessonRead, LessonVideoAddResponse, LessonVideoRead
+from typing import Literal, List, Optional
 from uuid import UUID
-from app.database import get_async_session as get_db
+
 from fastapi import Depends, HTTPException, APIRouter, Query
 from fastapi.responses import StreamingResponse
-from sqlalchemy.ext.asyncio import AsyncSession
-from starlette import status
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-from app.users import current_active_user
-from app.routes.videos import generate_video, VideoGenerateRequest
-from app.routes.tts import TTSRequest
-from app.routes.ttimage import TTImageRequest
-from app.schema_models.scenario import Scenario
+from starlette import status
+
+from app.database import get_async_session as get_db
+from app.models import Lesson, LessonVideo, Video, Breakpoint, User, LessonScenarioDB
 from app.scenario.generate_scenario import generate_scenario
+from app.schema_models.scenario import Scenario
+from app.schemas import LessonCreate, LessonRead, LessonVideoAddResponse, LessonVideoRead
+from app.users import current_active_user
 
 router = APIRouter(tags=["lessons"])
 
+
 @router.get("/my", response_model=List[LessonRead])
 async def get_my_lessons(
-    db: AsyncSession = Depends(get_db),
-    user: User = Depends(current_active_user),
-    sort_by: Literal["created_at", "title"] = Query(
-        "created_at", description="Sort lessons by 'created_at' or 'title'"
-    ),
-    order: Literal["asc", "desc"] = Query(
-        "desc", description="Sort order: 'asc' for ascending, 'desc' for descending"
-    ),
-    limit: int = Query(
-        20, ge=1, le=100, description="Number of lessons to return per page (1–100)"
-    ),
-    offset: int = Query(
-        0, ge=0, description="Number of lessons to skip for pagination"
-    ),
+        db: AsyncSession = Depends(get_db),
+        user: User = Depends(current_active_user),
+        sort_by: Literal["created_at", "title"] = Query(
+            "created_at", description="Sort lessons by 'created_at' or 'title'"
+        ),
+        order: Literal["asc", "desc"] = Query(
+            "desc", description="Sort order: 'asc' for ascending, 'desc' for descending"
+        ),
+        limit: int = Query(
+            20, ge=1, le=100, description="Number of lessons to return per page (1–100)"
+        ),
+        offset: int = Query(
+            0, ge=0, description="Number of lessons to skip for pagination"
+        ),
 ) -> List[LessonRead]:
     """
     Get all lessons belonging to the current signed-in user.
@@ -65,6 +63,7 @@ async def get_my_lessons(
 
     return lessons
 
+
 @router.post("/create", response_model=LessonRead)
 async def create_lesson(lesson: LessonCreate, db: AsyncSession = Depends(get_db)) -> LessonRead:
     new_lesson = Lesson(title=lesson.title, user_id=lesson.user_id)
@@ -73,11 +72,11 @@ async def create_lesson(lesson: LessonCreate, db: AsyncSession = Depends(get_db)
     await db.refresh(new_lesson)
     return new_lesson
 
+
 @router.post("/upload_scenario", response_model=LessonRead)
 async def upload_scenario(scenario: Scenario,
                           db: AsyncSession = Depends(get_db),
                           user: User = Depends(current_active_user)):
-
     new_lesson = await create_lesson(LessonCreate(title=scenario.title, user_id=user.id), db)
     video_paths = await generate_scenario(scenario, new_lesson.id)
     await save_scenario_json(scenario=scenario, lesson_id=new_lesson.id, session=db)
@@ -188,6 +187,7 @@ async def update_lesson(
 
     return lesson
 
+
 async def save_scenario_json(scenario: Scenario, lesson_id: UUID, session: AsyncSession):
     record = LessonScenarioDB(
         lesson_id=lesson_id,
@@ -197,11 +197,12 @@ async def save_scenario_json(scenario: Scenario, lesson_id: UUID, session: Async
     await session.commit()
     return record.id
 
+
 @router.post("/{lesson_id}/add_video", response_model=LessonVideoAddResponse)
 async def add_video_to_lesson(
-    lesson_id: UUID,
-    request: LessonVideoAddResponse,
-    db: AsyncSession = Depends(get_db)
+        lesson_id: UUID,
+        request: LessonVideoAddResponse,
+        db: AsyncSession = Depends(get_db)
 ) -> LessonVideoAddResponse:
     # Check that the lesson exists
     lesson_result = await db.execute(select(Lesson).where(Lesson.id == lesson_id))
@@ -265,6 +266,7 @@ async def add_video_to_lesson(
         "index": request.index
     }
 
+
 @router.get("/{lesson_id}", response_model=LessonRead)
 async def get_lesson(lesson_id: UUID, db: AsyncSession = Depends(get_db)) -> LessonRead:
     result = await db.execute(select(Lesson).where(Lesson.id == lesson_id))
@@ -304,9 +306,9 @@ async def has_next_video(lesson_id: UUID, index: int, db: AsyncSession = Depends
 
 # Helper function to resolve segment file path
 def resolve_segment_file_path(
-    lesson_id: UUID,
-    segment_number: int,
-    segment_type: Optional[str] = None
+        lesson_id: UUID,
+        segment_number: int,
+        segment_type: Optional[str] = None
 ) -> str:
     """
     Resolve the video file path based on lesson_id, segment_number, and segment_type.
@@ -346,10 +348,10 @@ def resolve_segment_file_path(
 
 # Helper function to validate segment exists in scenario JSON
 async def validate_segment_in_scenario(
-    lesson_id: UUID,
-    segment_number: int,
-    segment_type: Optional[str],
-    db: AsyncSession
+        lesson_id: UUID,
+        segment_number: int,
+        segment_type: Optional[str],
+        db: AsyncSession
 ) -> bool:
     """
     Validate that the requested segment exists in the lesson's scenario JSON.
@@ -392,8 +394,8 @@ async def validate_segment_in_scenario(
 
 @router.get("/{lesson_id}/scenario")
 async def get_lesson_scenario(
-    lesson_id: UUID,
-    db: AsyncSession = Depends(get_db)
+        lesson_id: UUID,
+        db: AsyncSession = Depends(get_db)
 ):
     """
     Fetch the complete lesson scenario JSON including all segments, branches, and breakpoints.
@@ -447,10 +449,11 @@ async def get_lesson_scenario(
 
 @router.get("/{lesson_id}/segment")
 async def stream_video_segment(
-    lesson_id: UUID,
-    segment_number: int = Query(..., ge=1, description="The segment number (1-indexed)"),
-    segment_type: Optional[str] = Query(None, description="Branch type (e.g., 'option_A', 'option_B') or None for main segments"),
-    db: AsyncSession = Depends(get_db)
+        lesson_id: UUID,
+        segment_number: int = Query(..., ge=1, description="The segment number (1-indexed)"),
+        segment_type: Optional[str] = Query(None,
+                                            description="Branch type (e.g., 'option_A', 'option_B') or None for main segments"),
+        db: AsyncSession = Depends(get_db)
 ):
     """
     Stream a video segment for a lesson based on segment number and optional branch type.

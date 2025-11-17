@@ -1,13 +1,17 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException
+import io
+import os
+
 from PyPDF2 import PdfReader
+from fastapi import APIRouter, UploadFile, File, HTTPException
 from openai import OpenAI
 from pydantic import BaseModel
-import io, os
+
 from app.script_system_prompt import build_prompt;
 
 router = APIRouter(tags=["genscript"])
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
 
 class ScriptIn(BaseModel):
     content: str
@@ -17,7 +21,6 @@ def extract_pdf_text(pdf_bytes: bytes) -> str:
     reader = PdfReader(io.BytesIO(pdf_bytes))
     chunks = [page.extract_text() or "" for page in reader.pages]
     return "\n\n".join(chunks).strip()
-
 
 
 @router.post("/from_pdf")

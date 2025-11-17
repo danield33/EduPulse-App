@@ -12,7 +12,6 @@ from app.users import current_active_user
 router = APIRouter(tags=["tts"])
 
 
-
 class TTSRequest(BaseModel):
     text: str = Field(..., description="Text to synthesize into speech")
     voice_description: str = Field(
@@ -35,10 +34,9 @@ class TTSResponse(BaseModel):
 
 @router.post("/synthesize", response_model=TTSResponse)
 async def synthesize_speech(
-    request: TTSRequest,
-    user: User = Depends(current_active_user),
+        request: TTSRequest,
+        user: User = Depends(current_active_user),
 ) -> TTSResponse:
-
     """
     Generate speech from text using Hume.ai TTS API.
 
@@ -74,8 +72,8 @@ def synthesize_with_hume(request: TTSRequest) -> TTSResponse:
         version="1"
     )
 
-    return  TTSResponse(
-                audio_url=result.generations[0].audio,
-                format=request.format,
-                message="Speech synthesized successfully. Audio available via URL.",
-            )
+    return TTSResponse(
+        audio_url=result.generations[0].audio,
+        format=request.format,
+        message="Speech synthesized successfully. Audio available via URL.",
+    )

@@ -1,9 +1,8 @@
+import base64
+import os
 import re
 import subprocess
-import base64
 import tempfile
-import subprocess
-import os
 from typing import List, Optional
 
 from PIL import Image
@@ -59,6 +58,7 @@ def make_video(image_path: str, audio_path: str, output_path: str) -> None:
     ]
 
     subprocess.run(cmd, check=True)
+
 
 def stitch_base64_mp3s(base64_list: List[str], output_path: Optional[str] = None) -> str:
     """

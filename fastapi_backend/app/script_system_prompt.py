@@ -1,6 +1,6 @@
-
 def build_prompt(scenario_text):
     return SYSTEM_PROMPT.replace("{PDF_TEXT}", scenario_text)
+
 
 SYSTEM_PROMPT = """
 You are EduPulse, an AI lesson designer for education.

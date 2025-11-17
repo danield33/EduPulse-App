@@ -9,7 +9,6 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from .config import settings
 from .models import Base, User
 
-
 parsed_db_url = urlparse(settings.DATABASE_URL)
 
 async_db_connection_url = (
@@ -36,5 +35,6 @@ async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
         yield session
 
 
-async def get_user_db(session: AsyncSession = Depends(get_async_session)) -> AsyncGenerator[SQLAlchemyUserDatabase, None]:
+async def get_user_db(session: AsyncSession = Depends(get_async_session)) -> AsyncGenerator[
+    SQLAlchemyUserDatabase, None]:
     yield SQLAlchemyUserDatabase(session, User)

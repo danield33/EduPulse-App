@@ -5,18 +5,18 @@ import tempfile
 from typing import List, Optional
 
 from PIL import Image
-from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.ffmpeg_cmds import make_video
+from app.routes.tts import synthesize_with_hume, TTSRequest
 from app.schema_models.scenario import Scenario
 from app.schema_models.scenario import ScriptBlock
-from app.ffmpeg_cmds import stitch_base64_mp3s, make_video
-from app.routes.tts import synthesize_with_hume, TTSRequest
 
 
 async def get_b64_audio(block: ScriptBlock):
     tts_request = TTSRequest(text=block.dialogue, voice_description="A deep lumberjack voice.")
     response = synthesize_with_hume(tts_request)
     return response.audio_url
+
 
 def decode_base64_to_file(data_b64: str, suffix: Optional[str] = None) -> str:
     """Write base64 data to a temporary file and return its path, detecting image/audio type if possible."""
@@ -26,13 +26,13 @@ def decode_base64_to_file(data_b64: str, suffix: Optional[str] = None) -> str:
 
     # Auto-detect format
     header = data_b64[:10]
-    if header.startswith("/9j/"):          # JPEG
+    if header.startswith("/9j/"):  # JPEG
         suffix = suffix or ".jpg"
-    elif header.startswith("iVBORw0K"):    # PNG
+    elif header.startswith("iVBORw0K"):  # PNG
         suffix = suffix or ".png"
-    elif header.startswith("UklGR"):       # WEBP
+    elif header.startswith("UklGR"):  # WEBP
         suffix = suffix or ".webp"
-    elif header.startswith("//uUx"):       # MP3
+    elif header.startswith("//uUx"):  # MP3
         suffix = suffix or ".mp3"
     else:
         # Fallbacks
@@ -56,6 +56,7 @@ def concat_audio_files(audio_files: List[str], output_path: str):
     ]
     subprocess.run(cmd, check=True)
     os.remove(concat_file.name)
+
 
 def make_video_segment(image_path: str, audio_path: str, output_path: str):
     make_video(image_path, audio_path, output_path)

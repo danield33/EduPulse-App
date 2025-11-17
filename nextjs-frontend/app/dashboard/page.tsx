@@ -1,130 +1,119 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  TableHeader,
-} from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
-import { DeleteButton } from "./deleteButton";
-import { Button } from "@/components/ui/button";
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@/components/ui/table";
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,} from "@/components/ui/dropdown-menu";
+import {DeleteButton} from "./deleteButton";
+import {Button} from "@/components/ui/button";
 import Link from "next/link";
-import { PageSizeSelector } from "@/components/page-size-selector";
-import { PagePagination } from "@/components/page-pagination";
+import {PageSizeSelector} from "@/components/page-size-selector";
+import {PagePagination} from "@/components/page-pagination";
 import {fetchMyLessons} from "@/components/actions/lesson-action";
 import {LessonRead} from "@/app/openapi-client";
 
 interface DashboardPageProps {
-  searchParams: Promise<{
-    page?: string;
-    size?: string;
-  }>;
+    searchParams: Promise<{
+        page?: string;
+        size?: string;
+    }>;
 }
 
 export default async function DashboardPage({
-  searchParams,
-}: DashboardPageProps) {
-  const params = await searchParams;
-  const myLessons = await fetchMyLessons();
+                                                searchParams,
+                                            }: DashboardPageProps) {
+    const params = await searchParams;
+    const myLessons = await fetchMyLessons();
 
-  const page = Number(params.page) || 1;
-  const size = Number(params.size) || 10;
+    const page = Number(params.page) || 1;
+    const size = Number(params.size) || 10;
 
-  const items = {items: [], total: 0}
-  const totalPages = Math.ceil((items.items.length || 0) / size);
+    const items = {items: [], total: 0}
+    const totalPages = Math.ceil((items.items.length || 0) / size);
 
 
-  return (
-    <div>
-      <h2 className="text-2xl font-semibold mb-6">Welcome to your Dashboard</h2>
-      <p className="text-lg mb-6">
-        Here, you can see your lessons and manage them.
-      </p>
+    return (
+        <div>
+            <h2 className="text-2xl font-semibold mb-6">Welcome to your Dashboard</h2>
+            <p className="text-lg mb-6">
+                Here, you can see your lessons and manage them.
+            </p>
 
-      <div className="mb-6">
-        <Link href="/dashboard/new-lesson">
-          <Button variant="outline" className="text-lg px-4 py-2">
-            + Create New Lesson!
-          </Button>
-        </Link>
-      </div>
+            <div className="mb-6">
+                <Link href="/dashboard/new-lesson">
+                    <Button variant="outline" className="text-lg px-4 py-2">
+                        + Create New Lesson!
+                    </Button>
+                </Link>
+            </div>
 
-      <section className="p-6 bg-white rounded-lg shadow-lg mt-8">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">Lessons</h2>
-          <PageSizeSelector currentSize={size} />
+            <section className="p-6 bg-white rounded-lg shadow-lg mt-8">
+                <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-semibold">Lessons</h2>
+                    <PageSizeSelector currentSize={size}/>
+                </div>
+
+                <Table className="min-w-full text-sm">
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Name</TableHead>
+                            <TableHead>Created At</TableHead>
+                            <TableHead className="text-center">Watch Count</TableHead>
+                            <TableHead className="text-center">Actions</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {!myLessons.items.length ? (
+                            <TableRow>
+                                <TableCell colSpan={4} className="text-center">
+                                    No results.
+                                </TableCell>
+                            </TableRow>
+                        ) : (
+                            myLessons.items.map((item: LessonRead, index: any) => (
+                                <TableRow key={index}>
+                                    <TableCell>
+                                        <Link
+                                            href={"/watch-lesson/" + item.id}
+                                            className="font-semibold hover:underline hover:text-blue-500"
+                                        >
+                                            {item.title}
+                                        </Link>
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        {new Date(item.created_at).toDateString()}
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        {/* Watch count - placeholder */}
+                                        0
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger
+                                                className="cursor-pointer p-1 text-gray-600 hover:text-gray-800">
+                                                <span className="text-lg font-semibold">...</span>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent className="p-2">
+                                                <Link href={`/dashboard/new-lesson?lessonId=${item.id}`}>
+                                                    <DropdownMenuItem className="cursor-pointer">
+                                                        Edit
+                                                    </DropdownMenuItem>
+                                                </Link>
+                                                <DeleteButton itemId={item.id}/>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        )}
+                    </TableBody>
+                </Table>
+
+                {/* Pagination Controls */}
+                <PagePagination
+                    currentPage={page}
+                    totalPages={totalPages}
+                    pageSize={size}
+                    totalItems={items.items.length || 0}
+                    basePath="/dashboard"
+                />
+            </section>
         </div>
-
-        <Table className="min-w-full text-sm">
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Created At</TableHead>
-              <TableHead className="text-center">Watch Count</TableHead>
-              <TableHead className="text-center">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {!myLessons.items.length ? (
-              <TableRow>
-                <TableCell colSpan={4} className="text-center">
-                  No results.
-                </TableCell>
-              </TableRow>
-            ) : (
-              myLessons.items.map((item: LessonRead, index: any) => (
-                <TableRow key={index}>
-                  <TableCell>
-                    <Link
-                      href={"/watch-lesson/" + item.id}
-                      className="font-semibold hover:underline hover:text-blue-500"
-                    >
-                      {item.title}
-                    </Link>
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {new Date(item.created_at).toDateString()}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {/* Watch count - placeholder */}
-                    0
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger className="cursor-pointer p-1 text-gray-600 hover:text-gray-800">
-                        <span className="text-lg font-semibold">...</span>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className="p-2">
-                        <Link href={`/dashboard/new-lesson?lessonId=${item.id}`}>
-                          <DropdownMenuItem className="cursor-pointer">
-                            Edit
-                          </DropdownMenuItem>
-                        </Link>
-                        <DeleteButton itemId={item.id} />
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-
-        {/* Pagination Controls */}
-        <PagePagination
-          currentPage={page}
-          totalPages={totalPages}
-          pageSize={size}
-          totalItems={items.items.length || 0}
-          basePath="/dashboard"
-        />
-      </section>
-    </div>
-  );
+    );
 }

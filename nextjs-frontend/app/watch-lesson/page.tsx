@@ -1,11 +1,11 @@
 "use client"
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useRouter } from "next/navigation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlayCircle } from "lucide-react";
+import {useState} from "react";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {useRouter} from "next/navigation";
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
+import {PlayCircle} from "lucide-react";
 
 export default function WatchLesson() {
     const [lessonId, setLessonId] = useState("");
@@ -14,7 +14,7 @@ export default function WatchLesson() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (!lessonId.trim()) {
             setError("Please enter a lesson ID");
             return;
@@ -41,7 +41,7 @@ export default function WatchLesson() {
                 <Card className="w-full max-w-2xl">
                     <CardHeader className="text-center">
                         <div className="flex justify-center mb-4">
-                            <PlayCircle className="h-16 w-16 text-blue-500" />
+                            <PlayCircle className="h-16 w-16 text-blue-500"/>
                         </div>
                         <CardTitle className="text-3xl font-bold">
                             Watch a Lesson
@@ -50,12 +50,12 @@ export default function WatchLesson() {
                             Enter a lesson ID to start watching
                         </CardDescription>
                     </CardHeader>
-                    
+
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="space-y-2">
-                                <label 
-                                    htmlFor="lesson-id" 
+                                <label
+                                    htmlFor="lesson-id"
                                     className="text-sm font-medium text-gray-700 dark:text-gray-300"
                                 >
                                     Lesson ID
@@ -79,8 +79,8 @@ export default function WatchLesson() {
                                 </p>
                             </div>
 
-                            <Button 
-                                type="submit" 
+                            <Button
+                                type="submit"
                                 className="w-full bg-blue-500 hover:bg-blue-600 text-white"
                                 size="lg"
                             >
@@ -99,7 +99,7 @@ export default function WatchLesson() {
                                     className="w-full justify-start"
                                     onClick={() => router.push("/dashboard")}
                                 >
-                                    <PlayCircle className="h-4 w-4 mr-2" />
+                                    <PlayCircle className="h-4 w-4 mr-2"/>
                                     View My Lessons
                                 </Button>
                             </div>
@@ -111,15 +111,15 @@ export default function WatchLesson() {
                 <div className="mt-8 text-center max-w-2xl">
                     <p className="text-sm text-gray-600 dark:text-gray-400">
                         Don't have a lesson ID?{" "}
-                        <a 
-                            href="/dashboard/new-lesson" 
+                        <a
+                            href="/dashboard/new-lesson"
                             className="text-blue-500 hover:text-blue-600 underline"
                         >
                             Create a new lesson
                         </a>
                         {" "}or{" "}
-                        <a 
-                            href="/dashboard" 
+                        <a
+                            href="/dashboard"
                             className="text-blue-500 hover:text-blue-600 underline"
                         >
                             browse your lessons

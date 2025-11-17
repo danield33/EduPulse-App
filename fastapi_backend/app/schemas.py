@@ -3,10 +3,10 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 from typing import List, Optional
+from uuid import UUID
 
 from fastapi_users import schemas
 from pydantic import BaseModel, Field
-from uuid import UUID
 
 
 class UserRead(schemas.BaseUser[uuid.UUID]):
@@ -37,6 +37,7 @@ class VideoRead(VideoBase):
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
 
 class Breakpoint(BaseModel):
     question: str
@@ -92,6 +93,7 @@ class LessonVideoAdd(BaseModel):
     breakpoints: Optional[List[Breakpoint]] = None
 
     model_config = {"from_attributes": True}
+
 
 class LessonVideoAddResponse(BaseModel):
     lesson_id: UUID

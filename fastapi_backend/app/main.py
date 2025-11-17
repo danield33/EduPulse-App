@@ -1,16 +1,16 @@
 from fastapi import FastAPI
-from fastapi_pagination import add_pagination
-from .schemas import UserCreate, UserRead, UserUpdate
-from .users import auth_backend, fastapi_users, AUTH_URL_PATH
 from fastapi.middleware.cors import CORSMiddleware
-from .utils import simple_generate_unique_route_id
-from app.routes.videos import router as videos_router
-from app.routes.tts import router as tts_router
-from app.routes.ttimage import router as ttimage_router
-from app.routes.lesson import router as lesson_router
-from app.routes.generate_script import router as script_router
+from fastapi_pagination import add_pagination
 
 from app.config import settings
+from app.routes.generate_script import router as script_router
+from app.routes.lesson import router as lesson_router
+from app.routes.ttimage import router as ttimage_router
+from app.routes.tts import router as tts_router
+from app.routes.videos import router as videos_router
+from .schemas import UserCreate, UserRead, UserUpdate
+from .users import auth_backend, fastapi_users, AUTH_URL_PATH
+from .utils import simple_generate_unique_route_id
 
 app = FastAPI(
     generate_unique_id_function=simple_generate_unique_route_id,

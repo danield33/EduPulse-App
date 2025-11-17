@@ -1,10 +1,11 @@
-
-from fastapi import APIRouter, HTTPException, Response, Depends
-from pydantic import BaseModel, Field
 import os
+
 import requests
+from fastapi import APIRouter, HTTPException, Depends
+from pydantic import BaseModel, Field
+
+from app.database import User
 from app.users import current_active_user
-from app.database import User, get_async_session
 
 router = APIRouter(tags=["ttimage"])
 
@@ -20,8 +21,10 @@ class TTImageRequest(BaseModel):
         pattern="^(1024x1024|512x512|256x256)$",
     )
 
+
 class TTImageResponse(BaseModel):
     image_url: str
+
 
 @router.post("/generateImage", response_model=TTImageResponse)
 async def generate_image(request: TTImageRequest, user: User = Depends(current_active_user)) -> TTImageResponse:
@@ -83,5 +86,3 @@ async def generate_image(request: TTImageRequest, user: User = Depends(current_a
             status_code=500,
             detail=f"Unexpected error during image generation: {str(e)}",
         )
-
-

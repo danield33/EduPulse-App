@@ -1,4 +1,5 @@
 from typing import List, Optional
+
 from pydantic import BaseModel
 
 
@@ -36,7 +37,6 @@ class ScriptBlock(BaseModel):
     branch_options: Optional[List[BranchOption]] = None
     image: Optional[ImageData] = None
     breakpoint: Optional[BreakpointQuestion] = None
-
 
 
 class Scenario(BaseModel):

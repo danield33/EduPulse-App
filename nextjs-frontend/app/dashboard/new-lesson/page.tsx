@@ -1,8 +1,8 @@
 "use client"
 
-import {MouseEvent, useState, useEffect} from "react";
+import {MouseEvent, useEffect, useState} from "react";
 import {Button} from "@/components/ui/button";
-import {generateScriptFromPdf, uploadScenario, getLessonScenario, updateLesson} from "@/app/openapi-client";
+import {generateScriptFromPdf, getLessonScenario, updateLesson, uploadScenario} from "@/app/openapi-client";
 import DialogueEditor, {Scenario} from "@/components/ui/DialogueEditor";
 import {LoadingOverlay} from "@/components/ui/LoadingOverlay";
 import {prepareScenarioForBackend} from "@/lib/script-editor";

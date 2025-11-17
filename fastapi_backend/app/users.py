@@ -1,6 +1,5 @@
-import uuid
 import re
-
+import uuid
 from typing import Optional, AsyncGenerator
 
 from fastapi import Depends, Request
@@ -10,7 +9,6 @@ from fastapi_users import (
     UUIDIDMixin,
     InvalidPasswordException,
 )
-
 from fastapi_users.authentication import (
     AuthenticationBackend,
     BearerTransport,
@@ -35,19 +33,19 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
         print(f"User {user.id} has registered.")
 
     async def on_after_forgot_password(
-        self, user: User, token: str, request: Optional[Request] = None
+            self, user: User, token: str, request: Optional[Request] = None
     ):
         await send_reset_password_email(user, token)
 
     async def on_after_request_verify(
-        self, user: User, token: str, request: Optional[Request] = None
+            self, user: User, token: str, request: Optional[Request] = None
     ):
         print(f"Verification requested for user {user.id}. Verification token: {token}")
 
     async def validate_password(
-        self,
-        password: str,
-        user: UserCreate,
+            self,
+            password: str,
+            user: UserCreate,
     ) -> None:
         errors = []
 
