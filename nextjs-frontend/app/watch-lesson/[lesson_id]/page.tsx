@@ -6,10 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 
-// OpenAPI client
 import { streamVideoSegment } from "@/app/openapi-client";
 
-// Local imports
 import { usePlaybackManager } from "../usePlaybackManager";
 import { BreakpointOverlay } from "../BreakpointOverlay";
 

@@ -23,47 +23,6 @@ export default function Home() {
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
             {/* NAVBAR */}
-            <nav className="w-full sticky top-0 z-50 bg-gray-900 text-white">
-                <div className="mx-auto max-w-6xl px-4 py-4 flex items-center justify-between">
-                    {/* Brand */}
-                    <Link href="/" className="font-bold text-lg tracking-tight">
-                        EduPulse
-                    </Link>
-
-                    {/* Right controls */}
-                    <div className="flex items-center gap-3">
-                        {/* Role dropdown */}
-                        <DropdownMenu>
-                            <DropdownMenuTrigger className="rounded-xl bg-gray-800 px-4 py-2 text-sm font-semibold hover:bg-gray-700 focus:outline-none">
-                                {role === "student" ? "Students ▾" : "Instructors ▾"}
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent className="rounded-xl">
-                                <DropdownMenuItem onClick={() => setRole("student")}>
-                                    🎓 Students
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => setRole("instructor")}>
-                                    🧑‍🏫 Instructors
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-
-                        {/* Auth buttons */}
-                        <Link href="/register">
-                            <Button
-                                variant="outline"
-                                className="rounded-xl border-white text-white bg-transparent shadow-none hover:bg-gray-800/60 hover:text-white focus:ring-0"
-                            >
-                                Sign up
-                            </Button>
-                        </Link>
-                        <Link href="/login">
-                            <Button className="rounded-xl bg-lime-400 text-black hover:bg-lime-500">
-                                Log in
-                            </Button>
-                        </Link>
-                    </div>
-                </div>
-            </nav>
 
             {/* MAIN */}
             <main className="flex flex-col items-center justify-center px-8 py-14">

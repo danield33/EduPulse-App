@@ -335,7 +335,7 @@ export function usePlaybackManager({
         onSegmentChange(nextMainSegment.segmentNumber, undefined);
         return;
       } else {
-        console.log("✗ No more main segments after branch. Lesson complete.");
+        console.log("* No more main segments after branch. Lesson complete.");
       }
     }
 
@@ -366,9 +366,9 @@ export function usePlaybackManager({
 
         if (segmentMap[targetBranch]) {
           const branchSegments = segmentMap[targetBranch];
-          console.log(` Branching to ${targetBranch}, starting at segment 1`);
-          console.log(`  Branch has ${branchSegments.length} segment(s):`, branchSegments.map(s => s.segmentNumber));
-          console.log(`  Calling onSegmentChange(1, "${targetBranch}")`);
+          console.log(`Branching to ${targetBranch}, starting at segment 1`);
+          console.log(`Branch has ${branchSegments.length} segment(s):`, branchSegments.map(s => s.segmentNumber));
+          console.log(`Calling onSegmentChange(1, "${targetBranch}")`);
 
           setPlaybackState((prev) => ({
             ...prev,
