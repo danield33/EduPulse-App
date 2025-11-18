@@ -2,14 +2,16 @@ import {useMemo, useState} from "react";
 import DialogueBox from "@/components/ui/DialogueBox";
 import {Card} from "@/components/ui/card";
 import {Button} from "@/components/ui/button";
-import {arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable} from "@dnd-kit/sortable";
+import {arrayMove, SortableContext, sortableKeyboardCoordinates} from "@dnd-kit/sortable";
 import {closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors} from "@dnd-kit/core";
 import {ScriptContentButton} from "@/components/ui/ScriptContentButton";
 import {ImageUploadModal} from "@/components/modals/ImageUploadModal";
 import {EditDialogueModal} from "@/components/modals/EditDialogueModal";
 import {BreakpointModal} from "@/components/modals/BreakpointModal";
+import {VoiceManagementModal} from "@/components/modals/VoiceManagementModal";
 import {getAvailableBranches, hasValidBreakpoint, isBeforeBranching, isBranchingBlock} from "@/lib/script-editor";
-import { SortableItem } from "./SortableItem";
+import {SortableItem} from "./SortableItem";
+import {Mic} from "lucide-react";
 
 export interface DialogueLine {
     role: string;
@@ -41,12 +43,13 @@ export interface ScriptBlock {
 export interface Scenario {
     title: string;
     script: ScriptBlock[];
+    characters?: Record<string, string>; // Added: voice descriptions
 }
 
 export interface BreakpointOption {
     text: string;
     isCorrect: boolean,
-    branchTarget?: string | null; //  name or index of branch to go to
+    branchTarget?: string | null;
 }
 
 export interface BreakpointQuestion {
@@ -55,7 +58,10 @@ export interface BreakpointQuestion {
 }
 
 
-export default function DialogueEditor({scenario: globalScenario, generateScenario}: { scenario: Scenario, generateScenario: (scenario: Scenario) => void }) {
+export default function DialogueEditor({scenario: globalScenario, generateScenario}: {
+    scenario: Scenario,
+    generateScenario: (scenario: Scenario) => void
+}) {
     const [scenario, setScenario] = useState<Scenario>(globalScenario);
     const [editing, setEditing] = useState<{ speaker?: string; line?: string; path?: string } | null>(null);
     const [newText, setNewText] = useState("");
@@ -64,8 +70,28 @@ export default function DialogueEditor({scenario: globalScenario, generateScenar
         currentImage: { url?: string; prompt?: string } | null;
     } | null>(null);
     const [breakpointEdit, setBreakpointEdit] = useState<{ path: string, data?: BreakpointQuestion } | null>(null);
+    const [voiceModalOpen, setVoiceModalOpen] = useState(false);
 
     const branches = useMemo(() => getAvailableBranches(scenario, breakpointEdit?.path), [scenario, breakpointEdit]);
+
+    // Extract all unique roles from the script
+    const availableRoles = useMemo(() => {
+        const roles = new Set<string>();
+
+        scenario.script.forEach((block) => {
+            if (block.role) roles.add(block.role);
+
+            if (block.branch_options) {
+                block.branch_options.forEach((branch) => {
+                    branch.dialogue.forEach((line) => {
+                        if (line.role) roles.add(line.role);
+                    });
+                });
+            }
+        });
+
+        return Array.from(roles);
+    }, [scenario]);
 
 
     const handleEdit = (speaker: string, line: string, path: string) => {
@@ -132,13 +158,11 @@ export default function DialogueEditor({scenario: globalScenario, generateScenar
             updated.script[scriptIndex].branch_options &&
             updated.script[scriptIndex].branch_options![branchIndex]
         ) {
-            // Add to branch dialogue array
             const branch = updated.script[scriptIndex].branch_options![branchIndex];
             branch.dialogue.splice((dialogueIndex ?? branch.dialogue.length) + 1, 0, newDialogue);
-        } else if(scriptIndex === 0){
-           updated.script.unshift(newDialogue);
-        }else{
-            // Add to main script array
+        } else if (scriptIndex === 0) {
+            updated.script.unshift(newDialogue);
+        } else {
             updated.script.splice(scriptIndex + 1, 0, newDialogue);
         }
 
@@ -158,7 +182,6 @@ export default function DialogueEditor({scenario: globalScenario, generateScenar
             ],
         };
 
-        //  If we are inside an existing branching dialogue group
         if (
             branchIndex !== undefined &&
             updated.script[scriptIndex].branch_options &&
@@ -170,7 +193,6 @@ export default function DialogueEditor({scenario: globalScenario, generateScenar
                 newBranchOption
             );
         } else {
-            // Otherwise, create a new branching dialogue group
             const newBranchGroup: ScriptBlock = {
                 branch_options: [newBranchOption],
                 dialogue: '',
@@ -189,61 +211,6 @@ export default function DialogueEditor({scenario: globalScenario, generateScenar
         setScenario(updated);
     };
 
-    const handleDeleteDialogueBox = () => {
-        if (!editing?.path) return;
-
-        // clone the scenario safely
-        const updated: any = typeof structuredClone === "function"
-            ? structuredClone(scenario)
-            : JSON.parse(JSON.stringify(scenario));
-
-        const pathParts = editing.path.split(".").map((p) => {
-            // convert numeric-looking segs to numbers for array access
-            return /^\d+$/.test(p) ? Number(p) : p;
-        });
-
-        // traverse to find parent container and key
-        let parent: any = null;
-        let cur: any = updated;
-        let key: string | number | null = null;
-
-        for (let i = 0; i < pathParts.length; i++) {
-            parent = cur;
-            key = pathParts[i];
-            // stop traversal if parent is undefined/null
-            if (parent == null) break;
-            cur = parent[key as any];
-        }
-
-        if (parent == null || key == null) {
-            console.warn("Delete: could not resolve path", editing.path);
-            setEditing(null);
-            return;
-        }
-
-        // If parent is an array and key is a number -> remove that index
-        if (Array.isArray(parent) && typeof key === "number") {
-            if (key >= 0 && key < parent.length) {
-                parent.splice(key, 1);
-            } else {
-                console.warn("Delete: index out of range", key);
-            }
-        } else if (typeof parent === "object" && (key in parent)) {
-            // otherwise delete object property
-            if (typeof key === "number") {
-                // numeric key on object -> convert to string
-                delete parent[String(key)];
-            } else {
-                delete parent[key as string];
-            }
-        } else {
-            console.warn("Delete: parent container mismatch", parent, key);
-        }
-
-        setScenario(updated);
-        setEditing(null);
-    };
-
     const handleAddImage = (data: { url?: string, prompt?: string }) => {
         const updated = structuredClone(scenario);
         const pathParts = imageEdit!.path.split(".").map((p) =>
@@ -259,13 +226,81 @@ export default function DialogueEditor({scenario: globalScenario, generateScenar
         setImageEdit(null);
     };
 
+    const handleDeleteDialogueBox = () => {
+        if (!editing?.path) return;
 
+        const updated: any = typeof structuredClone === "function"
+            ? structuredClone(scenario)
+            : JSON.parse(JSON.stringify(scenario));
+
+        const pathParts = editing.path.split(".").map((p) => {
+            return /^\d+$/.test(p) ? Number(p) : p;
+        });
+
+        let parent: any = null;
+        let cur: any = updated;
+        let key: string | number | null = null;
+
+        for (let i = 0; i < pathParts.length; i++) {
+            parent = cur;
+            key = pathParts[i];
+            if (parent == null) break;
+            cur = parent[key as any];
+        }
+
+        if (parent == null || key == null) {
+            console.warn("Delete: could not resolve path", editing.path);
+            setEditing(null);
+            return;
+        }
+
+        if (Array.isArray(parent) && typeof key === "number") {
+            if (key >= 0 && key < parent.length) {
+                parent.splice(key, 1);
+            } else {
+                console.warn("Delete: index out of range", key);
+            }
+        } else if (typeof parent === "object" && (key in parent)) {
+            if (typeof key === "number") {
+                delete parent[String(key)];
+            } else {
+                delete parent[key as string];
+            }
+        } else {
+            console.warn("Delete: parent container mismatch", parent, key);
+        }
+
+        setScenario(updated);
+        setEditing(null);
+    };
+
+    const handleSaveVoices = (characters: Record<string, string>) => {
+        setScenario({
+            ...scenario,
+            characters,
+        });
+    };
 
     return (
         <div className="p-6 space-y-6 max-w-3xl mx-auto">
-            <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">
-                EduPulse Scenario Editor
-            </h2>
+            <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+                    EduPulse Scenario Editor
+                </h2>
+                <Button
+                    onClick={() => setVoiceModalOpen(true)}
+                    variant="outline"
+                    className="flex items-center gap-2"
+                >
+                    <Mic className="h-4 w-4"/>
+                    Manage Voices
+                    {scenario.characters && Object.keys(scenario.characters).length > 0 && (
+                        <span className="ml-1 px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded-full">
+                            {Object.keys(scenario.characters).length}
+                        </span>
+                    )}
+                </Button>
+            </div>
 
             {/* Main Dialogue */}
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -291,13 +326,12 @@ export default function DialogueEditor({scenario: globalScenario, generateScenar
                                     </h3>
                                     {block.branch_options?.map((branch, j) => (
                                         <div key={j} className="group realtive items-center flex flex-col w-full">
-                                        <Card className="p-4 mt-3 bg-gray-50 dark:bg-gray-800 w-full">
+                                            <Card className="p-4 mt-3 bg-gray-50 dark:bg-gray-800 w-full">
                                                 <div className="
                                                       font-semibold text-blue-700 dark:text-blue-300
                                                       bg-transparent border-b border-transparent
                                                       hover:border-blue-300 focus:border-blue-400
                                                       focus:outline-none w-full">
-                                                    {/* Inline editable branch type */}
                                                     <input
                                                         type="text"
                                                         value={branch.type}
@@ -364,9 +398,9 @@ export default function DialogueEditor({scenario: globalScenario, generateScenar
                                         breakpoint={block.breakpoint}
                                         onEdit={() => handleEdit(block.role, block.dialogue, `script.${i}`)}
                                     />
-                                    {/* Check for misconfiguration */}
                                     {isBeforeBranching(scenario.script, i) && !hasValidBreakpoint(block) && (
-                                        <div className="my-2 w-full border border-yellow-400 bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 rounded-md p-3 text-sm flex items-center justify-between">
+                                        <div
+                                            className="my-2 w-full border border-yellow-400 bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 rounded-md p-3 text-sm flex items-center justify-between">
                                             <span>⚠️ Misconfigured Breakpoint — no branch selected for next dialogue.</span>
                                             <button
                                                 onClick={() =>
@@ -407,7 +441,6 @@ export default function DialogueEditor({scenario: globalScenario, generateScenar
 
             {scenario && (
                 <>
-                    {/* Save JSON */}
                     <div className="pt-6 border-t w-full flex flex-row justify-between">
                         <Button
                             onClick={() => {
@@ -471,6 +504,14 @@ export default function DialogueEditor({scenario: globalScenario, generateScenar
                     setBreakpointEdit(null);
                 }}
                 availableBranches={branches}
+            />
+
+            <VoiceManagementModal
+                isOpen={voiceModalOpen}
+                onClose={() => setVoiceModalOpen(false)}
+                characters={scenario.characters || {}}
+                onSave={handleSaveVoices}
+                availableRoles={availableRoles}
             />
 
         </div>
