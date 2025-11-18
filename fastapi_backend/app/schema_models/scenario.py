@@ -1,6 +1,6 @@
-from typing import List, Optional
+from typing import List, Optional, Dict
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class ImageData(BaseModel):
@@ -42,6 +42,11 @@ class ScriptBlock(BaseModel):
 class Scenario(BaseModel):
     title: str
     script: List[ScriptBlock]
+    characters: Optional[Dict[str, str]] = Field(
+        default=None,
+        description="Dictionary mapping character names to voice descriptions. "
+                    "Example: {'Narrator': 'A man with a deep voice', 'Teacher': 'Warm female voice'}"
+    )
 
     class Config:
         schema_extra = {

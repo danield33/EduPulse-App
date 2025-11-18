@@ -12,8 +12,18 @@ from app.schema_models.scenario import Scenario
 from app.schema_models.scenario import ScriptBlock
 
 
-async def get_b64_audio(block: ScriptBlock):
-    tts_request = TTSRequest(text=block.dialogue, voice_description="A deep lumberjack voice.")
+async def get_b64_audio(block: ScriptBlock, voice_description: str):
+    """
+    Generate audio for a dialogue block using the specified voice description.
+
+    Args:
+        block: ScriptBlock containing dialogue text
+        voice_description: Description of how the character's voice should sound
+    """
+    tts_request = TTSRequest(
+        text=block.dialogue,
+        voice_description=voice_description
+    )
     response = synthesize_with_hume(tts_request)
     return response.audio_url
 
@@ -73,11 +83,18 @@ async def generate_scenario(scenario: Scenario, lesson_id: str):
     """
     Stitch each image+audio group in a scenario into separate video files.
     Includes support for branch_options after the main script.
+    Uses character voice descriptions from scenario.characters if available.
     Returns a list of paths to generated video segments.
     """
 
     output_dir = f"{os.path.curdir}/lessons/{lesson_id}/videos/"
     os.makedirs(output_dir, exist_ok=True)
+
+    # Get character voice descriptions from scenario
+    character_voices = getattr(scenario, "characters", {}) or {}
+    default_voice = "A neutral, clear voice"
+
+    print(f"Loaded {len(character_voices)} character voices: {list(character_voices.keys())}")
 
     # Trackers
     current_image_b64 = None
@@ -142,10 +159,18 @@ async def generate_scenario(scenario: Scenario, lesson_id: str):
                 current_audios.clear()
             current_image_b64 = image.base64
 
-        # Generate speech
+        # Generate speech with character-specific voice
         if dialogue:
+            # Get voice description for this character, or use default
+            voice_description = character_voices.get(role, default_voice)
+
+            if not voice_description or voice_description.strip() == "":
+                voice_description = default_voice
+
+            print(f"Generating audio for '{role}' with voice: '{voice_description}'")
+
             dummy = ScriptBlock(dialogue=dialogue, image=image)
-            b64_audio = await get_b64_audio(dummy)
+            b64_audio = await get_b64_audio(dummy, voice_description)
             audio_path = decode_base64_to_file(b64_audio, ".mp3")
             current_audios.append(audio_path)
 
