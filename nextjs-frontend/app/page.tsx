@@ -1,229 +1,105 @@
-"use client";
-
-import { useState } from "react";
 import Link from "next/link";
-import { FaGithub } from "react-icons/fa";
-
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
+import {Button} from "@/components/ui/button";
+import {BookOpen, Brain, Video} from "lucide-react";
 
 export default function Home() {
-  // 🔹 Role toggle
-  const [role, setRole] = useState<"student" | "instructor">("student");
+    return (
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+            <main className="flex flex-col items-center px-8 py-20">
 
-  // 🔹 State for instructor script generation
-  const [fileName, setFileName] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [generatedScript, setGeneratedScript] = useState<string | null>(null);
+                {/* Hero Section */}
+                <section className="flex flex-col items-center text-center max-w-4xl">
+                    <h1 className="text-4xl md:text-5xl font-extrabold mb-6 text-gray-900 dark:text-white">
+                        Edpulse: AI-Powered Lesson Video Creation
+                    </h1>
 
-  // 🔹 Breakpoint system
-  const [breakpoints, setBreakpoints] = useState<Record<number, string>>({});
+                    <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mb-10">
+                        Turn PDFs, outlines, and teaching scenarios into fully narrated,
+                        branching educational videos - complete with AI speech, visuals, and interactivity.
+                        Built for educators. Designed for learners. Powered by AI.
+                    </p>
 
-  const handleAddBreakpoint = (index: number) => {
-    const question = prompt("Enter a reflection question for this point:");
-    if (question) {
-      setBreakpoints((prev) => ({ ...prev, [index]: question }));
-    }
-  };
+                    <div className="flex gap-4">
+                        <Link href="/login">
+                            <Button className="rounded-xl bg-lime-400 text-black hover:bg-lime-500 px-6 py-3 text-lg">
+                                Log In
+                            </Button>
+                        </Link>
 
-  const handleSaveScript = () => {
-    if (!generatedScript) return;
-    const paragraphs = generatedScript
-      .split(/\n+/)
-      .filter((p) => p.trim() !== "");
-    const finalScript = paragraphs
-      .map((p, i) =>
-        breakpoints[i] ? `${p}\n\n[BREAKPOINT] ${breakpoints[i]}` : p,
-      )
-      .join("\n\n");
-    console.log("✅ Final Script with Breakpoints:\n", finalScript);
-    alert("Breakpoints saved! (Check console for combined output)");
-  };
+                        <Link href="/register">
+                            <Button
+                                variant="outline"
+                                className="rounded-xl border-gray-900 dark:border-white dark:text-white text-gray-900 px-6 py-3 text-lg hover:bg-gray-800 hover:text-white"
+                            >
+                                Sign Up
+                            </Button>
+                        </Link>
+                    </div>
+                </section>
 
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* NAVBAR */}
-      <nav className="w-full sticky top-0 z-50 bg-gray-900 text-white">
-        <div className="mx-auto max-w-6xl px-4 py-4 flex items-center justify-between">
-          {/* Brand */}
-          <Link href="/" className="font-bold text-lg tracking-tight">
-            EduPulse
-          </Link>
+                {/* Features Section */}
+                <section className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-5xl">
+                    <FeatureCard
+                        icon={<Brain className="h-10 w-10 text-lime-500"/>}
+                        title="AI-Generated Scripts"
+                        desc="Upload a PDF or outline and Edpulse transforms it into a structured, high-quality teaching script."
+                    />
 
-          {/* Right controls */}
-          <div className="flex items-center gap-3">
-            {/* Role dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger className="rounded-xl bg-gray-800 px-4 py-2 text-sm font-semibold hover:bg-gray-700 focus:outline-none">
-                {role === "student" ? "Students ▾" : "Instructors ▾"}
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="rounded-xl">
-                <DropdownMenuItem onClick={() => setRole("student")}>
-                  🎓 Students
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setRole("instructor")}>
-                  🧑‍🏫 Instructors
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                    <FeatureCard
+                        icon={<Video className="h-10 w-10 text-lime-500"/>}
+                        title="Automatic Video Creation"
+                        desc="Your script becomes a narrated, image-driven MP4 video - broken into segments for branching and flexibility."
+                    />
 
-            {/* Auth buttons */}
-            <Link href="/register">
-              <Button
-                variant="outline"
-                className="rounded-xl border-white text-white bg-transparent shadow-none hover:bg-gray-800/60 hover:text-white focus:ring-0"
-              >
-                Sign up
-              </Button>
-            </Link>
-            <Link href="/login">
-              <Button className="rounded-xl bg-lime-400 text-black hover:bg-lime-500">
-                Log in
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </nav>
+                    <FeatureCard
+                        icon={<BookOpen className="h-10 w-10 text-lime-500"/>}
+                        title="Branching Lessons"
+                        desc="Build interactive decision points that adapt the learner’s path, encouraging deeper engagement."
+                    />
+                </section>
 
-      {/* MAIN */}
-      <main className="flex flex-col items-center justify-center px-8 py-14">
-        <section className="mt-12 w-full max-w-3xl rounded-2xl bg-white dark:bg-gray-800 shadow p-6">
-          {role === "student" ? (
-            <>
-              <h2 className="text-2xl font-semibold mb-3">🎓 Student Video</h2>
-              <p className="text-gray-600 dark:text-gray-300 mb-4">
-                Learn from curated lessons designed for students.
-              </p>
-              <video controls className="w-full rounded-lg">
-                <source src="/videos/student-lesson.mp4" type="video/mp4" />
-              </video>
-            </>
-          ) : (
-            <>
-              <h2 className="text-2xl font-semibold mb-3">
-                🧑‍🏫 Instructor Dashboard
-              </h2>
-              <p className="text-gray-600 dark:text-gray-300 mb-6">
-                Upload a teaching scenario PDF to generate a 2-minute AI-powered
-                teaching script.
-              </p>
+                {/* Secondary Section */}
+                <section className="mt-24 w-full max-w-4xl text-center">
+                    <div className="rounded-2xl bg-white dark:bg-gray-800 shadow p-10">
+                        <h2 className="text-3xl font-semibold mb-4 text-gray-900 dark:text-white">
+                            Designed for Educators. Powered by AI.
+                        </h2>
 
-              {/* Upload script form */}
-              <form
-                className="mb-6 flex flex-col items-center justify-center border-2 border-dashed border-gray-400 dark:border-gray-600 rounded-lg p-8 bg-gray-100 dark:bg-gray-800"
-                onSubmit={async (e) => {
-                  e.preventDefault();
-                  const input = document.getElementById(
-                    "script-upload",
-                  ) as HTMLInputElement;
-                  if (!input?.files?.length)
-                    return alert("Please select a PDF file first.");
-
-                  const formData = new FormData();
-                  formData.append("file", input.files[0]);
-                  setLoading(true);
-                  setGeneratedScript(null);
-
-                  try {
-                    const res = await fetch(
-                      "http://localhost:8000/api/scripts/generate-script-from-pdf",
-                      {
-                        method: "POST",
-                        body: formData,
-                      },
-                    );
-                    if (!res.ok) throw new Error("Failed to generate script");
-                    const data = await res.json();
-                    setGeneratedScript(data.script);
-                    setBreakpoints({});
-                  } catch (err) {
-                    console.error(err);
-                    alert("Error generating script. Check backend logs.");
-                  } finally {
-                    setLoading(false);
-                  }
-                }}
-              >
-                <input
-                  id="script-upload"
-                  type="file"
-                  accept=".pdf"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    setFileName(file ? file.name : "");
-                  }}
-                />
-
-                <label
-                  htmlFor="script-upload"
-                  className="cursor-pointer px-6 py-3 mb-4 rounded-lg bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
-                >
-                  Choose PDF
-                </label>
-
-                <p className="text-sm text-gray-500 mb-4">
-                  {fileName || "No file selected"}
-                </p>
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
-                >
-                  {loading ? "Generating..." : "Upload & Generate Script"}
-                </button>
-              </form>
-
-              {/* Editable script with breakpoints */}
-              {generatedScript && (
-                <div className="mt-6 w-full bg-white dark:bg-gray-700 rounded-xl shadow p-6 whitespace-pre-wrap">
-                  <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
-                    🎬 Generated Teaching Script
-                  </h3>
-
-                  {generatedScript
-                    .split(/\n+/)
-                    .filter((p) => p.trim() !== "")
-                    .map((para, i) => (
-                      <div key={i} className="mb-4">
-                        <p className="text-gray-700 dark:text-gray-200">
-                          {para}
+                        <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                            Whether you're training nurses, teaching communication skills, or
+                            creating interactive scenarios, Edpulse provides the tools to
+                            create engaging, emotionally intelligent lessons - without needing
+                            editing software, actors, or expensive equipment.
                         </p>
 
-                        {breakpoints[i] && (
-                          <div className="bg-yellow-100 dark:bg-yellow-800 text-yellow-900 dark:text-yellow-200 p-3 rounded-lg mt-2">
-                            <strong>[BREAKPOINT]</strong> {breakpoints[i]}
-                          </div>
-                        )}
+                        <Link href="/register">
+                            <Button className="rounded-xl bg-lime-400 text-black hover:bg-lime-500 px-6 py-3 text-lg">
+                                Start Creating
+                            </Button>
+                        </Link>
+                    </div>
+                </section>
+            </main>
+        </div>
+    );
+}
 
-                        <button
-                          className="mt-2 text-sm text-blue-600 hover:underline"
-                          onClick={() => handleAddBreakpoint(i)}
-                        >
-                          ➕ Add Breakpoint Here
-                        </button>
-                      </div>
-                    ))}
-
-                  <button
-                    onClick={handleSaveScript}
-                    className="mt-6 w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition"
-                  >
-                    💾 Save Script with Breakpoints
-                  </button>
-                </div>
-              )}
-            </>
-          )}
-        </section>
-      </main>
-    </div>
-  );
+function FeatureCard({
+                         icon,
+                         title,
+                         desc,
+                     }: {
+    icon: React.ReactNode;
+    title: string;
+    desc: string;
+}) {
+    return (
+        <div className="rounded-2xl bg-white dark:bg-gray-800 shadow p-6 text-center flex flex-col items-center">
+            <div className="mb-4">{icon}</div>
+            <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-2">
+                {title}
+            </h3>
+            <p className="text-gray-600 dark:text-gray-300">{desc}</p>
+        </div>
+    );
 }

@@ -22,14 +22,44 @@ export type Body_auth_verify_verify = {
   token: string;
 };
 
-export type Body_Script_Generation_generate_script_from_pdf = {
+export type Body_genscript_generate_script_from_pdf = {
   file: Blob | File;
 };
 
-export type Body_Videos_upload_video = {
+export type Body_videos_upload_video = {
   title: string;
   description?: string | null;
   file: Blob | File;
+};
+
+export type BranchOption = {
+  type: string;
+  dialogue: Array<DialogueLine>;
+};
+
+export type BreakpointOption = {
+  text: string;
+  isCorrect: boolean;
+  branchTarget?: string | null;
+};
+
+export type BreakpointQuestion = {
+  question: string;
+  options: Array<BreakpointOption>;
+};
+
+export type BreakpointRead = {
+  id: string;
+  question: string;
+  choices: Array<string>;
+  correct_choice: number;
+  created_at: string;
+};
+
+export type DialogueLine = {
+  role: string;
+  dialogue: string;
+  image?: ImageData | null;
 };
 
 export type ErrorModel = {
@@ -44,12 +74,23 @@ export type HTTPValidationError = {
   detail?: Array<ValidationError>;
 };
 
+export type ImageData = {
+  url?: string | null;
+  prompt?: string | null;
+  base64?: string | null;
+};
+
 export type LessonCreate = {
   /**
    * Lesson title
    */
   title: string;
   user_id: string;
+};
+
+export type LessonListResponse = {
+  items: Array<LessonRead>;
+  total: number;
 };
 
 export type LessonRead = {
@@ -66,6 +107,14 @@ export type LessonVideoAddResponse = {
   lesson_id: string;
   video_id: string;
   index: number;
+};
+
+export type LessonVideoRead = {
+  video_id: string;
+  index: number;
+  breakpoints?: Array<BreakpointRead> | null;
+  id: string;
+  video: VideoRead;
 };
 
 export type login = {
@@ -85,8 +134,17 @@ export type Page_VideoRead_ = {
   pages?: number | null;
 };
 
-export type ScriptIn = {
-  content: string;
+export type Scenario = {
+  title: string;
+  script: Array<ScriptBlock>;
+};
+
+export type ScriptBlock = {
+  role?: string | null;
+  dialogue?: string | null;
+  branch_options?: Array<BranchOption> | null;
+  image?: ImageData | null;
+  breakpoint?: BreakpointQuestion | null;
 };
 
 export type TTImageRequest = {
@@ -283,7 +341,7 @@ export type GenerateVideoResponse = VideoRead;
 export type GenerateVideoError = HTTPValidationError;
 
 export type UploadVideoData = {
-  body: Body_Videos_upload_video;
+  body: Body_videos_upload_video;
 };
 
 export type UploadVideoResponse = VideoRead;
@@ -323,7 +381,9 @@ export type DeleteVideoData = {
   };
 };
 
-export type DeleteVideoResponse = unknown;
+export type DeleteVideoResponse = {
+  [key: string]: string;
+};
 
 export type DeleteVideoError = HTTPValidationError;
 
@@ -353,6 +413,25 @@ export type GenerateImageResponse = TTImageResponse;
 
 export type GenerateImageError = HTTPValidationError;
 
+export type GetMyLessonsData = {
+  query?: {
+    limit?: number;
+    offset?: number;
+    /**
+     * Sort order: ascending or descending
+     */
+    order?: "asc" | "desc";
+    /**
+     * Sort lessons by 'created_at' or 'title'
+     */
+    sort_by?: "created_at" | "title";
+  };
+};
+
+export type GetMyLessonsResponse = LessonListResponse;
+
+export type GetMyLessonsError = HTTPValidationError;
+
 export type CreateLessonData = {
   body: LessonCreate;
 };
@@ -360,6 +439,35 @@ export type CreateLessonData = {
 export type CreateLessonResponse = LessonRead;
 
 export type CreateLessonError = HTTPValidationError;
+
+export type UploadScenarioData = {
+  body: Scenario;
+};
+
+export type UploadScenarioResponse = LessonRead;
+
+export type UploadScenarioError = HTTPValidationError;
+
+export type UpdateLessonData = {
+  body: Scenario;
+  path: {
+    lesson_id: string;
+  };
+};
+
+export type UpdateLessonResponse = LessonRead;
+
+export type UpdateLessonError = HTTPValidationError;
+
+export type GetLessonData = {
+  path: {
+    lesson_id: string;
+  };
+};
+
+export type GetLessonResponse = LessonRead;
+
+export type GetLessonError = HTTPValidationError;
 
 export type AddVideoToLessonData = {
   body: LessonVideoAddResponse;
@@ -372,16 +480,6 @@ export type AddVideoToLessonResponse = LessonVideoAddResponse;
 
 export type AddVideoToLessonError = HTTPValidationError;
 
-export type GetLessonData = {
-  path: {
-    lesson_id: string;
-  };
-};
-
-export type GetLessonResponse = LessonRead;
-
-export type GetLessonError = HTTPValidationError;
-
 export type GetVideoByIndexData = {
   path: {
     index: number;
@@ -389,7 +487,7 @@ export type GetVideoByIndexData = {
   };
 };
 
-export type GetVideoByIndexResponse = unknown;
+export type GetVideoByIndexResponse = LessonVideoRead;
 
 export type GetVideoByIndexError = HTTPValidationError;
 
@@ -400,26 +498,46 @@ export type HasNextVideoData = {
   };
 };
 
-export type HasNextVideoResponse = unknown;
+export type HasNextVideoResponse = {
+  [key: string]: boolean;
+};
 
 export type HasNextVideoError = HTTPValidationError;
 
+export type GetLessonScenarioData = {
+  path: {
+    lesson_id: string;
+  };
+};
+
+export type GetLessonScenarioResponse = unknown;
+
+export type GetLessonScenarioError = HTTPValidationError;
+
+export type StreamVideoSegmentData = {
+  path: {
+    lesson_id: string;
+  };
+  query: {
+    /**
+     * The segment number (1-indexed)
+     */
+    segment_number: number;
+    /**
+     * Branch type (e.g., 'option_A', 'option_B') or None for main segments
+     */
+    segment_type?: string | null;
+  };
+};
+
+export type StreamVideoSegmentResponse = unknown;
+
+export type StreamVideoSegmentError = HTTPValidationError;
+
 export type GenerateScriptFromPdfData = {
-  body: Body_Script_Generation_generate_script_from_pdf;
+  body: Body_genscript_generate_script_from_pdf;
 };
 
 export type GenerateScriptFromPdfResponse = unknown;
 
 export type GenerateScriptFromPdfError = HTTPValidationError;
-
-export type SaveScriptData = {
-  body: ScriptIn;
-};
-
-export type SaveScriptResponse = unknown;
-
-export type SaveScriptError = HTTPValidationError;
-
-export type RootResponse = unknown;
-
-export type RootError = unknown;

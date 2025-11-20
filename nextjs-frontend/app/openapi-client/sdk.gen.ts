@@ -66,29 +66,39 @@ import type {
   GenerateImageData,
   GenerateImageError,
   GenerateImageResponse,
+  GetMyLessonsData,
+  GetMyLessonsError,
+  GetMyLessonsResponse,
   CreateLessonData,
   CreateLessonError,
   CreateLessonResponse,
-  AddVideoToLessonData,
-  AddVideoToLessonError,
-  AddVideoToLessonResponse,
+  UploadScenarioData,
+  UploadScenarioError,
+  UploadScenarioResponse,
+  UpdateLessonData,
+  UpdateLessonError,
+  UpdateLessonResponse,
   GetLessonData,
   GetLessonError,
   GetLessonResponse,
+  AddVideoToLessonData,
+  AddVideoToLessonError,
+  AddVideoToLessonResponse,
   GetVideoByIndexData,
   GetVideoByIndexError,
   GetVideoByIndexResponse,
   HasNextVideoData,
   HasNextVideoError,
   HasNextVideoResponse,
+  GetLessonScenarioData,
+  GetLessonScenarioError,
+  GetLessonScenarioResponse,
+  StreamVideoSegmentData,
+  StreamVideoSegmentError,
+  StreamVideoSegmentResponse,
   GenerateScriptFromPdfData,
   GenerateScriptFromPdfError,
   GenerateScriptFromPdfResponse,
-  SaveScriptData,
-  SaveScriptError,
-  SaveScriptResponse,
-  RootError,
-  RootResponse,
 } from "./types.gen";
 
 export const client = createClient(createConfig());
@@ -400,11 +410,8 @@ export const streamVideo = <ThrowOnError extends boolean = false>(
  * Synthesize Speech
  * Generate speech from text using Hume.ai TTS API.
  *
- * Args:
- * request: TTS request containing text, voice description, and format
- *
- * Returns:
- * Audio URL or base64-encoded audio data
+ * - Ensures user is authenticated
+ * - Delegates to Hume TTS service for synthesis
  */
 export const synthesizeSpeech = <ThrowOnError extends boolean = false>(
   options: OptionsLegacyParser<SynthesizeSpeechData, ThrowOnError>,
@@ -443,6 +450,24 @@ export const generateImage = <ThrowOnError extends boolean = false>(
 };
 
 /**
+ * Get My Lessons
+ * Get lessons for the current user with sorting & pagination.
+ * Returns both paginated items and total count.
+ */
+export const getMyLessons = <ThrowOnError extends boolean = false>(
+  options?: OptionsLegacyParser<GetMyLessonsData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<
+    GetMyLessonsResponse,
+    GetMyLessonsError,
+    ThrowOnError
+  >({
+    ...options,
+    url: "/lessons/my",
+  });
+};
+
+/**
  * Create Lesson
  */
 export const createLesson = <ThrowOnError extends boolean = false>(
@@ -459,18 +484,56 @@ export const createLesson = <ThrowOnError extends boolean = false>(
 };
 
 /**
- * Add Video To Lesson
+ * Upload Scenario
  */
-export const addVideoToLesson = <ThrowOnError extends boolean = false>(
-  options: OptionsLegacyParser<AddVideoToLessonData, ThrowOnError>,
+export const uploadScenario = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<UploadScenarioData, ThrowOnError>,
 ) => {
   return (options?.client ?? client).post<
-    AddVideoToLessonResponse,
-    AddVideoToLessonError,
+    UploadScenarioResponse,
+    UploadScenarioError,
     ThrowOnError
   >({
     ...options,
-    url: "/lessons/{lesson_id}/add_video",
+    url: "/lessons/upload_scenario",
+  });
+};
+
+/**
+ * Update Lesson
+ * Update an existing lesson by replacing its scenario and regenerating all video segments.
+ *
+ * This endpoint:
+ * 1. Validates that the lesson exists and belongs to the current user
+ * 2. Deletes all existing video segments from disk
+ * 3. Updates the lesson title if changed
+ * 4. Regenerates all video segments based on the new scenario
+ * 5. Updates the scenario JSON in the database
+ *
+ * Args:
+ * lesson_id: UUID of the lesson to update
+ * scenario: New scenario structure with script blocks, breakpoints, and branch options
+ * db: Database session dependency
+ * user: Current authenticated user
+ *
+ * Returns:
+ * Updated lesson information
+ *
+ * Raises:
+ * 404: If lesson not found
+ * 403: If user doesn't own the lesson
+ * 500: If video generation or file deletion fails
+ */
+export const updateLesson = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<UpdateLessonData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).put<
+    UpdateLessonResponse,
+    UpdateLessonError,
+    ThrowOnError
+  >({
+    ...options,
+    url: "/lessons/{lesson_id}",
   });
 };
 
@@ -487,6 +550,22 @@ export const getLesson = <ThrowOnError extends boolean = false>(
   >({
     ...options,
     url: "/lessons/{lesson_id}",
+  });
+};
+
+/**
+ * Add Video To Lesson
+ */
+export const addVideoToLesson = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<AddVideoToLessonData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<
+    AddVideoToLessonResponse,
+    AddVideoToLessonError,
+    ThrowOnError
+  >({
+    ...options,
+    url: "/lessons/{lesson_id}/add_video",
   });
 };
 
@@ -523,6 +602,79 @@ export const hasNextVideo = <ThrowOnError extends boolean = false>(
 };
 
 /**
+ * Get Lesson Scenario
+ * Fetch the complete lesson scenario JSON including all segments, branches, and breakpoints.
+ *
+ * This endpoint returns the full scenario structure which the frontend can use to:
+ * - Determine segment ordering
+ * - Detect breakpoints
+ * - Map branch options to segment types
+ * - Display questions and answers
+ *
+ * Args:
+ * lesson_id: UUID of the lesson
+ * db: Database session dependency
+ *
+ * Returns:
+ * The complete scenario JSON with script blocks, breakpoints, and branch options
+ *
+ * Raises:
+ * 404: If lesson or scenario not found
+ */
+export const getLessonScenario = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<GetLessonScenarioData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<
+    GetLessonScenarioResponse,
+    GetLessonScenarioError,
+    ThrowOnError
+  >({
+    ...options,
+    url: "/lessons/{lesson_id}/scenario",
+  });
+};
+
+/**
+ * Stream Video Segment
+ * Stream a video segment for a lesson based on segment number and optional branch type.
+ *
+ * This endpoint:
+ * 1. Validates the lesson exists in the database
+ * 2. Validates the segment exists in the lesson's scenario JSON
+ * 3. Resolves the video file path on disk
+ * 4. Streams the MP4 file to the client
+ *
+ * Args:
+ * lesson_id: UUID of the lesson
+ * segment_number: The segment number to retrieve (1-indexed)
+ * segment_type: Optional branch identifier (e.g., "option_A", "option_B")
+ * db: Database session dependency
+ *
+ * Returns:
+ * StreamingResponse with the video file
+ *
+ * Raises:
+ * 404: If lesson, segment, or video file not found
+ * 400: If segment_number is invalid
+ *
+ * Example:
+ * GET /lessons/{lesson_id}/segment?segment_number=1
+ * GET /lessons/{lesson_id}/segment?segment_number=3&segment_type=option_A
+ */
+export const streamVideoSegment = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<StreamVideoSegmentData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<
+    StreamVideoSegmentResponse,
+    StreamVideoSegmentError,
+    ThrowOnError
+  >({
+    ...options,
+    url: "/lessons/{lesson_id}/segment",
+  });
+};
+
+/**
  * Generate Script From Pdf
  * Accept a PDF upload and return a 2-minute teaching script.
  */
@@ -540,37 +692,6 @@ export const generateScriptFromPdf = <ThrowOnError extends boolean = false>(
       "Content-Type": null,
       ...options?.headers,
     },
-    url: "/api/scripts/generate-script-from-pdf",
+    url: "/generate_script/from_pdf",
   });
-};
-
-/**
- * Save Script
- * Save the generated script to the database.
- */
-export const saveScript = <ThrowOnError extends boolean = false>(
-  options: OptionsLegacyParser<SaveScriptData, ThrowOnError>,
-) => {
-  return (options?.client ?? client).post<
-    SaveScriptResponse,
-    SaveScriptError,
-    ThrowOnError
-  >({
-    ...options,
-    url: "/api/scripts/save-script",
-  });
-};
-
-/**
- * Root
- */
-export const root = <ThrowOnError extends boolean = false>(
-  options?: OptionsLegacyParser<unknown, ThrowOnError>,
-) => {
-  return (options?.client ?? client).get<RootResponse, RootError, ThrowOnError>(
-    {
-      ...options,
-      url: "/",
-    },
-  );
 };
