@@ -1,8 +1,8 @@
-"""initial migration
+"""initial
 
-Revision ID: 01fd1c442bba
-Revises: 321a31b9a100
-Create Date: 2025-10-27 19:46:01.552206
+Revision ID: 96f111e087b0
+Revises:
+Create Date: 2025-11-19 23:57:42.315084
 
 """
 
@@ -14,8 +14,8 @@ import fastapi_users_db_sqlalchemy
 
 
 # revision identifiers, used by Alembic.
-revision: str = "01fd1c442bba"
-down_revision: Union[str, None] = "321a31b9a100"
+revision: str = "96f111e087b0"
+down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -60,7 +60,7 @@ def upgrade() -> None:
         sa.Column("id", sa.UUID(), nullable=False),
         sa.Column("author", sa.String(), nullable=True),
         sa.Column("content", sa.Text(), nullable=False),
-        sa.Column("created_at", sa.DateTime(), nullable=False),
+        sa.Column("created_at", sa.DateTime(), nullable=True),
         sa.Column(
             "user_id", fastapi_users_db_sqlalchemy.generics.GUID(), nullable=True
         ),

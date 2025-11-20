@@ -1,22 +1,24 @@
 import asyncio
 import os
 from urllib.parse import urlparse
-
 from logging.config import fileConfig
-
+from dotenv import load_dotenv
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
-
 from alembic import context
 from app.models import Base
-from dotenv import load_dotenv
 
 load_dotenv()
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+DATABASE_URL = os.getenv("DATABASE_SYNC_URL")
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL is missing from environment!")
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -48,7 +50,7 @@ async_db_connection_url = (
     f"{parsed_db_url.path}"
 )
 
-config.set_main_option("sqlalchemy.url", async_db_connection_url)
+config.set_main_option("sqlalchemy.url", str(DATABASE_URL))
 
 
 def run_migrations_offline() -> None:

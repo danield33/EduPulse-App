@@ -8,6 +8,7 @@ from app.users import auth_backend, fastapi_users, AUTH_URL_PATH
 from app.config import settings
 from app.utils import simple_generate_unique_route_id
 
+
 # Routers
 from app.routes.videos import router as videos_router
 from app.routes.tts import router as tts_router
@@ -31,7 +32,7 @@ app = FastAPI(
 # --------------------------------------------------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
+    allow_origins=list(settings.CORS_ORIGINS),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -65,6 +66,7 @@ app.include_router(
     prefix="/users",
     tags=["users"],
 )
+
 
 # --------------------------------------------------------
 # Application Routes (Feature Modules)

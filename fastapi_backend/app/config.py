@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from typing import Set
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -38,7 +37,7 @@ class Settings(BaseSettings):
     FRONTEND_URL: str = "http://localhost:3000"
 
     # CORS
-    CORS_ORIGINS: Set[str]
+    CORS_ORIGINS: str | None = None
 
     # Video Upload
     VIDEO_UPLOAD_DIR: str = "uploaded_videos"
