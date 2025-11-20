@@ -1,4 +1,4 @@
-FROM python:3.12-bookworm
+FROM --platform=linux/arm64 python:3.12-bookworm
 
 # Set the working directory
 WORKDIR /app
@@ -30,4 +30,4 @@ COPY . .
 EXPOSE 8000
 
 # Command to run the application
-CMD ["./start.sh"]
+CMD ["bash", "start.sh"]
