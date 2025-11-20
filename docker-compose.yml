@@ -1,13 +1,18 @@
+version: "3.9"
+
 services:
   backend:
+    platform: linux/arm64/v8
     build:
       context: fastapi_backend
     env_file:
       - ./fastapi_backend/.env
     environment:
-      - OPENAPI_OUTPUT_FILE=./shared-data/openapi.json
-      - DATABASE_URL=postgresql+asyncpg://postgres:password@db:5432/mydatabase
-      - MAIL_SERVER=mailhog
+      OPENAPI_OUTPUT_FILE: ./shared-data/openapi.json
+      DATABASE_URL: postgresql+asyncpg://postgres:password@db:5432/mydatabase
+      TEST_DATABASE_URL: postgresql+asyncpg://postgres:password@db_test:5432/testdatabase
+      MAIL_SERVER: mailhog
+      PORT: 8000
     ports:
       - "8000:8000"
     networks:
@@ -18,6 +23,7 @@ services:
       - ./local-shared-data:/app/shared-data
     depends_on:
       - db
+
   db:
     image: postgres:17
     environment:
@@ -30,32 +36,49 @@ services:
       - my_network
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+  db_test:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: testdatabase
+    ports:
+      - "5433:5432"
+    networks:
+      - my_network
+    restart: always
+    volumes:
+      - test_postgres_data:/var/lib/postgresql/data
+
   frontend:
     build:
       context: ./nextjs-frontend
     user: node
+    environment:
+      NODE_ENV: development
+      API_BASE_URL: http://backend:8000
+      OPENAPI_OUTPUT_FILE: ./shared-data/openapi.json
     ports:
       - "3000:3000"
     networks:
       - my_network
-    environment:
-      NODE_ENV: development
-      NEXT_PUBLIC_API_BASE_URL: http://localhost:8000
-      OPENAPI_OUTPUT_FILE: ./shared-data/openapi.json
     volumes:
       - ./nextjs-frontend:/app
       - nextjs-node-modules:/app/node_modules
       - ./local-shared-data:/app/shared-data
+
   mailhog:
     image: mailhog/mailhog
     ports:
-      - "1025:1025" # SMTP server
-      - "8025:8025" # Web UI
+      - "1025:1025"
+      - "8025:8025"
     networks:
       - my_network
 
 volumes:
   postgres_data:
+  test_postgres_data:
   nextjs-node-modules:
   fastapi-venv:
 
