@@ -20,8 +20,8 @@ from app.database import User, get_async_session
 from app.models import Video
 from app.schemas import VideoRead
 from app.users import current_active_user
-from app.routes.ttimage import TTImageRequest, generate_image
-from app.routes.tts import TTSRequest, synthesize_speech
+from app.routes.ttimage import TTImageRequest
+from app.routes.tts import TTSRequest
 
 from app.ffmpeg_cmds import make_video
 
@@ -61,9 +61,9 @@ def safe_b64decode(b64_string: str) -> bytes:
 
 @router.post("/generate", response_model=VideoRead)
 async def generate_video(
-        request: VideoGenerateRequest,
-        user: User = Depends(current_active_user),
-        db: AsyncSession = Depends(get_async_session),
+    request: VideoGenerateRequest,
+    user: User = Depends(current_active_user),
+    db: AsyncSession = Depends(get_async_session),
 ):
     # image_data = await generate_image(request.images)
     image_data = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBw8NDQ0NDw0NDw0PDQ0NDQ0NDw8NDw0NFREWFhURFRUYHSggGBolHRUVITEhJSkrLi4uFx8zODMsNygtLisBCgoKDQ0NEg4PFSsZFRkrKysrKysrKysrKys3KystLSsrKysrKysrKy0tKysrKysrKysrKysrKysrKysrKysrK//AABEIAKwBJgMBIgACEQEDEQH/xAAXAAEBAQEAAAAAAAAAAAAAAAAAAQIH/8QAIRABAQEAAQMEAwAAAAAAAAAAAAERIWGBoQIxcfAiQVH/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8A7iAAACW+3Hf+KAAAAJJgKAAAAAAAAAAAAAAAAz6rZfTkt25bx+My3fEndoAAAMAAAAACgAAAAAAAAAAAAAAAAAAACbz7d1AAAAAAAAAAACgAAAAAAAAAaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAABL08qAAAAAEAAAAAAAAAAAAAAAAANABL96qAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFAAAAAAAAABLAUAAEBQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAIoAAAAAAAAAAAACYoAAAACSqAAAAAAAAAAAAAAAAAAAAAAlgCgAAAAAJd/XHzN4UABKCgAAAAAAAAAAlBRMUAAAAAAAAEqgAAAAD/2Q=="
@@ -93,20 +93,18 @@ async def generate_video(
         file_bytes = f.read()
     headers = {"content-type": "video/mp4"}
     upload_file = UploadFile(
-        filename=f"Clip.mp4",
-        file=BytesIO(file_bytes),
-        headers=headers
+        filename="Clip.mp4", file=BytesIO(file_bytes), headers=headers
     )
-    return await upload_video(f"Clip", None, upload_file, db, user)
+    return await upload_video("Clip", None, upload_file, db, user)
 
 
 @router.post("/upload", response_model=VideoRead)
 async def upload_video(
-        title: str = Form(...),
-        description: str | None = Form(None),
-        file: UploadFile = File(...),
-        db: AsyncSession = Depends(get_async_session),
-        user: User = Depends(current_active_user),
+    title: str = Form(...),
+    description: str | None = Form(None),
+    file: UploadFile = File(...),
+    db: AsyncSession = Depends(get_async_session),
+    user: User = Depends(current_active_user),
 ):
     """Upload a video file to disk and save metadata to database"""
 
@@ -121,11 +119,11 @@ async def upload_video(
     if file_size > settings.MAX_VIDEO_SIZE:
         raise HTTPException(
             status_code=400,
-            detail=f"File size exceeds maximum allowed size of {settings.MAX_VIDEO_SIZE} bytes"
+            detail=f"File size exceeds maximum allowed size of {settings.MAX_VIDEO_SIZE} bytes",
         )
 
     # Create unique filename
-    file_extension = os.path.splitext(file.filename or "video.mp4")[1]
+    # file_extension = os.path.splitext(file.filename or "video.mp4")[1]
     unique_filename = f"{user.id}_{title.replace(' ', '_')}_{file.filename}"
     file_path = VIDEO_DIR / unique_filename
 
@@ -154,22 +152,24 @@ async def upload_video(
 
 @router.get("/", response_model=Page[VideoRead])
 async def list_videos(
-        db: AsyncSession = Depends(get_async_session),
-        user: User = Depends(current_active_user),
-        page: int = Query(1, ge=1, description="Page number"),
-        size: int = Query(10, ge=1, le=100, description="Page size"),
+    db: AsyncSession = Depends(get_async_session),
+    user: User = Depends(current_active_user),
+    page: int = Query(1, ge=1, description="Page number"),
+    size: int = Query(10, ge=1, le=100, description="Page size"),
 ):
     """Get all videos for the authenticated user"""
     params = Params(page=page, size=size)
-    query = select(Video).filter(Video.user_id == user.id).order_by(Video.created_at.desc())
+    query = (
+        select(Video).filter(Video.user_id == user.id).order_by(Video.created_at.desc())
+    )
     return await apaginate(db, query, params, transformer=transform_videos)
 
 
 @router.get("/{video_id}", response_model=VideoRead)
 async def get_video(
-        video_id: UUID,
-        db: AsyncSession = Depends(get_async_session),
-        user: User = Depends(current_active_user),
+    video_id: UUID,
+    db: AsyncSession = Depends(get_async_session),
+    user: User = Depends(current_active_user),
 ):
     """Get a specific video's metadata"""
     result = await db.execute(
@@ -185,9 +185,9 @@ async def get_video(
 
 @router.get("/{video_id}/stream")
 async def stream_video(
-        video_id: UUID,
-        db: AsyncSession = Depends(get_async_session),
-        user: User = Depends(current_active_user),
+    video_id: UUID,
+    db: AsyncSession = Depends(get_async_session),
+    user: User = Depends(current_active_user),
 ):
     """Stream a video file"""
     result = await db.execute(
@@ -209,17 +209,15 @@ async def stream_video(
     return StreamingResponse(
         iterfile(),
         media_type="video/mp4",
-        headers={
-            "Content-Disposition": f'inline; filename="{video.filename}"'
-        }
+        headers={"Content-Disposition": f'inline; filename="{video.filename}"'},
     )
 
 
 @router.delete("/{video_id}")
 async def delete_video(
-        video_id: UUID,
-        db: AsyncSession = Depends(get_async_session),
-        user: User = Depends(current_active_user),
+    video_id: UUID,
+    db: AsyncSession = Depends(get_async_session),
+    user: User = Depends(current_active_user),
 ):
     """Delete a video and its file from disk"""
     result = await db.execute(
@@ -236,7 +234,9 @@ async def delete_video(
         try:
             os.remove(file_path)
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Failed to delete video file: {str(e)}")
+            raise HTTPException(
+                status_code=500, detail=f"Failed to delete video file: {str(e)}"
+            )
 
     # Delete database record
     await db.delete(video)

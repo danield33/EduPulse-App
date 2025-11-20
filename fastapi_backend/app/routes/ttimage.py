@@ -1,10 +1,9 @@
-
-from fastapi import APIRouter, HTTPException, Response, Depends
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
 import os
 import requests
 from app.users import current_active_user
-from app.database import User, get_async_session
+from app.database import User
 
 router = APIRouter(tags=["ttimage"])
 
@@ -20,11 +19,15 @@ class TTImageRequest(BaseModel):
         pattern="^(1024x1024|512x512|256x256)$",
     )
 
+
 class TTImageResponse(BaseModel):
     image_url: str
 
+
 @router.post("/generateImage", response_model=TTImageResponse)
-async def generate_image(request: TTImageRequest, user: User = Depends(current_active_user)):
+async def generate_image(
+    request: TTImageRequest, user: User = Depends(current_active_user)
+):
     """
     Generate an image using DALL-E based on a text prompt.
 
@@ -35,10 +38,7 @@ async def generate_image(request: TTImageRequest, user: User = Depends(current_a
         Image URL or image data
     """
     if not user:
-        raise HTTPException(
-            status_code=401,
-            detail="User not authenticated"
-        )
+        raise HTTPException(status_code=401, detail="User not authenticated")
 
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
@@ -83,5 +83,3 @@ async def generate_image(request: TTImageRequest, user: User = Depends(current_a
             status_code=500,
             detail=f"Unexpected error during image generation: {str(e)}",
         )
-
-

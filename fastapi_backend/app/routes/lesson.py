@@ -1,4 +1,3 @@
-
 from app.models import Lesson, LessonVideo, Video, Breakpoint
 from app.schemas import LessonCreate, LessonRead, LessonVideoAddResponse
 from uuid import UUID
@@ -10,6 +9,7 @@ from sqlalchemy import select
 
 router = APIRouter(tags=["lessons"])
 
+
 @router.post("/create", response_model=LessonRead)
 async def create_lesson(lesson: LessonCreate, db: AsyncSession = Depends(get_db)):
     new_lesson = Lesson(title=lesson.title, user_id=lesson.user_id)
@@ -18,11 +18,10 @@ async def create_lesson(lesson: LessonCreate, db: AsyncSession = Depends(get_db)
     await db.refresh(new_lesson)
     return new_lesson
 
+
 @router.post("/{lesson_id}/add_video", response_model=LessonVideoAddResponse)
 async def add_video_to_lesson(
-    lesson_id: UUID,
-    request: LessonVideoAddResponse,
-    db: AsyncSession = Depends(get_db)
+    lesson_id: UUID, request: LessonVideoAddResponse, db: AsyncSession = Depends(get_db)
 ):
     # Check that the lesson exists
     lesson_result = await db.execute(select(Lesson).where(Lesson.id == lesson_id))
@@ -30,7 +29,7 @@ async def add_video_to_lesson(
     if not lesson:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Lesson {lesson_id} not found"
+            detail=f"Lesson {lesson_id} not found",
         )
 
     # Check that the video exists
@@ -39,20 +38,19 @@ async def add_video_to_lesson(
     if not video:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Video {request.video_id} not found"
+            detail=f"Video {request.video_id} not found",
         )
 
     # Check that this video isn’t already linked to the lesson
     existing_link = await db.execute(
         select(LessonVideo).where(
-            LessonVideo.lesson_id == lesson_id,
-            LessonVideo.video_id == request.video_id
+            LessonVideo.lesson_id == lesson_id, LessonVideo.video_id == request.video_id
         )
     )
     if existing_link.scalar_one_or_none():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Video already added to this lesson"
+            detail="Video already added to this lesson",
         )
 
     # Create new LessonVideo association
@@ -83,8 +81,9 @@ async def add_video_to_lesson(
     return {
         "lesson_id": lesson_id,
         "video_id": request.video_id,
-        "index": request.index
+        "index": request.index,
     }
+
 
 @router.get("/{lesson_id}", response_model=LessonRead)
 def get_lesson(lesson_id: UUID, db: AsyncSession = Depends(get_db)):
@@ -110,7 +109,9 @@ def get_video_by_index(lesson_id: UUID, index: int, db: AsyncSession = Depends(g
 def has_next_video(lesson_id: UUID, index: int, db: AsyncSession = Depends(get_db)):
     next_exists = (
         db.query(LessonVideo)
-        .filter(LessonVideo.lesson_id == lesson_id, LessonVideo.order_index == index + 1)
+        .filter(
+            LessonVideo.lesson_id == lesson_id, LessonVideo.order_index == index + 1
+        )
         .first()
         is not None
     )

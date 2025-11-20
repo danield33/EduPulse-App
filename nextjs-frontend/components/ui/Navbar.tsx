@@ -1,7 +1,11 @@
 // components/Navbar.tsx
 import { useState } from "react";
 
-export default function Navbar({ onRoleChange }: { onRoleChange: (role: string) => void }) {
+export default function Navbar({
+  onRoleChange,
+}: {
+  onRoleChange: (role: string) => void;
+}) {
   const [role, setRole] = useState("student");
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {

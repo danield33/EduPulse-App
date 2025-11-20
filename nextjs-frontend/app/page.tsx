@@ -34,10 +34,12 @@ export default function Home() {
 
   const handleSaveScript = () => {
     if (!generatedScript) return;
-    const paragraphs = generatedScript.split(/\n+/).filter((p) => p.trim() !== "");
+    const paragraphs = generatedScript
+      .split(/\n+/)
+      .filter((p) => p.trim() !== "");
     const finalScript = paragraphs
       .map((p, i) =>
-        breakpoints[i] ? `${p}\n\n[BREAKPOINT] ${breakpoints[i]}` : p
+        breakpoints[i] ? `${p}\n\n[BREAKPOINT] ${breakpoints[i]}` : p,
       )
       .join("\n\n");
     console.log("✅ Final Script with Breakpoints:\n", finalScript);
@@ -104,7 +106,9 @@ export default function Home() {
             </>
           ) : (
             <>
-              <h2 className="text-2xl font-semibold mb-3">🧑‍🏫 Instructor Dashboard</h2>
+              <h2 className="text-2xl font-semibold mb-3">
+                🧑‍🏫 Instructor Dashboard
+              </h2>
               <p className="text-gray-600 dark:text-gray-300 mb-6">
                 Upload a teaching scenario PDF to generate a 2-minute AI-powered
                 teaching script.
@@ -115,8 +119,11 @@ export default function Home() {
                 className="mb-6 flex flex-col items-center justify-center border-2 border-dashed border-gray-400 dark:border-gray-600 rounded-lg p-8 bg-gray-100 dark:bg-gray-800"
                 onSubmit={async (e) => {
                   e.preventDefault();
-                  const input = document.getElementById("script-upload") as HTMLInputElement;
-                  if (!input?.files?.length) return alert("Please select a PDF file first.");
+                  const input = document.getElementById(
+                    "script-upload",
+                  ) as HTMLInputElement;
+                  if (!input?.files?.length)
+                    return alert("Please select a PDF file first.");
 
                   const formData = new FormData();
                   formData.append("file", input.files[0]);
@@ -124,10 +131,13 @@ export default function Home() {
                   setGeneratedScript(null);
 
                   try {
-                    const res = await fetch("http://localhost:8000/api/scripts/generate-script-from-pdf", {
-                      method: "POST",
-                      body: formData,
-                    });
+                    const res = await fetch(
+                      "http://localhost:8000/api/scripts/generate-script-from-pdf",
+                      {
+                        method: "POST",
+                        body: formData,
+                      },
+                    );
                     if (!res.ok) throw new Error("Failed to generate script");
                     const data = await res.json();
                     setGeneratedScript(data.script);
@@ -183,7 +193,9 @@ export default function Home() {
                     .filter((p) => p.trim() !== "")
                     .map((para, i) => (
                       <div key={i} className="mb-4">
-                        <p className="text-gray-700 dark:text-gray-200">{para}</p>
+                        <p className="text-gray-700 dark:text-gray-200">
+                          {para}
+                        </p>
 
                         {breakpoints[i] && (
                           <div className="bg-yellow-100 dark:bg-yellow-800 text-yellow-900 dark:text-yellow-200 p-3 rounded-lg mt-2">

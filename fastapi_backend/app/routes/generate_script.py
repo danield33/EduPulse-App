@@ -5,12 +5,13 @@ from openai import OpenAI
 from app.models import Script
 from app.database import get_async_session
 from pydantic import BaseModel
-import io, os, uuid
-from datetime import datetime
+import io
+import os
 
 router = APIRouter()
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
 
 class ScriptIn(BaseModel):
     content: str
@@ -59,7 +60,9 @@ async def generate_script_from_pdf(file: UploadFile = File(...)):
 
 
 @router.post("/save-script")
-async def save_script(payload: ScriptIn, session: AsyncSession = Depends(get_async_session)):
+async def save_script(
+    payload: ScriptIn, session: AsyncSession = Depends(get_async_session)
+):
     """Save the generated script to the database."""
     try:
         row = Script(content=payload.content)

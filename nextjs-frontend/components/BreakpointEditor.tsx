@@ -48,9 +48,7 @@ export default function BreakpointEditor({ script }: Props) {
         onClick={() => {
           const finalScript = paragraphs
             .map((p, i) =>
-              breakpoints[i]
-                ? `${p}\n\n[BREAKPOINT] ${breakpoints[i]}`
-                : p
+              breakpoints[i] ? `${p}\n\n[BREAKPOINT] ${breakpoints[i]}` : p,
             )
             .join("\n\n");
           console.log("Final Script with Breakpoints:\n", finalScript);

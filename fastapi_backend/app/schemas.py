@@ -38,6 +38,7 @@ class VideoRead(VideoBase):
 
     model_config = {"from_attributes": True}
 
+
 class Breakpoint(BaseModel):
     question: str
     options: List[str]
@@ -81,6 +82,7 @@ class LessonVideoAdd(BaseModel):
     breakpoints: Optional[List[Breakpoint]] = None
 
     model_config = {"from_attributes": True}
+
 
 class LessonVideoAddResponse(BaseModel):
     lesson_id: UUID

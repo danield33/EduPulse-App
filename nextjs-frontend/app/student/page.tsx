@@ -11,8 +11,7 @@ export default function StudentPage() {
           <Link href="/" className="font-bold text-lg tracking-tight">
             EduPulse
           </Link>
-          <div className="flex items-center gap-3">
-          </div>
+          <div className="flex items-center gap-3"></div>
         </div>
       </nav>
 

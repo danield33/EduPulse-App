@@ -1,5 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-
 import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,8 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
 
 export default function InstructorPage() {
   const [fileName, setFileName] = useState("");
@@ -31,7 +32,9 @@ export default function InstructorPage() {
       .filter((p) => p.trim() !== "");
 
     const finalScript = paragraphs
-      .map((p, i) => (breakpoints[i] ? `${p}\n\n[BREAKPOINT] ${breakpoints[i]}` : p))
+      .map((p, i) =>
+        breakpoints[i] ? `${p}\n\n[BREAKPOINT] ${breakpoints[i]}` : p,
+      )
       .join("\n\n");
 
     try {
@@ -95,9 +98,12 @@ export default function InstructorPage() {
       {/* MAIN */}
       <main className="flex flex-col items-center justify-center px-8 py-14">
         <section className="mt-12 w-full max-w-3xl rounded-2xl bg-white dark:bg-gray-800 shadow p-6">
-          <h2 className="text-2xl font-semibold mb-3">🧑‍🏫 Instructor Dashboard</h2>
+          <h2 className="text-2xl font-semibold mb-3">
+            🧑‍🏫 Instructor Dashboard
+          </h2>
           <p className="text-gray-600 dark:text-gray-300 mb-6">
-            Upload a teaching scenario PDF to generate a 2-minute AI-powered teaching script.
+            Upload a teaching scenario PDF to generate a 2-minute AI-powered
+            teaching script.
           </p>
 
           {/* Upload + Generate */}
@@ -105,8 +111,11 @@ export default function InstructorPage() {
             className="mb-6 flex flex-col items-center justify-center border-2 border-dashed border-gray-400 dark:border-gray-600 rounded-lg p-8 bg-gray-100 dark:bg-gray-800"
             onSubmit={async (e) => {
               e.preventDefault();
-              const input = document.getElementById("script-upload") as HTMLInputElement;
-              if (!input?.files?.length) return alert("Please select a PDF file first.");
+              const input = document.getElementById(
+                "script-upload",
+              ) as HTMLInputElement;
+              if (!input?.files?.length)
+                return alert("Please select a PDF file first.");
 
               const formData = new FormData();
               formData.append("file", input.files[0]);
@@ -114,10 +123,13 @@ export default function InstructorPage() {
               setGeneratedScript(null);
 
               try {
-                const res = await fetch(`${API_BASE}/api/scripts/generate-script-from-pdf`, {
-                  method: "POST",
-                  body: formData,
-                });
+                const res = await fetch(
+                  `${API_BASE}/api/scripts/generate-script-from-pdf`,
+                  {
+                    method: "POST",
+                    body: formData,
+                  },
+                );
                 if (!res.ok) {
                   const text = await res.text();
                   throw new Error(`Generate failed (${res.status}): ${text}`);
@@ -127,7 +139,9 @@ export default function InstructorPage() {
                 setBreakpoints({});
               } catch (err: any) {
                 console.error(err);
-                alert(`Error generating script. ${err?.message ?? ""} Check backend logs.`);
+                alert(
+                  `Error generating script. ${err?.message ?? ""} Check backend logs.`,
+                );
               } finally {
                 setLoading(false);
               }
@@ -148,7 +162,9 @@ export default function InstructorPage() {
               Choose PDF
             </label>
 
-            <p className="text-sm text-gray-500 mb-4">{fileName || "No file selected"}</p>
+            <p className="text-sm text-gray-500 mb-4">
+              {fileName || "No file selected"}
+            </p>
 
             <button
               type="submit"

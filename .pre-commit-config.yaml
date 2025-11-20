@@ -59,8 +59,9 @@ repos:
         pass_filenames: false
       - id: generate-frontend-client
         name: generate frontend client
-        entry: sh -c 'cd nextjs-frontend && pnpm run generate-client'
-        language: system
+        entry: openapi-ts --input ../openapi.json --output ../nextjs-frontend/src/client
+        language: node
+        pass_filenames: false
         # Only run frontend client generation if frontend files have changed:
         files: openapi\.json$
         pass_filenames: false

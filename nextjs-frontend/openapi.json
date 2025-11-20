@@ -1,8 +1,9 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "FastAPI",
-    "version": "0.1.0"
+    "title": "EduPulse Backend",
+    "description": "Backend API for EduPulse platform (lessons, videos, scripts, AI tools).",
+    "version": "1.0.0"
   },
   "paths": {
     "/auth/jwt/login": {
@@ -675,13 +676,110 @@
         }
       }
     },
-    "/items/": {
+    "/videos/generate": {
+      "post": {
+        "tags": [
+          "Videos",
+          "videos"
+        ],
+        "summary": "Generate Video",
+        "operationId": "generate_video",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VideoGenerateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VideoRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/videos/upload": {
+      "post": {
+        "tags": [
+          "Videos",
+          "videos"
+        ],
+        "summary": "Upload Video",
+        "description": "Upload a video file to disk and save metadata to database",
+        "operationId": "upload_video",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_Videos-upload_video"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VideoRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/videos/": {
       "get": {
         "tags": [
-          "item"
+          "Videos",
+          "videos"
         ],
-        "summary": "Read Item",
-        "operationId": "read_item",
+        "summary": "List Videos",
+        "description": "Get all videos for the authenticated user",
+        "operationId": "list_videos",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -722,51 +820,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Page_ItemRead_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "item"
-        ],
-        "summary": "Create Item",
-        "operationId": "create_item",
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ItemCreate"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ItemRead"
+                  "$ref": "#/components/schemas/Page_VideoRead_"
                 }
               }
             }
@@ -784,13 +838,15 @@
         }
       }
     },
-    "/items/{item_id}": {
-      "delete": {
+    "/videos/{video_id}": {
+      "get": {
         "tags": [
-          "item"
+          "Videos",
+          "videos"
         ],
-        "summary": "Delete Item",
-        "operationId": "delete_item",
+        "summary": "Get Video",
+        "description": "Get a specific video's metadata",
+        "operationId": "get_video",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -798,13 +854,61 @@
         ],
         "parameters": [
           {
-            "name": "item_id",
+            "name": "video_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
               "format": "uuid",
-              "title": "Item Id"
+              "title": "Video Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VideoRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Videos",
+          "videos"
+        ],
+        "summary": "Delete Video",
+        "description": "Delete a video and its file from disk",
+        "operationId": "delete_video",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "video_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Video Id"
             }
           }
         ],
@@ -824,6 +928,491 @@
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/videos/{video_id}/stream": {
+      "get": {
+        "tags": [
+          "Videos",
+          "videos"
+        ],
+        "summary": "Stream Video",
+        "description": "Stream a video file",
+        "operationId": "stream_video",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "video_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Video Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tts/synthesize": {
+      "post": {
+        "tags": [
+          "Text-to-Speech",
+          "tts"
+        ],
+        "summary": "Synthesize Speech",
+        "description": "Generate speech from text using Hume.ai TTS API.\n\nArgs:\n    request: TTS request containing text, voice description, and format\n\nReturns:\n    Audio URL or base64-encoded audio data",
+        "operationId": "synthesize_speech",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TTSRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TTSResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/ttimage/generateImage": {
+      "post": {
+        "tags": [
+          "Text-to-Image",
+          "ttimage"
+        ],
+        "summary": "Generate Image",
+        "description": "Generate an image using DALL-E based on a text prompt.\n\nArgs:\n    request: Dalle request containing the prompt and desired image size.\n\nReturns:\n    Image URL or image data",
+        "operationId": "generate_image",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TTImageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TTImageResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/lessons/create": {
+      "post": {
+        "tags": [
+          "Lessons",
+          "lessons"
+        ],
+        "summary": "Create Lesson",
+        "operationId": "create_lesson",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LessonCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LessonRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lessons/{lesson_id}/add_video": {
+      "post": {
+        "tags": [
+          "Lessons",
+          "lessons"
+        ],
+        "summary": "Add Video To Lesson",
+        "operationId": "add_video_to_lesson",
+        "parameters": [
+          {
+            "name": "lesson_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Lesson Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LessonVideoAddResponse"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LessonVideoAddResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lessons/{lesson_id}": {
+      "get": {
+        "tags": [
+          "Lessons",
+          "lessons"
+        ],
+        "summary": "Get Lesson",
+        "operationId": "get_lesson",
+        "parameters": [
+          {
+            "name": "lesson_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Lesson Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LessonRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lessons/{lesson_id}/video/{index}": {
+      "get": {
+        "tags": [
+          "Lessons",
+          "lessons"
+        ],
+        "summary": "Get Video By Index",
+        "operationId": "get_video_by_index",
+        "parameters": [
+          {
+            "name": "lesson_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Lesson Id"
+            }
+          },
+          {
+            "name": "index",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Index"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lessons/{lesson_id}/video/{index}/has_next": {
+      "get": {
+        "tags": [
+          "Lessons",
+          "lessons"
+        ],
+        "summary": "Has Next Video",
+        "operationId": "has_next_video",
+        "parameters": [
+          {
+            "name": "lesson_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Lesson Id"
+            }
+          },
+          {
+            "name": "index",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Index"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scripts/generate-script-from-pdf": {
+      "post": {
+        "tags": [
+          "Script Generation"
+        ],
+        "summary": "Generate Script From Pdf",
+        "description": "Accept a PDF upload and return a 2-minute teaching script.",
+        "operationId": "generate_script_from_pdf",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_Script_Generation-generate_script_from_pdf"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scripts/save-script": {
+      "post": {
+        "tags": [
+          "Script Generation"
+        ],
+        "summary": "Save Script",
+        "description": "Save the generated script to the database.",
+        "operationId": "save_script",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScriptIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "tags": [
+          "Root"
+        ],
+        "summary": "Root",
+        "operationId": "root",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           }
@@ -850,6 +1439,50 @@
           "token_type"
         ],
         "title": "BearerResponse"
+      },
+      "Body_Script_Generation-generate_script_from_pdf": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_Script Generation-generate_script_from_pdf"
+      },
+      "Body_Videos-upload_video": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "file": {
+            "type": "string",
+            "format": "binary",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "file"
+        ],
+        "title": "Body_Videos-upload_video"
       },
       "Body_auth-reset_forgot_password": {
         "properties": {
@@ -946,73 +1579,12 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
-      "ItemCreate": {
+      "LessonCreate": {
         "properties": {
-          "name": {
+          "title": {
             "type": "string",
-            "title": "Name"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description"
-          },
-          "quantity": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Quantity"
-          }
-        },
-        "type": "object",
-        "required": [
-          "name"
-        ],
-        "title": "ItemCreate"
-      },
-      "ItemRead": {
-        "properties": {
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description"
-          },
-          "quantity": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Quantity"
-          },
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
+            "title": "Title",
+            "description": "Lesson title"
           },
           "user_id": {
             "type": "string",
@@ -1022,17 +1594,73 @@
         },
         "type": "object",
         "required": [
-          "name",
-          "id",
+          "title",
           "user_id"
         ],
-        "title": "ItemRead"
+        "title": "LessonCreate"
       },
-      "Page_ItemRead_": {
+      "LessonRead": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Lesson title"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "id",
+          "created_at",
+          "user_id"
+        ],
+        "title": "LessonRead"
+      },
+      "LessonVideoAddResponse": {
+        "properties": {
+          "lesson_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Lesson Id"
+          },
+          "video_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Video Id"
+          },
+          "index": {
+            "type": "integer",
+            "title": "Index"
+          }
+        },
+        "type": "object",
+        "required": [
+          "lesson_id",
+          "video_id",
+          "index"
+        ],
+        "title": "LessonVideoAddResponse"
+      },
+      "Page_VideoRead_": {
         "properties": {
           "items": {
             "items": {
-              "$ref": "#/components/schemas/ItemRead"
+              "$ref": "#/components/schemas/VideoRead"
             },
             "type": "array",
             "title": "Items"
@@ -1092,7 +1720,127 @@
           "page",
           "size"
         ],
-        "title": "Page[ItemRead]"
+        "title": "Page[VideoRead]"
+      },
+      "ScriptIn": {
+        "properties": {
+          "content": {
+            "type": "string",
+            "title": "Content"
+          }
+        },
+        "type": "object",
+        "required": [
+          "content"
+        ],
+        "title": "ScriptIn"
+      },
+      "TTImageRequest": {
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "title": "Prompt",
+            "description": "Text prompt for image generation"
+          },
+          "n": {
+            "type": "integer",
+            "title": "N",
+            "description": "Number of images to generate (max 1)"
+          },
+          "size": {
+            "type": "string",
+            "pattern": "^(1024x1024|512x512|256x256)$",
+            "title": "Size",
+            "description": "Image size: '1024x1024', '512x512', or '256x256'",
+            "default": "1024x1024"
+          }
+        },
+        "type": "object",
+        "required": [
+          "prompt",
+          "n"
+        ],
+        "title": "TTImageRequest"
+      },
+      "TTImageResponse": {
+        "properties": {
+          "image_url": {
+            "type": "string",
+            "title": "Image Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "image_url"
+        ],
+        "title": "TTImageResponse"
+      },
+      "TTSRequest": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "description": "Text to synthesize into speech"
+          },
+          "voice_description": {
+            "type": "string",
+            "title": "Voice Description",
+            "description": "Description of the voice characteristics (e.g., 'warm female voice with slight accent')"
+          },
+          "format": {
+            "type": "string",
+            "pattern": "^(mp3|wav)$",
+            "title": "Format",
+            "description": "Audio format: 'mp3' or 'wav'",
+            "default": "mp3"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text",
+          "voice_description"
+        ],
+        "title": "TTSRequest"
+      },
+      "TTSResponse": {
+        "properties": {
+          "audio_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audio Url"
+          },
+          "audio_base64": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audio Base64"
+          },
+          "format": {
+            "type": "string",
+            "title": "Format"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "format",
+          "message"
+        ],
+        "title": "TTSResponse"
       },
       "UserCreate": {
         "properties": {
@@ -1278,6 +2026,86 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "VideoGenerateRequest": {
+        "properties": {
+          "audio": {
+            "$ref": "#/components/schemas/TTSRequest"
+          },
+          "images": {
+            "$ref": "#/components/schemas/TTImageRequest"
+          },
+          "lesson_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Lesson Id"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          }
+        },
+        "type": "object",
+        "required": [
+          "audio",
+          "images",
+          "lesson_id",
+          "title"
+        ],
+        "title": "VideoGenerateRequest"
+      },
+      "VideoRead": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "filename": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "file_size": {
+            "type": "integer",
+            "title": "File Size"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "id",
+          "filename",
+          "file_size",
+          "created_at"
+        ],
+        "title": "VideoRead"
       },
       "login": {
         "properties": {

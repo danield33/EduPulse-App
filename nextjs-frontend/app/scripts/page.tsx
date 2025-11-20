@@ -3,7 +3,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-type Row = { id: string; author?: string | null; created_at: string; preview: string };
+type Row = {
+  id: string;
+  author?: string | null;
+  created_at: string;
+  preview: string;
+};
 
 export default function ScriptsPage() {
   const [rows, setRows] = useState<Row[]>([]);
@@ -12,7 +17,9 @@ export default function ScriptsPage() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/scripts`);
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/scripts`,
+        );
         const data = await res.json();
         setRows(data);
       } finally {
@@ -26,19 +33,27 @@ export default function ScriptsPage() {
       <div className="mx-auto max-w-3xl">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold">Saved Scripts</h1>
-          <Link href="/instructor" className="text-blue-600 hover:underline">← Back to Instructor</Link>
+          <Link href="/instructor" className="text-blue-600 hover:underline">
+            ← Back to Instructor
+          </Link>
         </div>
 
-        {loading ? <p>Loading…</p> : rows.length === 0 ? (
+        {loading ? (
+          <p>Loading…</p>
+        ) : rows.length === 0 ? (
           <p>No scripts yet.</p>
         ) : (
           <ul className="space-y-3">
-            {rows.map(r => (
+            {rows.map((r) => (
               <li key={r.id} className="rounded border p-4 bg-white">
                 <div className="flex justify-between">
                   <div>
-                    <div className="text-sm text-gray-500">{new Date(r.created_at).toLocaleString()}</div>
-                    <div className="font-medium">{r.author ?? "Unknown author"}</div>
+                    <div className="text-sm text-gray-500">
+                      {new Date(r.created_at).toLocaleString()}
+                    </div>
+                    <div className="font-medium">
+                      {r.author ?? "Unknown author"}
+                    </div>
                   </div>
                   <Link
                     href={`/scripts/${r.id}`}
