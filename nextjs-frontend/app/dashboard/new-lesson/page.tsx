@@ -32,7 +32,6 @@ export default function CreateNewLessonPage() {
                 path: {
                     lesson_id: lessonId
                 },
-                baseURL: "http://localhost:8000"
             });
 
             if (response.data && "scenario" in (response.data as any)) {
@@ -67,7 +66,6 @@ export default function CreateNewLessonPage() {
                 body: {
                     file: fileInput.files[0],
                 },
-                baseURL: "http://localhost:8000"
             });
 
             if ("script" in (res.data as any)) {
@@ -125,7 +123,6 @@ export default function CreateNewLessonPage() {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
-                    baseURL: "http://localhost:8000"
                 });
 
                 if (response.data) {
@@ -142,7 +139,6 @@ export default function CreateNewLessonPage() {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
-                    baseURL: "http://localhost:8000"
                 });
 
                 if (res.data) {

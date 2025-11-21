@@ -42,7 +42,6 @@ export default function LessonVideoPlayer() {
                         segment_number: segmentNumber,
                         segment_type: segmentType,
                     },
-                    baseURL: "http://localhost:8000",
                     responseType: "blob",
                 });
 
