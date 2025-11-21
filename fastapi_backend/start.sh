@@ -1,13 +1,10 @@
 #!/bin/bash
 
+# Always run production mode on Railway
 if [ -f /.dockerenv ]; then
-    echo "Running in Docker"
-    fastapi dev app/main.py --host 0.0.0.0 --port 8000 --reload &
-    python watcher.py
+    echo "Running in Docker (production mode)"
+    exec /app/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port $PORT
 else
-    echo "Running locally with uv"
-    uv run fastapi dev app/main.py --host 0.0.0.0 --port 8000 --reload &
-    uv run python watcher.py
+    echo "Running locally with uv (dev mode)"
+    uv run fastapi dev app/main.py --reload --host 0.0.0.0 --port 8000
 fi
-
-wait
