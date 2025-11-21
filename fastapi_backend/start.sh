@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if [ ! -z "$PORT" ]; then
+    echo "Running on Railway (production mode)"
+    exec uvicorn app.main:app --host 0.0.0.0 --port $PORT
+fi
 # Always run production mode on Railway
 if [ -f /.dockerenv ]; then
     echo "Running in Docker (production mode)"

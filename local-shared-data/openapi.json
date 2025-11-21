@@ -2221,6 +2221,21 @@
             },
             "type": "array",
             "title": "Script"
+          },
+          "characters": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Characters",
+            "description": "Dictionary mapping character names to voice descriptions. Example: {'Narrator': 'A man with a deep voice', 'Teacher': 'Warm female voice'}"
           }
         },
         "type": "object",
