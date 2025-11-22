@@ -1,6 +1,7 @@
 import {AnimatePresence, motion} from "framer-motion";
 import {useEffect, useState} from "react";
 import {Button} from "@/components/ui/button";
+import Image from "next/image";
 
 interface ImageModalProps {
     isOpen: boolean;
@@ -94,7 +95,7 @@ export function ImageUploadModal({
                                     </label>
 
                                     {uploadFile && (
-                                        <img
+                                        <Image
                                             src={URL.createObjectURL(uploadFile)}
                                             alt="Preview"
                                             className="mt-3 rounded-md max-h-48 object-cover"

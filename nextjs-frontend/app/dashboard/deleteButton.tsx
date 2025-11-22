@@ -6,7 +6,7 @@ interface DeleteButtonProps {
     itemId: string;
 }
 
-export function DeleteButton({itemId}: DeleteButtonProps) {
+export function DeleteButton({}: DeleteButtonProps) {
     const handleDelete = async () => {
         // await removeItem(itemId);
     };

@@ -25,6 +25,7 @@ export function getAvailableBranches(scenario: Scenario, path?: string|null): st
 }
 
 // checks to see if a branching dialogue option has a dialogue box before it to specify which branch to go to
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function validateScenarioBreakpoints(scenario: Scenario) {
     const errors: string[] = [];
 

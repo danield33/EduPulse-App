@@ -1,8 +1,5 @@
 import {GetMyLessonsData, getMyLessons} from "@/app/openapi-client";
-import {cookies} from "next/headers";
-import {getUser} from "@/components/actions/user-action";
 import {getAccessToken} from "@/components/actions/cookie-action";
-import {Scenario} from "@/components/ui/DialogueEditor";
 
 
 /**

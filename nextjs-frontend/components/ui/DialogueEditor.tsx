@@ -43,7 +43,7 @@ export interface ScriptBlock {
 export interface Scenario {
     title: string;
     script: ScriptBlock[];
-    characters?: Record<string, string>; // Added: voice descriptions
+    characters?: Record<string, string>;
 }
 
 export interface BreakpointOption {
@@ -124,7 +124,7 @@ export default function DialogueEditor({scenario: globalScenario, generateScenar
     };
 
 
-    const handleDragEnd = (event: any) => {
+    const handleDragEnd = (event: { active: any; over: any; }) => {
         const {active, over} = event;
         if (!over || active.id === over.id) return;
 

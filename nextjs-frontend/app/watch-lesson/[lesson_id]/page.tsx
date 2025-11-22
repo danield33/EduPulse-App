@@ -75,7 +75,6 @@ export default function LessonVideoPlayer() {
     // Use the playback manager hook
     const {
         playbackState,
-        currentSegmentMetadata,
         scenarioLoaded,
         scenarioError,
         handleVideoEnded,
