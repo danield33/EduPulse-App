@@ -1,7 +1,6 @@
 "use server";
 
 import {cookies} from "next/headers";
-// import { readItem, deleteItem, createItem } from "@/app/clientService";
 import {usersCurrentUser} from "@/app/clientService"
 
 export async function getUser() {

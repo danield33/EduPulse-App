@@ -3,9 +3,6 @@ import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     output: "standalone",
-    experimental: {
-        missingSuspenseWithCSRBailout: false,
-    },
     webpack: (config, {isServer}) => {
         if (!isServer) {
             config.plugins.push(

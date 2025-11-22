@@ -1,6 +1,6 @@
 "use client"
 
-import {MouseEvent, useEffect, useState} from "react";
+import {MouseEvent, Suspense, useEffect, useState} from "react";
 import {Button} from "@/components/ui/button";
 import {generateScriptFromPdf, getLessonScenario, updateLesson, uploadScenario} from "@/app/openapi-client";
 import DialogueEditor, {Scenario} from "@/components/ui/DialogueEditor";
@@ -9,7 +9,16 @@ import {prepareScenarioForBackend} from "@/lib/script-editor";
 import {useSearchParams} from "next/navigation";
 
 
-export default function CreateNewLessonPage() {
+
+export default function Page() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <CreateNewLessonPage />
+        </Suspense>
+    );
+}
+
+function CreateNewLessonPage() {
     const searchParams = useSearchParams();
     const lessonId = searchParams.get("lessonId");
     const isEditMode = !!lessonId;
@@ -35,7 +44,6 @@ export default function CreateNewLessonPage() {
             });
 
             if (response.data && "scenario" in (response.data as any)) {
-                // response.data contains { lesson_id, title, scenario }
                 setScenario((response.data as { scenario: Scenario }).scenario as Scenario);
             } else {
                 throw new Error("Invalid response format");
