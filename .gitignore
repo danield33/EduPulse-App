@@ -155,3 +155,4 @@ cython_debug/
 .idea/
 fastapi_backend/.DS_Store
 .DS_Store
+node_modules

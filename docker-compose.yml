@@ -56,7 +56,7 @@ services:
       context: ./nextjs-frontend
     user: node
     environment:
-      NODE_ENV: development
+      NODE_ENV: production
       API_BASE_URL: http://backend:8000
       OPENAPI_OUTPUT_FILE: ./shared-data/openapi.json
     ports:
