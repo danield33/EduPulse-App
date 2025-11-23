@@ -137,6 +137,12 @@ export type Page_VideoRead_ = {
 export type Scenario = {
   title: string;
   script: Array<ScriptBlock>;
+  /**
+   * Dictionary mapping character names to voice descriptions. Example: {'Narrator': 'A man with a deep voice', 'Teacher': 'Warm female voice'}
+   */
+  characters?: {
+    [key: string]: string;
+  } | null;
 };
 
 export type ScriptBlock = {

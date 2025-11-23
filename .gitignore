@@ -156,3 +156,4 @@ cython_debug/
 fastapi_backend/.DS_Store
 .DS_Store
 node_modules
+fastapi_backend/lessons
