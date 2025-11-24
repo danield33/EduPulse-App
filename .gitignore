@@ -157,3 +157,4 @@ fastapi_backend/.DS_Store
 .DS_Store
 node_modules
 fastapi_backend/lessons
+/nextjs-frontend/.pnpm-store

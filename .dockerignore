@@ -3,3 +3,8 @@ venv
 **/.venv
 **/venv
 __pycache__
+**/.next
+.pnpm-store
+.next
+/nextjs-frontend/.pnpm-store
+/nextjs-frontend/.next
