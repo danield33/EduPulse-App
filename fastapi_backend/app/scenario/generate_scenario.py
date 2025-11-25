@@ -173,6 +173,7 @@ async def generate_scenario(scenario: Scenario, lesson_id: str):
             b64_audio = await get_b64_audio(dummy, voice_description)
             audio_path = decode_base64_to_file(b64_audio, ".mp3")
             current_audios.append(audio_path)
+            print(f"Audio saved to: '{audio_path}' for '{role}'")
 
     # -------------------------------------------------
     # Process MAIN SCRIPT
