@@ -1,5 +1,6 @@
 import {useCallback, useEffect, useState} from "react";
 import {BreakpointQuestion, LessonScenarioResponse, PlaybackState, ScriptBlock, SegmentMetadata,} from "./types";
+import {getLessonScenario} from "@/app/openapi-client";
 
 interface UsePlaybackManagerProps {
     lessonId: string;
@@ -49,15 +50,18 @@ export function usePlaybackManager({
     useEffect(() => {
         async function loadScenario() {
             try {
-                const response = await fetch(
-                    `http://localhost:8000/lessons/${lessonId}/scenario`
-                );
+                const response: {data: LessonScenarioResponse} = (await getLessonScenario({
+                    path: {
+                        lesson_id: lessonId
+                    },
+                    baseURL: process.env.NEXT_PUBLIC_API_BASE_URL
+                })) as {data: LessonScenarioResponse}
 
-                if (!response.ok) {
+                if (!response.data) {
                     throw new Error("Failed to load lesson scenario");
                 }
 
-                const data: LessonScenarioResponse = await response.json();
+                const data: LessonScenarioResponse = response.data;
                 setScenario(data);
 
                 // Build segment map by analyzing the scenario
