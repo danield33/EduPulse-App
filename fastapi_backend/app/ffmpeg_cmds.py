@@ -62,7 +62,7 @@ def make_video(image_path: str, audio_path: str, output_path: str) -> None:
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
-        check=True
+        # check=True
     )
 
     print("FFmpeg Command:", " ".join(cmd))
