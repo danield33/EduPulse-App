@@ -44,6 +44,7 @@ export default function LessonVideoPlayer() {
                     },
                     baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
                     responseType: "blob",
+                    baseURL: process.env.NEXT_PUBLIC_API_BASE_URL
                 });
 
                 const blob = (await response.data) as Blob;
