@@ -6,11 +6,12 @@ export const getApiBaseUrl = () => {
     return process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
   }
   // In server components, use API_BASE_URL
-  return process.env.API_BASE_URL || "http://localhost:8000";
+  return process.env.API_BASE_URL || "http://backend:8000";
 };
 
 const configureClient = () => {
-  const baseURL = process.env.API_BASE_URL || "http://localhost:8000";
+  const baseURL = getApiBaseUrl()
+  console.log("BASEURL:  ", baseURL)
 
   client.setConfig({
     baseURL: baseURL,

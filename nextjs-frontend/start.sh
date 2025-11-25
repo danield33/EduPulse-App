@@ -1,6 +1,6 @@
 #!/bin/bash
 
-pnpm run build && pnpm run start &
+ pnpm run dev &
 
 node watcher.js
 

@@ -41,7 +41,8 @@ function CreateNewLessonPage() {
                 path: {
                     lesson_id: lessonId
                 },
-                baseURL: "http://localhost:8000"
+
+                baseURL: process.env.NEXT_PUBLIC_API_BASE_URL
             });
 
             if (response.data && "scenario" in (response.data as any)) {
@@ -75,7 +76,7 @@ function CreateNewLessonPage() {
                 body: {
                     file: fileInput.files[0],
                 },
-                baseURL: "http://localhost:8000"
+                baseURL: process.env.NEXT_PUBLIC_API_BASE_URL
             });
 
             if ("script" in (res.data as any)) {
@@ -133,7 +134,7 @@ function CreateNewLessonPage() {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
-                    baseURL: "http://localhost:8000"
+                    baseURL: process.env.NEXT_PUBLIC_API_BASE_URL
                 });
 
                 if (response.data) {
@@ -150,7 +151,7 @@ function CreateNewLessonPage() {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
-                    baseURL: "http://localhost:8000"
+                    baseURL: process.env.NEXT_PUBLIC_API_BASE_URL
                 });
 
                 if (res.data) {

@@ -1,6 +1,7 @@
 "use server";
 
 import {cookies} from "next/headers";
+import { client } from "@/app/openapi-client/sdk.gen";
 
 import {authJwtLogin} from "@/app/clientService";
 import {redirect} from "next/navigation";

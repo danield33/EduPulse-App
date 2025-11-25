@@ -42,7 +42,7 @@ export default function LessonVideoPlayer() {
                         segment_number: segmentNumber,
                         segment_type: segmentType,
                     },
-                    baseURL: "http://localhost:8000",
+                    baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
                     responseType: "blob",
                 });
 
