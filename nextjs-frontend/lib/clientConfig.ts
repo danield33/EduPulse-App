@@ -11,7 +11,6 @@ export const getApiBaseUrl = () => {
 
 const configureClient = () => {
   const baseURL = getApiBaseUrl()
-  console.log("BASEURL:  ", baseURL)
 
   client.setConfig({
     baseURL: baseURL,
