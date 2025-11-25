@@ -68,13 +68,13 @@ services:
       - nextjs-node-modules:/app/node_modules
       - ./local-shared-data:/app/shared-data
 
-  mailhog:
-    image: mailhog/mailhog
-    ports:
-      - "1025:1025"
-      - "8025:8025"
-    networks:
-      - my_network
+#  mailhog:
+#    image: mailhog/mailhog
+#    ports:
+#      - "1025:1025"
+#      - "8025:8025"
+#    networks:
+#      - my_network
 
 volumes:
   postgres_data:
