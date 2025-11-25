@@ -44,7 +44,7 @@ def make_video(image_path: str, audio_path: str, output_path: str) -> None:
         "-crf", "18",  # visually lossless for static images
         "-r", "1",  # 1 FPS good for still image
         "-pix_fmt", "yuv420p",
-        "-vsync", "0",
+        "-fps_mode", "cfr",
 
         # Audio
         "-c:a", "aac",
