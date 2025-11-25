@@ -51,14 +51,23 @@ def make_video(image_path: str, audio_path: str, output_path: str) -> None:
         "-b:a", "192k",
 
         # Duration
-        "-shortest",  # ensures video ends at audio
-        # "-t", str(duration),
+        # "-shortest",  # ensures video ends at audio
+        "-t", str(duration),
 
         output_path,
     ]
 
-    subprocess.run(cmd, check=True)
+    result = subprocess.run(
+        cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        check=True
+    )
 
+    print("FFmpeg Command:", " ".join(cmd))
+    print("FFmpeg stdout:", result.stdout)
+    print("FFmpeg stderr:", result.stderr)
 
 def stitch_base64_mp3s(base64_list: List[str], output_path: Optional[str] = None) -> str:
     """
