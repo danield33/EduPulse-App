@@ -51,7 +51,6 @@ def make_video(image_path: str, audio_path: str, output_path: str) -> None:
         "-b:a", "192k",
 
         # Duration
-        "-shortest",  # ensures video ends at audio
         "-t", str(duration),
 
         output_path,
