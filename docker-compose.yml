@@ -22,7 +22,8 @@ services:
       - fastapi-venv:/app/.venv
       - ./local-shared-data:/app/shared-data
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   db:
     image: postgres:17
@@ -36,6 +37,11 @@ services:
       - my_network
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 #  db_test:
 #    image: postgres:17
