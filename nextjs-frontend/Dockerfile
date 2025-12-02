@@ -12,6 +12,12 @@ COPY package*.json ./
 # Install dependencies as root (or myappuser, depending on your structure)
 RUN pnpm install
 
+# Make .next directory
+RUN mkdir -p .next
+
+# Let user node own .next directory
+RUN chown node .next
+
 ## Switch to the non-root user
 USER node
 
