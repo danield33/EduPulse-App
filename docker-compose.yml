@@ -60,7 +60,7 @@ services:
   frontend:
     build:
       context: ./nextjs-frontend
-    user: node
+    user: root # todo: want to de-escalate privileges to user: node
     environment:
       NODE_ENV: production
       API_BASE_URL: http://backend:8000
