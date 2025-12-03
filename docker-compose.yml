@@ -9,7 +9,7 @@ services:
       - ./fastapi_backend/.env
     environment:
       OPENAPI_OUTPUT_FILE: ./shared-data/openapi.json
-      DATABASE_URL: postgresql+asyncpg://postgres:password@db:5432/mydatabase
+      DATABASE_URL: postgresql+asyncpg://postgres:password@15.204.234.253:5432/mydatabase
       TEST_DATABASE_URL: postgresql+asyncpg://postgres:password@db_test:5432/testdatabase
       MAIL_SERVER: mailhog
       PORT: 8000
