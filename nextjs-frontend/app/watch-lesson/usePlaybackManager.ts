@@ -54,7 +54,6 @@ export function usePlaybackManager({
                     path: {
                         lesson_id: lessonId
                     },
-                    baseURL: process.env.NEXT_PUBLIC_API_BASE_URL
                 })) as {data: LessonScenarioResponse}
 
                 if (!response.data) {
