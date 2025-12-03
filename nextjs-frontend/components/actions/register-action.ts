@@ -32,6 +32,7 @@ export async function register(prevState: unknown, formData: FormData) {
     try {
         const {error} = await registerRegister(input);
         if (error) {
+            console.error(error)
             return {server_validation_error: getErrorMessage(error)};
         }
     } catch (err) {
