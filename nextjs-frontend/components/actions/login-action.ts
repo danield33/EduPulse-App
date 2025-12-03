@@ -27,7 +27,6 @@ export async function login(prevState: unknown, formData: FormData) {
             username,
             password,
         },
-        baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
     };
 
     try {
