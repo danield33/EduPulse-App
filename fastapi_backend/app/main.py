@@ -15,7 +15,6 @@ from .utils import simple_generate_unique_route_id
 app = FastAPI(
     generate_unique_id_function=simple_generate_unique_route_id,
     openapi_url=settings.OPENAPI_URL,
-    root_path="/api",
     servers=[{"url": "/api"}]
 )
 

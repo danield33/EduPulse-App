@@ -21,13 +21,11 @@ export async function register(prevState: unknown, formData: FormData) {
 
     const {email, password} = validatedFields.data;
 
-    console.log(process.env.NEXT_PUBLIC_API_BASE_URL, "URL")
     const input = {
         body: {
             email,
             password,
         },
-        baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
     };
     try {
         const {error} = await registerRegister(input);
