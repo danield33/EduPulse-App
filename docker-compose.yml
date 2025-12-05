@@ -59,7 +59,7 @@ services:
     user: root # todo: want to de-escalate privileges to user: node
     environment:
       NODE_ENV: production
-      API_BASE_URL: http://backend:8000/api
+      API_BASE_URL: http://backend:8000
       NEXT_PUBLIC_API_BASE_URL: https://edupulse.net/api
       OPENAPI_OUTPUT_FILE: ./shared-data/openapi.json
     ports:
