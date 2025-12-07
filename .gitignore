@@ -158,3 +158,4 @@ fastapi_backend/.DS_Store
 node_modules
 fastapi_backend/lessons
 /nextjs-frontend/.pnpm-store
+nextjs-frontend/pnpm-lock.yaml
