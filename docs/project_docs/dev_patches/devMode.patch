@@ -1,0 +1,85 @@
+diff --git a/docker-compose.yml b/docker-compose.yml
+index 3d94fad..a4a1b2e 100644
+--- a/docker-compose.yml
++++ b/docker-compose.yml
+@@ -58,9 +58,9 @@ services:
+       context: ./nextjs-frontend
+     user: root # todo: want to de-escalate privileges to user: node
+     environment:
+-      NODE_ENV: production
++      NODE_ENV: development
+       API_BASE_URL: http://backend:8000
+-      NEXT_PUBLIC_API_BASE_URL: https://edupulse.net/api
++      NEXT_PUBLIC_API_BASE_URL: https://localhost:8000
+       OPENAPI_OUTPUT_FILE: ./shared-data/openapi.json
+     ports:
+       - "3000:3000"
+diff --git a/fastapi_backend/app/main.py b/fastapi_backend/app/main.py
+index df0b3bd..7a0a975 100644
+--- a/fastapi_backend/app/main.py
++++ b/fastapi_backend/app/main.py
+@@ -15,6 +15,7 @@ from .utils import simple_generate_unique_route_id
+ app = FastAPI(
+     generate_unique_id_function=simple_generate_unique_route_id,
+     openapi_url=settings.OPENAPI_URL,
++    root_path="/api"
+ )
+ 
+ # Middleware for CORS configuration
+diff --git a/fastapi_backend/app/routes/generate_script.py b/fastapi_backend/app/routes/generate_script.py
+index 04269e6..98a4152 100644
+--- a/fastapi_backend/app/routes/generate_script.py
++++ b/fastapi_backend/app/routes/generate_script.py
+@@ -10,7 +10,6 @@ from app.script_system_prompt import build_prompt;
+ 
+ router = APIRouter(tags=["genscript"])
+ 
+-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+ 
+ 
+ class ScriptIn(BaseModel):
+@@ -25,6 +24,7 @@ def extract_pdf_text(pdf_bytes: bytes) -> str:
+ 
+ @router.post("/from_pdf")
+ async def generate_script_from_pdf(file: UploadFile = File(...)):
++    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+     """Accept a PDF upload and return a 2-minute teaching script."""
+     if not file.filename.lower().endswith(".pdf"):
+         raise HTTPException(status_code=400, detail="Please upload a .pdf file")
+diff --git a/nextjs-frontend/lib/clientConfig.ts b/nextjs-frontend/lib/clientConfig.ts
+index b87337c..9e1438b 100644
+--- a/nextjs-frontend/lib/clientConfig.ts
++++ b/nextjs-frontend/lib/clientConfig.ts
+@@ -3,7 +3,7 @@ import { client } from "@/app/openapi-client/sdk.gen";
+ export const getApiBaseUrl = () => {
+   // In client components (browser), use the public URL
+   if (typeof window !== 'undefined') {
+-    return process.env.NEXT_PUBLIC_API_BASE_URL || "https://edupulse.net";
++    return process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost.net";
+   }
+   // In server components (Docker), use internal Docker network
+   return process.env.API_BASE_URL || "http://backend:8000";
+diff --git a/nextjs-frontend/next.config.mjs b/nextjs-frontend/next.config.mjs
+index d03199c..55bb7a0 100644
+--- a/nextjs-frontend/next.config.mjs
++++ b/nextjs-frontend/next.config.mjs
+@@ -2,7 +2,6 @@ import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
+ 
+ /** @type {import('next').NextConfig} */
+ const nextConfig = {
+-    output: "standalone",
+     webpack: (config, {isServer}) => {
+         if (!isServer) {
+             config.plugins.push(
+diff --git a/nextjs-frontend/start.sh b/nextjs-frontend/start.sh
+index 1289bad..89fe4ee 100755
+--- a/nextjs-frontend/start.sh
++++ b/nextjs-frontend/start.sh
+@@ -1,6 +1,6 @@
+ #!/bin/bash
+ 
+-pnpm run build && pnpm run start &
++pnpm run dev &
+ 
+ node watcher.js
+ 
