@@ -77,3 +77,4 @@ On the frontend, there are a number of things that could need implemented/fixing
 * Better ffmpeg updates - instead of re-rendering the entire video, determine what segments were changed and only update them (Faster loading times).
 * Parallelize ffmpeg. When ffmpeg is running, it uses most/all the system's resources, leaving nothing else able to process. This prevents other users from using the website while a lesson is rendering.
 	* Could also move the rendering process to an AWS lambda service
+* Don't save images in the postgres database - this could lead to slow database writes. Instead use a blob storage like S3
