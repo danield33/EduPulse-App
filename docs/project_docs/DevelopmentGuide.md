@@ -30,7 +30,7 @@ automatically convert the two.
 
 ## Tools
 
-* Frontend: Next.js
+* Frontend: Next.js + TailwindCSS
 * Backend: FastAPI (python)
     * Key Library: FFmpeg
 * Database: PostgreSQL
@@ -49,3 +49,24 @@ to clean them up.
 Visit `localhost:8000/docs` or `localhost:8000/api/docs` for API information.
 
 
+
+# Possible Future Work
+
+## Frontend
+
+On the frontend, there's a number of things that could need implemented/fixing
+
+* Editing lesson names
+* Deleting lessons
+* Better lesson search
+	* Adding some kind of "search" for lessons like youtube
+* Feature for seeing whos speaking in each lesson / subtitles.
+	* When a dialogue starts, add some kind of overlay that says who is speaking or subtitles with character names.
+
+
+## Backend
+
+* Move lesson videos to AWS S3 for better reliability. On the host, the files could corrupt or some other issues but S3 is more redundant and reliable
+* Better ffmpeg updates - instead of re-rendering the entire video, determine what segments were changed and only update them (Fast loading times).
+* Parallelize ffmpeg. When ffmpeg is running, it uses most/all the system's cores leaving nothing able to process. This prevents users from navigating the website while a lesson is rendering.
+	* Could also move the rendering process to an AWS lambda service
