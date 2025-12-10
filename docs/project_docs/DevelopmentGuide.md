@@ -52,9 +52,13 @@ Visit `localhost:8000/docs` or `localhost:8000/api/docs` for API information.
 
 # Possible Future Work
 
+* Better CI/CD pipeline
+  * Fix GitHub pipeline. They're currently failing due to tests
+* Write tests for code
+
 ## Frontend
 
-On the frontend, there's a number of things that could need implemented/fixing
+On the frontend, there are a number of things that could need implemented/fixing:
 
 * Editing lesson names
 * Deleting lessons
@@ -62,11 +66,14 @@ On the frontend, there's a number of things that could need implemented/fixing
 	* Adding some kind of "search" for lessons like youtube
 * Feature for seeing whos speaking in each lesson / subtitles.
 	* When a dialogue starts, add some kind of overlay that says who is speaking or subtitles with character names.
-
+* iframe the video for canvas usage
+* AI Image generation - right now, the image generation prompt when adding images isn't implemented.
+* Dashboard user icon pfp is always a default user. This icon looks like a (U). Could change to be first character of profile's name
 
 ## Backend
 
-* Move lesson videos to AWS S3 for better reliability. On the host, the files could corrupt or some other issues but S3 is more redundant and reliable
-* Better ffmpeg updates - instead of re-rendering the entire video, determine what segments were changed and only update them (Fast loading times).
-* Parallelize ffmpeg. When ffmpeg is running, it uses most/all the system's cores leaving nothing able to process. This prevents users from navigating the website while a lesson is rendering.
+* Move lesson videos to AWS S3 for better reliability. On the host, the files could corrupt or some other issues, but S3 is more redundant and reliable
+  * This could potentially lower costs for VPS since we wouldn't need as much storage there (this would have to be configured on the ovh dashboard).
+* Better ffmpeg updates - instead of re-rendering the entire video, determine what segments were changed and only update them (Faster loading times).
+* Parallelize ffmpeg. When ffmpeg is running, it uses most/all the system's resources, leaving nothing else able to process. This prevents other users from using the website while a lesson is rendering.
 	* Could also move the rendering process to an AWS lambda service
