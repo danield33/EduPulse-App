@@ -124,80 +124,71 @@ Steps:
 <img width="1509" height="783" alt="image" src="https://github.com/user-attachments/assets/b9633f85-f7a9-470f-805f-319e07b5664f" />
 
 > **Screenshot #6 — Segments Panel**  
-> - Show: List of segments  
-> - Highlight: “Add Segment” button  
-
-Segments are individual video clips used inside scenarios.
+> - Shows a list of segments  
+> - Able to add/edit segments
 
 ---
 
 ## **Adding a Segment**
 
-<img width="1508" height="781" alt="image" src="https://github.com/user-attachments/assets/1c519fda-581f-4a0d-89b9-cfda2ea1f2a0" />
-<img width="1509" height="784" alt="image" src="https://github.com/user-attachments/assets/7ee8e337-3e17-4307-b5b7-c1c9db911010" />
+<img width="308" height="206" alt="image" src="https://github.com/user-attachments/assets/31940194-3682-4aef-9c60-069c8f901ed1" />
 
-> **Screenshot #7 — Add Segment Form**  
-> - Show: Name field, Upload button, Save button  
-> - Highlight: File upload area
-
-
+> **Screenshot #7 — Add Segment Options**  
+> - Able to add new breakpoints, images, dialouge boxs, or branching dialouges
 
 Steps:
-1. Click **Add Segment**  
-2. Upload a video file  
-3. Name the segment  
-4. Save
+1. Click **Add Content**  
+2. Upload any additional content  
+3. Save
 
 ---
 
-## **Previewing a Segment**
+## **Manage Character Voices**
+
+<img width="1509" height="784" alt="image" src="https://github.com/user-attachments/assets/7ee8e337-3e17-4307-b5b7-c1c9db911010" />
+
+> **Screenshot #8 — Managing Voices**  
+
+Steps:
+1. Click **Manage Voices**  
+2. Type in a description of the desired voice  
+3. Add any optional characters, if needed
+4. Save voices
+5. Generate video
+
+---
+
+## **Previewing Video**
 
 <img width="1509" height="779" alt="image" src="https://github.com/user-attachments/assets/ec21e5b5-c74d-4fea-926a-82558099efcd" />
-
-> **Screenshot #8 — Segment Preview Window**  
-> - Show: Video player with the segment loaded  
-> - Crop: Video + controls only  
-
----
-
-# **6. Scenario Builder**
-
-The Scenario Builder visually connects segments into branching learning pathways.
-
-## **Scenario Builder Overview**
-
 <img width="1509" height="783" alt="image" src="https://github.com/user-attachments/assets/e555aa9a-894d-4061-a3af-8fc5e001385b" />
 
-> **Screenshot #9 — Scenario Builder Canvas**  
-> - Show: Nodes (segments) and arrows  
-> - Highlight: First segment, transitions  
-> - Crop: Full builder area  
+
+> **Screenshot #8 — Segment Preview Window**
+
+Steps:
+1. Click **Play**  
+2. Review content and breakpoints
+3. Copy down lesson ID
+4. Click save
+
 
 ---
 
-## **Viewing media**
+## **Viewing Media**
 
 <img width="1508" height="782" alt="image" src="https://github.com/user-attachments/assets/64c70fbc-799b-4e4a-b12d-acce0682d81a" />
  
-> **Screenshot #10 — Node Detail Panel**  
-> - Show: Prompt field, options, next-segment dropdown  
-> - Highlight: “Add Option” button  
+> **Screenshot #10 — Media Panel**  
 
-Actions you can take:
-- Add prompts  
-- Add branching options  
-- Connect nodes  
-- Remove transitions  
+
+Features:
+1. Ability to input lesson ID
+2. Access to watched lessons
+
 
 ---
 
-## **Validation Tool**
-
-**Screenshot Placeholder**  
-> **Screenshot #13 — Validation Results Panel**  
-> - Show: Error list or green success message  
-
----
 
 # **7. Media Manager**
 
