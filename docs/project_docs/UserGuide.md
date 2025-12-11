@@ -57,14 +57,11 @@ This guide walks through the interface using annotated screenshots.
 <img width="1510" height="775" alt="image" src="https://github.com/user-attachments/assets/5c2412c9-2891-40f4-b7be-d7db868ed823" />
 
 > **Screenshot #1 — Login Page**  
-> - Show: Email field, password field, login button  
-> - Optional: "Forgot Password" link  
-> - Crop: Only the login modal/center section  
 
-Text instructions:
-1. Navigate to the Edupulse site.  
-2. Enter your credentials.  
-3. Click **Log In**.
+Text Instructions:
+	1.	Navigate to the EduPulse site
+	2.	Enter your email and password
+	3.	Click Log In to access your dashboard
 
 ---
 
