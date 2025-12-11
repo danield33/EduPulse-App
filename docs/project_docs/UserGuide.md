@@ -25,6 +25,7 @@ Use this document when preparing a polished visual guide for instructors and lea
   * [**Adding a Segment**](#adding-a-segment)
 * [**7. Manage Character Voices**](#7-scenario-builder)
 * [**8. Previewing Content**](#8-previewing-content)
+* [**9. Student View**](#9-student-view)
 * [**End of Screenshot Template Guide**](#end-of-screenshot-template-guide)
 <!-- TOC -->
 
@@ -81,7 +82,6 @@ The Dashboard displays:
 
 # **5. Creating and Managing Lessons**
 
-## **Creating a Lesson**
 
 <img width="255" height="77" alt="image" src="https://github.com/user-attachments/assets/6b13d8a5-f0c9-4b8a-a8ae-5b81bad3a888" />
 
@@ -156,6 +156,16 @@ Steps:
 3. Copy down lesson ID
 4. Click save
 
+# **9. Student View**
+
+<img width="1508" height="782" alt="image" src="https://github.com/user-attachments/assets/64c70fbc-799b-4e4a-b12d-acce0682d81a" />
+ 
+> **Screenshot #10 — Lesson ID**  
+
+
+Features:
+1. Ability to input lesson ID
+2. Access to watched lessons
 
 ---
 
