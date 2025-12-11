@@ -61,10 +61,10 @@ This guide walks through the interface using annotated screenshots.
 
 > **Screenshot #1 — Sign Up Page**
 
-How to Sign Up
-	1.	Go to the EduPulse website.
-	2.	On the Sign Up page, enter your email and create a password.
-	3.	Click Sign Up to create your account.
+How to Sign Up:
+1. Go to the EduPulse website.
+2. On the Sign Up page, enter your email and create a password.
+3. Click Sign Up to create your account.
 	
 ---
 
@@ -75,11 +75,10 @@ How to Sign Up
 
 > **Screenshot #1 — Login Page**
 
-
-How to Log In
-	1.	After signing up, open the Login page.
-	2.	Enter the same email and password you used during sign up.
-	3.	Click Sign In to access your EduPulse dashboard and start creating lessons.
+How to Log In:
+1. After signing up, open the Login page.
+2. Enter the same email and password you used during sign up.
+3. Click Sign In to access your EduPulse dashboard and start creating lessons.
 
 ---
 
@@ -88,8 +87,6 @@ How to Log In
 <img width="1508" height="781" alt="image" src="https://github.com/user-attachments/assets/d14a3183-2144-4929-9074-6ff4263f7a9e" />
 
 > **Screenshot #2 — Dashboard Overview**  
-> - Show: Lesson table, sidebar navigation, Create Lesson button  
-> - Crop: Entire dashboard, excluding browser chrome  
 
 The Dashboard displays:
 - List of lessons  
