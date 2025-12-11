@@ -16,6 +16,7 @@ Use this document when preparing a polished visual guide for instructors and lea
 * [**Edupulse User Guide — Screenshot Template Edition**](#edupulse-user-guide--screenshot-template-edition)
 * [**Table of Contents**](#table-of-contents)
 * [**1. Introduction to Edupulse**](#1-introduction-to-edupulse)
+* [**2. Sign Up**](#2-sign-up)
 * [**2. Logging In**](#2-logging-in)
 * [**3. Dashboard**](#3-dashboard)
 * [**4. Creating and Managing Lessons**](#4-creating-and-managing-lessons)
@@ -55,24 +56,36 @@ This guide walks through the interface using annotated screenshots.
 
 ---
 
-# **2. Sign Up & Logging In**
+# **2. Sign Up**
 <img width="1508" height="780" alt="image" src="https://github.com/user-attachments/assets/da8c159f-22c5-43e2-9177-e3742b31314f" />
 
-<img width="1510" height="775" alt="image" src="https://github.com/user-attachments/assets/5c2412c9-2891-40f4-b7be-d7db868ed823" />
+> **Screenshot #1 — Sign Up Page**
 
-> **Screenshot #1 — Login Page**  
-
-Text Instructions:
-	1.	Navigate to the EduPulse site
-	2.	Enter your email and password
-	3.	Click Log In to access your dashboard
+How to Sign Up
+	1.	Go to the EduPulse website.
+	2.	On the Sign Up page, enter your email and create a password.
+	3.	Click Sign Up to create your account.
+	
+---
 
 ---
 
-# **3. Dashboard**
+# **3. Logging In**
+<img width="1510" height="775" alt="image" src="https://github.com/user-attachments/assets/5c2412c9-2891-40f4-b7be-d7db868ed823" />
+
+> **Screenshot #1 — Login Page**
+
+
+How to Log In
+	1.	After signing up, open the Login page.
+	2.	Enter the same email and password you used during sign up.
+	3.	Click Sign In to access your EduPulse dashboard and start creating lessons.
+
+---
+
+# **4. Dashboard**
 
 <img width="1508" height="781" alt="image" src="https://github.com/user-attachments/assets/d14a3183-2144-4929-9074-6ff4263f7a9e" />
-
 
 > **Screenshot #2 — Dashboard Overview**  
 > - Show: Lesson table, sidebar navigation, Create Lesson button  
@@ -85,7 +98,7 @@ The Dashboard displays:
 
 ---
 
-# **4. Creating and Managing Lessons**
+# **5. Creating and Managing Lessons**
 
 ## **Creating a Lesson**
 
