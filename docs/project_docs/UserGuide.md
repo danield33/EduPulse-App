@@ -112,27 +112,12 @@ Steps:
 
 > **Screenshot #4 — Upload Script**  
 
-2. Enter lesson title & description.  
-3. Click **Save**.
+2. Upload a file or create from sctrach  
+3. Click **Generate**.
 
 ---
 
-## **Lesson List & Actions**
-
-**Screenshot Placeholder**  
-> **Screenshot #5 — Lessons Table**  
-> - Show: Rows of lessons  
-> - Highlight: Edit, Preview, Delete options  
-
-From here you can:
-- Open lessons  
-- Delete them  
-- Check status  
-- View last update time
-
----
-
-# **5. Segments**
+# **6. Segments**
 
 ## **Viewing Segments Inside a Lesson**
 
