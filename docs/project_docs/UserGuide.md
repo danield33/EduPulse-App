@@ -126,8 +126,8 @@ Steps:
 3. Save
 
 ---
+# **7. Manage Character Voices**
 
-## **Manage Character Voices**
 
 <img width="1509" height="784" alt="image" src="https://github.com/user-attachments/assets/7ee8e337-3e17-4307-b5b7-c1c9db911010" />
 
@@ -142,7 +142,7 @@ Steps:
 
 ---
 
-## **Previewing Video**
+# **8. Previewing Content**
 
 <img width="1509" height="779" alt="image" src="https://github.com/user-attachments/assets/ec21e5b5-c74d-4fea-926a-82558099efcd" />
 <img width="1509" height="783" alt="image" src="https://github.com/user-attachments/assets/e555aa9a-894d-4061-a3af-8fc5e001385b" />
@@ -156,64 +156,6 @@ Steps:
 3. Copy down lesson ID
 4. Click save
 
-
----
-
-## **Viewing Media**
-
-<img width="1508" height="782" alt="image" src="https://github.com/user-attachments/assets/64c70fbc-799b-4e4a-b12d-acce0682d81a" />
- 
-> **Screenshot #10 — Media Panel**  
-
-
-Features:
-1. Ability to input lesson ID
-2. Access to watched lessons
-
-
----
-
-# **8. Preview Mode**
-
-Preview simulates a learner’s path through the scenario.
-
-**Screenshot Placeholder**  
-> **Screenshot #17 — Lesson Preview Screen**  
-> - Show: Video player + options below  
-> - Highlight: Branching options  
-
----
-
-# **9. Learner Experience**
-
-**Screenshot Placeholder**  
-> **Screenshot #18 — Learner View: Video + Prompt**  
-> - Show: Clean learner interface  
-> - Crop: Only lesson player and prompt  
-
-Learners:
-- Watch each segment  
-- Choose responses  
-- Follow the consequences of their choices
-
----
-
-
-# **12. Common Workflows**
-
-## **Workflow: Create a Lesson Quickly**
-
-**Screenshot Placeholder**  
-> **Screenshot #21 — Step-by-step visual checklist**  
-> - Suggestion: Side-by-side mini thumbnails showing each step  
-
-Steps:
-1. Create lesson  
-2. Upload segments  
-3. Build scenario  
-4. Validate  
-5. Preview  
-6. Publish  
 
 ---
 
