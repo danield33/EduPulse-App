@@ -17,9 +17,9 @@ Use this document when preparing a polished visual guide for instructors and lea
 * [**Table of Contents**](#table-of-contents)
 * [**1. Introduction to Edupulse**](#1-introduction-to-edupulse)
 * [**2. Sign Up**](#2-sign-up)
-* [**2. Logging In**](#2-logging-in)
-* [**3. Dashboard**](#3-dashboard)
-* [**4. Creating and Managing Lessons**](#4-creating-and-managing-lessons)
+* [**3. Logging In**](#3-logging-in)
+* [**4. Dashboard**](#4-dashboard)
+* [**5. Creating and Managing Lessons**](#5-creating-and-managing-lessons)
   * [**Creating a Lesson**](#creating-a-lesson)
   * [**Lesson List & Actions**](#lesson-list--actions)
 * [**5. Segments**](#5-segments)
@@ -99,19 +99,18 @@ The Dashboard displays:
 
 ## **Creating a Lesson**
 
-<img width="1510" height="787" alt="image" src="https://github.com/user-attachments/assets/39f440dd-9421-48cc-be85-b1bba11edd86" />
-  
+<img width="255" height="77" alt="image" src="https://github.com/user-attachments/assets/6b13d8a5-f0c9-4b8a-a8ae-5b81bad3a888" />
+
 > **Screenshot #3 — “Create Lesson” Button**  
-> - Highlight: Button in top-right or top-left  
-> - Crop: Dashboard header area  
+> - Button in top-left  
+> - Dashboard header area  
 
 Steps:
-1. Click **Create Lesson**.  
+1. Click **Create Lesson**.
 
-**Screenshot Placeholder**  
-> **Screenshot #4 — New Lesson Form**  
-> - Show: Title field, Description field, Save button  
-> - Highlight: Where to enter lesson details  
+<img width="1510" height="787" alt="image" src="https://github.com/user-attachments/assets/39f440dd-9421-48cc-be85-b1bba11edd86" />
+
+> **Screenshot #4 — Upload Script**  
 
 2. Enter lesson title & description.  
 3. Click **Save**.
