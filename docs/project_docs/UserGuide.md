@@ -67,7 +67,8 @@ Text Instructions:
 
 # **3. Dashboard**
 
-**Screenshot Placeholder**  
+<img width="1509" height="782" alt="image" src="https://github.com/user-attachments/assets/344bbac7-6ba9-4272-964c-d0e84f2f263f" />
+
 > **Screenshot #2 — Dashboard Overview**  
 > - Show: Lesson table, sidebar navigation, Create Lesson button  
 > - Crop: Entire dashboard, excluding browser chrome  
