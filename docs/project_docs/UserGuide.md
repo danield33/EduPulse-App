@@ -47,12 +47,16 @@ Use this document when preparing a polished visual guide for instructors and lea
 
 # **1. Introduction to Edupulse**
 
+<img width="1509" height="789" alt="image" src="https://github.com/user-attachments/assets/9cf2be7d-9923-472e-8061-c9e7171a4ec4" />
+
+
 Edupulse is an interactive scenario-based video learning platform.  
 This guide walks through the interface using annotated screenshots.
 
 ---
 
-# **2. Logging In**
+# **2. Sign Up & Logging In**
+<img width="1508" height="780" alt="image" src="https://github.com/user-attachments/assets/da8c159f-22c5-43e2-9177-e3742b31314f" />
 
 <img width="1510" height="775" alt="image" src="https://github.com/user-attachments/assets/5c2412c9-2891-40f4-b7be-d7db868ed823" />
 
@@ -67,7 +71,8 @@ Text Instructions:
 
 # **3. Dashboard**
 
-<img width="1509" height="782" alt="image" src="https://github.com/user-attachments/assets/344bbac7-6ba9-4272-964c-d0e84f2f263f" />
+<img width="1508" height="781" alt="image" src="https://github.com/user-attachments/assets/d14a3183-2144-4929-9074-6ff4263f7a9e" />
+
 
 > **Screenshot #2 — Dashboard Overview**  
 > - Show: Lesson table, sidebar navigation, Create Lesson button  
@@ -84,7 +89,8 @@ The Dashboard displays:
 
 ## **Creating a Lesson**
 
-**Screenshot Placeholder**  
+<img width="1510" height="787" alt="image" src="https://github.com/user-attachments/assets/39f440dd-9421-48cc-be85-b1bba11edd86" />
+  
 > **Screenshot #3 — “Create Lesson” Button**  
 > - Highlight: Button in top-right or top-left  
 > - Crop: Dashboard header area  
@@ -121,7 +127,8 @@ From here you can:
 
 ## **Viewing Segments Inside a Lesson**
 
-**Screenshot Placeholder**  
+<img width="1509" height="783" alt="image" src="https://github.com/user-attachments/assets/b9633f85-f7a9-470f-805f-319e07b5664f" />
+
 > **Screenshot #6 — Segments Panel**  
 > - Show: List of segments  
 > - Highlight: “Add Segment” button  
@@ -132,10 +139,14 @@ Segments are individual video clips used inside scenarios.
 
 ## **Adding a Segment**
 
-**Screenshot Placeholder**  
+<img width="1508" height="781" alt="image" src="https://github.com/user-attachments/assets/1c519fda-581f-4a0d-89b9-cfda2ea1f2a0" />
+<img width="1509" height="784" alt="image" src="https://github.com/user-attachments/assets/7ee8e337-3e17-4307-b5b7-c1c9db911010" />
+
 > **Screenshot #7 — Add Segment Form**  
 > - Show: Name field, Upload button, Save button  
-> - Highlight: File upload area  
+> - Highlight: File upload area
+
+
 
 Steps:
 1. Click **Add Segment**  
@@ -147,7 +158,8 @@ Steps:
 
 ## **Previewing a Segment**
 
-**Screenshot Placeholder**  
+<img width="1509" height="779" alt="image" src="https://github.com/user-attachments/assets/ec21e5b5-c74d-4fea-926a-82558099efcd" />
+
 > **Screenshot #8 — Segment Preview Window**  
 > - Show: Video player with the segment loaded  
 > - Crop: Video + controls only  
@@ -160,7 +172,8 @@ The Scenario Builder visually connects segments into branching learning pathways
 
 ## **Scenario Builder Overview**
 
-**Screenshot Placeholder**  
+<img width="1509" height="783" alt="image" src="https://github.com/user-attachments/assets/e555aa9a-894d-4061-a3af-8fc5e001385b" />
+
 > **Screenshot #9 — Scenario Builder Canvas**  
 > - Show: Nodes (segments) and arrows  
 > - Highlight: First segment, transitions  
@@ -168,9 +181,10 @@ The Scenario Builder visually connects segments into branching learning pathways
 
 ---
 
-## **Editing a Segment Node**
+## **Viewing media**
 
-**Screenshot Placeholder**  
+<img width="1508" height="782" alt="image" src="https://github.com/user-attachments/assets/64c70fbc-799b-4e4a-b12d-acce0682d81a" />
+ 
 > **Screenshot #10 — Node Detail Panel**  
 > - Show: Prompt field, options, next-segment dropdown  
 > - Highlight: “Add Option” button  
@@ -180,22 +194,6 @@ Actions you can take:
 - Add branching options  
 - Connect nodes  
 - Remove transitions  
-
----
-
-## **Connecting Segments**
-
-**Screenshot Placeholder**  
-> **Screenshot #11 — Dragging Connection Between Nodes**  
-> - Show: Cursor dragging arrow  
-> - Crop: Simplified node-to-node view  
-
-Or through dropdown menus:
-
-**Screenshot Placeholder**  
-> **Screenshot #12 — Selecting Next Segment**  
-> - Show: Dropdown of segments  
-> - Highlight: Next segment selection  
 
 ---
 
