@@ -173,6 +173,3 @@ Features:
 
 # **End of Screenshot Template Guide**
 
-To generate a fully branded PDF or Notion page from this, simply replace each  
-**Screenshot Placeholder** block with the actual captured images.
-
