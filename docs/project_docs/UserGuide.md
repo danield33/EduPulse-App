@@ -21,7 +21,6 @@ Use this document when preparing a polished visual guide for instructors and lea
 * [**4. Dashboard**](#4-dashboard)
 * [**5. Creating and Managing Lessons**](#5-creating-and-managing-lessons)
   * [**Creating a Lesson**](#creating-a-lesson)
-  * [**Lesson List & Actions**](#lesson-list--actions)
 * [**5. Segments**](#5-segments)
   * [**Viewing Segments Inside a Lesson**](#viewing-segments-inside-a-lesson)
   * [**Adding a Segment**](#adding-a-segment)
@@ -31,10 +30,6 @@ Use this document when preparing a polished visual guide for instructors and lea
   * [**Editing a Segment Node**](#editing-a-segment-node)
   * [**Connecting Segments**](#connecting-segments)
   * [**Validation Tool**](#validation-tool)
-* [**7. Media Manager**](#7-media-manager)
-  * [**Opening the Media Library**](#opening-the-media-library)
-  * [**Uploading Media**](#uploading-media)
-  * [**Replacing or Deleting Media**](#replacing-or-deleting-media)
 * [**8. Preview Mode**](#8-preview-mode)
 * [**9. Learner Experience**](#9-learner-experience)
 * [**10. Scoring & Feedback**](#10-scoring--feedback)
@@ -186,35 +181,6 @@ Features:
 1. Ability to input lesson ID
 2. Access to watched lessons
 
-
----
-
-
-# **7. Media Manager**
-
-## **Opening the Media Library**
-
-**Screenshot Placeholder**  
-> **Screenshot #14 — Media Library Screen**  
-> - Show: Grid/list of uploaded videos  
-> - Highlight: Upload button  
-
----
-
-## **Uploading Media**
-
-**Screenshot Placeholder**  
-> **Screenshot #15 — Upload Dialog**  
-> - Show: Drag-and-drop area  
-> - Highlight: "Upload" or "Choose File" button  
-
----
-
-## **Replacing or Deleting Media**
-
-**Screenshot Placeholder**  
-> **Screenshot #16 — Media Actions Menu**  
-> - Show: Replace/Delete buttons next to a video  
 
 ---
 
