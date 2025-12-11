@@ -54,7 +54,8 @@ This guide walks through the interface using annotated screenshots.
 
 # **2. Logging In**
 
-**Screenshot Placeholder**  
+<img width="1510" height="775" alt="image" src="https://github.com/user-attachments/assets/5c2412c9-2891-40f4-b7be-d7db868ed823" />
+
 > **Screenshot #1 — Login Page**  
 > - Show: Email field, password field, login button  
 > - Optional: "Forgot Password" link  
