@@ -7,6 +7,8 @@ This guide will walk you through how to deploy on an OVH VPS.
   * [What the deploy script does:](#what-the-deploy-script-does)
 <!-- TOC -->
 
+## Production deployment
+
 1. Login to the vps:
 ```bash
 ssh ubuntu@IPV4
@@ -34,7 +36,7 @@ To view the logs of the backend/frontend run:
 `docker ps` to obtain the names/id's of the containers. Then 
 `docker logs <id/name>`
 
-## What the deploy script does:
+### What the deploy script does:
 
 1. Defines env variables
    1. Variables in .env in the root app directory can be automatically accessed in the docker-compose
@@ -53,3 +55,6 @@ To view the logs of the backend/frontend run:
 Do not delete the /app folder found here as it contains all the videos in app/fastapi_backend.
 Future work would be to move the videos to some remote storage like `S3` or `uploadthing`
 
+## Development Deployment
+
+See [DevelopmentGuide](./DevelopmentGuide.md) for this setup.
