@@ -23,7 +23,7 @@ Use this document when preparing a polished visual guide for instructors and lea
 * [**6. Segments**](#6-segments)
   * [**Viewing Segments Inside a Lesson**](#viewing-segments-inside-a-lesson)
   * [**Adding a Segment**](#adding-a-segment)
-* [**7. Manage Character Voices**](#7-scenario-builder)
+* [**7. Manage Character Voices**](#7-manage-character-voices)
 * [**8. Previewing Content**](#8-previewing-content)
 * [**9. Student View**](#9-student-view)
 * [**End of Screenshot Template Guide**](#end-of-screenshot-template-guide)

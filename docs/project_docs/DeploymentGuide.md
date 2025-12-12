@@ -2,6 +2,11 @@
 
 This guide will walk you through how to deploy on an OVH VPS.
 
+<!-- TOC -->
+* [Deployment Guide](#deployment-guide)
+  * [What the deploy script does:](#what-the-deploy-script-does)
+<!-- TOC -->
+
 1. Login to the vps:
 ```bash
 ssh ubuntu@IPV4
