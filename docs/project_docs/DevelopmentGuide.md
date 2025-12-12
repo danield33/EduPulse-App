@@ -91,8 +91,10 @@ Below are some features changes that can improve the project
 * AI Image generation
   * Currently image generation prompt when adding images isn't implemented.
 * Dashboard user icon
-  * Current pfp is always a default user. Could change to be first character of profile's name
+  * Current pfp is always a default user. Could change to be the first character of the profile's name
 * Additional security improvements
+* Nested video branching options
+  * Currently, we only support single branches, but it'd be cool to see multi-branching abilities
 
 
 ## Backend Improvements
@@ -110,6 +112,9 @@ Below are potential backend changes that can be considered
 	* Alternative can be to move ffmpeg to other compute services like AWS Lambdas
 * Reducing unused API endpoints
   * The current backend includes many API endpoints that are unused
+* Updating Hume.ai calls
+  * Instead of regenerating the voices for each new dialogue, we can reuses the same voice for the same person.
+  This can be found in the Hume.ai docs somewhere about reusing voices in conversations.
 
 ## Other
 * Create a snapshot of the website on the waybackmachine. I think that'd be pretty cool to see how this website changes over time at the end of each captstone
