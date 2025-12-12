@@ -25,6 +25,9 @@ The rest of this documetation provides additional guidance for developing the pr
 
 ## Starting Development
 
+Obtain the code from the github: https://github.com/Edpulse-osu/EduPulse-App.
+Obtain contribution access by emailing `dawit.6@osu.edu` before end of SP2026 semester as he'll be graduated by then. 
+
 The current state of the code is in 'production' mode. It's runnable but tedious for development as it takes a long time
 to build the frontend.
 To start 'development' mode, we need to change just a few things. To find these changes, see (and apply) the patch file
