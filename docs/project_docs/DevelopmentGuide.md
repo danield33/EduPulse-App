@@ -2,9 +2,9 @@
 
 To future Edupulse developers... This guide will help explain how to develop this project.
 
-This project includes a default setup [guide](../template_docs/get-started.md) for enviroment setup. Setup guide for the template the project is based off of can also be found online [here](https://nextfastapi.com/get-started/).
+This project includes a default setup [guide](../template_docs/get-started.md) for enviroment setup. Setup guide for the template of the project is based off of this resource [here](https://nextfastapi.com/get-started/).
 
-These documetations also provide cruicial instructions for performing key operations such as local setup and  database migrations (which should be done when editing/creating/deleting tables).
+These documentations also provide crucial instructions for performing key operations such as local setup and  database migrations (which should be done when editing/creating/deleting tables).
 
 Documentation for maintaing and running the project based off of the base template can be found in other markdown files in the `/docs/template_docs/` folder. Note that some details may be different and specific deployment instructions that the project is currently using can be found in the [DeploymentGuide](DeploymentGuide.md).
 
@@ -16,7 +16,11 @@ The rest of this documetation provides additional guidance for developing the pr
   * [Starting Development](#starting-development)
 * [Project Details](#project-details)
   * [Tools](#tools)
-  * [Backend](#backend)
+  * [Local development](#local-development)
+* [Possible Future Work](#possible-future-work)
+  * [Project Infrastructure](#project-infrastructure)
+  * [Frontend Feature Improvements](#frontend-feature-improvements)
+  * [Backend Improvements](#backend-improvements)
 <!-- TOC -->
 
 ## Starting Development
@@ -66,7 +70,7 @@ Below contains some potential future work that our team have identified. These r
 Project infrastrucutre can be improved for better maintability and reliability
 * Unit / Integration tests for code
 * CI/CD pipeline
-  * Current CI/CD pipeline is failing due to lack of working tests
+  * Current CI/CD pipeline is failing due to lack of any tests
 
 ## Frontend Feature Improvements
 Below are some features changes that can improve the project
@@ -79,6 +83,7 @@ Below are some features changes that can improve the project
   * Potential ideas include speach bubbles or subtitles with character names
 * iframe for lesson embed
   * Enable embedding the lesson into Canvas to improve lesson access
+  * Ensure CORS and other security features are configured properly
 * AI Image generation
   * Currently image generation prompt when adding images isn't implemented.
 * Dashboard user icon
@@ -92,10 +97,12 @@ Below are potential backend changes that can be considered
   * Reliability improvements and prevent file corruption which have been occurring and also enable redudancy
   * Reduce hosting costs as VPS can have less storage
   * Reduces load on postgres database and prevent slow writes caused by writing videos
+* AWS S3 or other blog storage for image storage
+  * Currently storing images in the script of postgres database under the `lesson_scenario` table. For the same reasonsa as above, we'd want to not do this.
 * Better ffmpeg updates
   * Instead of re-rendering the entire video when editing, determine what segments were changed and only update them (Faster loading times).
 * Limit ffmpeg compute usage
-  * When ffmpeg is running, it uses most/all the system's resources, blocking other server requests which can lead to other user's experience
+  * When ffmpeg is running, it uses most/all the system's resources, blocking other server requests which can lead to other user's experience stopping altogether
 	* Alternative can be to move ffmpeg to other compute services like AWS Lambdas
 * Reducing unused API endpoints
   * The current backend includes many API endpoints that are unused
