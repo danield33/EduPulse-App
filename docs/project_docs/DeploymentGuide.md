@@ -4,7 +4,9 @@ This guide will walk you through how to deploy on an OVH VPS.
 
 <!-- TOC -->
 * [Deployment Guide](#deployment-guide)
-  * [What the deploy script does:](#what-the-deploy-script-does)
+  * [Production deployment](#production-deployment)
+    * [What the deploy script does:](#what-the-deploy-script-does)
+  * [Development Deployment](#development-deployment)
 <!-- TOC -->
 
 ## Production deployment
