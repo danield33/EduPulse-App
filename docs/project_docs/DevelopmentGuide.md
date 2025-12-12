@@ -21,6 +21,7 @@ The rest of this documetation provides additional guidance for developing the pr
   * [Project Infrastructure](#project-infrastructure)
   * [Frontend Feature Improvements](#frontend-feature-improvements)
   * [Backend Improvements](#backend-improvements)
+  * [Other](#other)
 <!-- TOC -->
 
 ## Starting Development
