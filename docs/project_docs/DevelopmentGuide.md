@@ -107,3 +107,5 @@ Below are potential backend changes that can be considered
 * Reducing unused API endpoints
   * The current backend includes many API endpoints that are unused
 
+## Other
+* Create a snapshot of the website on the waybackmachine. I think that'd be pretty cool to see how this website changes over time at the end of each captstone
